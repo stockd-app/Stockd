@@ -2,7 +2,8 @@
 
 ### 1️⃣ Clone the repository
 ```bash
-git clone https://github.com/stockd-app/Backend.git
+git clone https://github.com/stockd-app/Stockd.git
+cd Backend
 ```
 
 ### 2️⃣ Install dependencies
