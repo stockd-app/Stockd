@@ -11,7 +11,7 @@ cd Backend
 pip install -r requirements.txt
 ```
 
-### 3️⃣ Install dependencies
+### 3️⃣ Run main.py
 ```bash
 uvicorn app.main:app --reload
 ```
