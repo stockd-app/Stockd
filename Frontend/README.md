@@ -17,7 +17,11 @@ npm run dev
 ```
 - The server will run at: http://localhost:5173/
 
-
+### Frontend Development Guideline.
+1. React Components starts with capital letter. (e.g. Profile.tsx)
+2. Static variable store in consts.ts, with capitalised variable name. (e.g. GOOGLE_CLIENT_ID)
+3. For each function implemented, comment it's functionality, parameters, and returns.
+4. Follow BEM convention for CSS classname, Block__Element-Modifier.
 
 # React + TypeScript + Vite
 
