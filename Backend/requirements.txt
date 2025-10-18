@@ -1,3 +1,6 @@
 fastapi
 uvicorn[standard]
 requests
+python-multipart
+python-dotenv
+google-auth
