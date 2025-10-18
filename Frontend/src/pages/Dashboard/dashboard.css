@@ -1,0 +1,71 @@
+.dashboard__container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100dvh;
+  width: 100dvw;
+  background-color: #eef4ff;
+  color: #222;
+  font-family: "Segoe UI", sans-serif;
+  text-align: center;
+  transition: all 0.3s ease-in-out;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+p {
+  font-size: 1.1rem;
+  max-width: 500px;
+}
+
+button {
+  background-color: #0077ff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 20px;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #005ecc;
+}
+
+/* 📱 Small screens (mobile) */
+@media (max-width: 600px) {
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  p {
+    font-size: 1rem;
+  }
+
+  button {
+    width: 80%;
+    padding: 12px;
+    font-size: 1rem;
+  }
+}
+
+/* 💻 Medium screens (tablets) */
+@media (min-width: 601px) and (max-width: 1024px) {
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  p {
+    font-size: 1.05rem;
+  }
+
+  button {
+    padding: 12px 24px;
+  }
+}
