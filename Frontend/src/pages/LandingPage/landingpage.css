@@ -1,3 +1,6 @@
+@import "@/styles/variable.css";
+
+/* Container for the entire landing page */
 .landingPage__container {
   display: flex;
   flex-direction: column;
@@ -5,39 +8,56 @@
   justify-content: center;
   height: 100dvh;
   width: 100dvw;
-  background-color: #f9fafb;
+  background-color: #ffffff;
   color: #333;
   font-family: "Segoe UI", sans-serif;
   text-align: center;
   transition: all 0.3s ease-in-out;
 }
 
-h1 {
+/* Stockd Title */
+.landingPage__header{
   font-size: 2.5rem;
+  font-weight: 500;
+  color: var(--color-primary);
   margin-bottom: 1rem;
+  margin-top: 2.5%;
 }
 
-p {
+/* Subtitle */
+.landingPage__text {
   font-size: 1.2rem;
+  color: var(--color-secondary);
   margin-bottom: 1.5rem;
-  max-width: 600px;
-  line-height: 1.4;
 }
 
-button {
-  background-color: #0077ff;
-  color: white;
-  padding: 12px 22px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+/* Text container to manage width */
+.landingPage__text-container {
+  width: 24dvh;
 }
 
-button:hover {
-  background-color: #005ecc;
-  transform: scale(1.05);
+/* === Google Login Button === */
+div[role="button"] {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  border: 2px solid #0077ff !important; /* Blue highlighted edge */
+  border-radius: 8px !important;
+  width: 100dvh !important; /* Make it longer horizontally */
+  max-width: 340px !important;
+  height: 50px !important;
+  background-color: white !important;
+  color: #333 !important;
+  font-size: 1rem !important;
+  font-family: "Segoe UI", sans-serif !important;
+  transition: all 0.25s ease !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+}
+
+div[role="button"]:hover {
+  background-color: #f5faff !important;
+  border-color: #005ecc !important;
+  transform: scale(1.03);
 }
 
 /* 📱 Small screens (mobile) */
