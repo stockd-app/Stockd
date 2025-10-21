@@ -36,30 +36,6 @@
   width: 24dvh;
 }
 
-/* === Google Login Button === */
-div[role="button"] {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  border: 2px solid #0077ff !important; /* Blue highlighted edge */
-  border-radius: 8px !important;
-  width: 100dvh !important; /* Make it longer horizontally */
-  max-width: 340px !important;
-  height: 50px !important;
-  background-color: white !important;
-  color: #333 !important;
-  font-size: 1rem !important;
-  font-family: "Segoe UI", sans-serif !important;
-  transition: all 0.25s ease !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
-}
-
-div[role="button"]:hover {
-  background-color: #f5faff !important;
-  border-color: #005ecc !important;
-  transform: scale(1.03);
-}
-
 /* 📱 Small screens (mobile) */
 @media (max-width: 600px) {
   h1 {
