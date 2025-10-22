@@ -1,6 +1,7 @@
 import time
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests # for token verification
+from google.auth.exceptions import InvalidValue
 from fastapi import APIRouter, File, UploadFile, HTTPException, Request # incoming requests from frontend
 import requests as httpx # for outgoing API requests (e.g., Google OAuth token exchange)
 import os
@@ -13,7 +14,6 @@ load_dotenv()
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GOOGLE_CLIENT_URI = os.getenv("GOOGLE_TOKEN_URI")
-GOOGLE_CLOCK_SKEW = os.getenv("GOOGLE_CLOW_SKEW")
 
 router = APIRouter()
 
@@ -73,17 +73,19 @@ async def verify_google_token(request: Request):
             raise HTTPException(status_code=400, detail="Failed to exchange code for ID token")
 
         # Verify the ID token
-        idinfo = id_token.verify_oauth2_token(token_data["id_token"], google_requests.Request(), GOOGLE_CLIENT_ID)
-
-        # Add manual time flexibility (grace period)
-        now = int(time.time())
-        exp = idinfo.get("exp", 0)
-        iat = idinfo.get("iat", 0)
-
-        if now < (iat - GOOGLE_CLOCK_SKEW):
-            raise HTTPException(status_code=400, detail="Token used too early (possible clock skew)")
-        if now > (exp + GOOGLE_CLOCK_SKEW):
-            raise HTTPException(status_code=400, detail="Token expired (beyond grace period)")
+        try:
+            idinfo = id_token.verify_oauth2_token(
+                token_data["id_token"], google_requests.Request(), GOOGLE_CLIENT_ID
+            )
+        except InvalidValue as e:
+            if "Token used too early" in str(e):
+                # Wait a second and retry — Google's token clock skew safety
+                time.sleep(2)
+                idinfo = id_token.verify_oauth2_token(
+                    token_data["id_token"], google_requests.Request(), GOOGLE_CLIENT_ID
+                )
+            else:
+                raise
 
         user_info = {
             "email": idinfo.get("email"),
