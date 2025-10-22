@@ -1,3 +1,6 @@
+@import "@/styles/variable.css";
+
+/* Container for the entire landing page */
 .landingPage__container {
   display: flex;
   flex-direction: column;
@@ -5,39 +8,32 @@
   justify-content: center;
   height: 100dvh;
   width: 100dvw;
-  background-color: #f9fafb;
+  background-color: #ffffff;
   color: #333;
   font-family: "Segoe UI", sans-serif;
   text-align: center;
   transition: all 0.3s ease-in-out;
 }
 
-h1 {
+/* Stockd Title */
+.landingPage__header{
   font-size: 2.5rem;
+  font-weight: 500;
+  color: var(--color-primary);
   margin-bottom: 1rem;
+  margin-top: 2.5%;
 }
 
-p {
+/* Subtitle */
+.landingPage__text {
   font-size: 1.2rem;
+  color: var(--color-secondary);
   margin-bottom: 1.5rem;
-  max-width: 600px;
-  line-height: 1.4;
 }
 
-button {
-  background-color: #0077ff;
-  color: white;
-  padding: 12px 22px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-button:hover {
-  background-color: #005ecc;
-  transform: scale(1.05);
+/* Text container to manage width */
+.landingPage__text-container {
+  width: 24dvh;
 }
 
 /* 📱 Small screens (mobile) */

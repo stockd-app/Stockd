@@ -1,0 +1,22 @@
+/* Custom Google Button Styles */
+.custom__google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 2px solid #0077ff;
+  border-radius: 8px;
+  background-color: white;
+  color: #333;
+  padding: 12px 24px;
+  width: 90%;
+  max-width: 340px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.custom-google-btn:hover {
+  background-color: #f5faff;
+  border-color: #005ecc;
+  transform: scale(1.03);
+}
