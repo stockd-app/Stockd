@@ -1,0 +1,6 @@
+ai_env/
+.env
+.ai_env/
+__pycache__/
+*.pyc
+*.parquet
