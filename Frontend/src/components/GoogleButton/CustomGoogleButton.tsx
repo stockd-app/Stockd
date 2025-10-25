@@ -1,6 +1,6 @@
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
-import { API_ROUTES, GOOGLE_CONSTS } from "../config/consts";
+import { API_ROUTES, GOOGLE_CONSTS } from "../../config/consts";
 import { useNavigate } from "react-router-dom";
 import "./customGoogleButton.css";
 

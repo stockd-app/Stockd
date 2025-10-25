@@ -1,6 +1,8 @@
 import React from "react";
 import StockdLogo from "../../assets/images/StockdLogo.svg";
-import { CustomGoogleButton } from "../../components/CustomGoogleButton";
+import { CustomGoogleButton } from "../../components/GoogleButton/CustomGoogleButton";
+import { LANDING_PAGE } from "../../config/consts";
+
 import "./landingpage.css";
 
 /**
@@ -14,8 +16,8 @@ const LandingPage: React.FC = () => {
     <div className="landingPage__container">
       <img src={StockdLogo} alt="Stockd Logo" width={100} />
       <div className="landingPage__text-container">
-        <p className="landingPage__header">Stockd</p>
-        <p className="landingPage__text">Let's join our community to cook better food!</p>
+        <p className="landingPage__header">{LANDING_PAGE.STOCKD}</p>
+        <p className="landingPage__text">{LANDING_PAGE.WELCOME_TEXT}</p>
       </div>
       <CustomGoogleButton />
     </div>
