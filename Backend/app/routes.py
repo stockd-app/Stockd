@@ -2,9 +2,12 @@ import time
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests # for token verification
 from google.auth.exceptions import InvalidValue
+from app.database.database import SessionLocal
+from app.database.models import User
 from fastapi import APIRouter, File, UploadFile, HTTPException, Request # incoming requests from frontend
 import requests as httpx # for outgoing API requests (e.g., Google OAuth token exchange)
 import os
+from sqlalchemy.exc import SQLAlchemyError
 from dotenv import load_dotenv
 from app.asprise_api import send_receipt_to_asprise
 from app.utils.receipt_parser import parse_asprise_response
@@ -48,6 +51,7 @@ async def verify_google_token(request: Request):
     1. Get temporary authorization code from frontend and exchange it for ID token.
     2. Verify the ID token and extract user info.
     """
+    db = SessionLocal()
     try:
         data = await request.json()
         auth_code = data.get("token")
@@ -85,13 +89,32 @@ async def verify_google_token(request: Request):
                     token_data["id_token"], google_requests.Request(), GOOGLE_CLIENT_ID
                 )
             else:
-                raise
+                raise HTTPException(status_code=401, detail="Invalid ID Token")
 
         user_info = {
             "email": idinfo.get("email"),
             "name": idinfo.get("name"),
             "picture": idinfo.get("picture"),
         }
+        
+        try:
+            existing_user = db.query(User).filter(User.email == user_info["email"]).first()
+
+            if not existing_user:
+                new_user = User(
+                    email=user_info["email"],
+                    name=user_info["name"],
+                    picture=user_info["picture"],
+                    client_id=idinfo.get("sub"),
+                    role="user"
+                )
+                db.add(new_user)
+                db.commit()
+                db.refresh(new_user)
+
+        except SQLAlchemyError as e:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
         return {"status": "success", "user": user_info}
 
@@ -99,4 +122,6 @@ async def verify_google_token(request: Request):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"OAuth exchange failed: {str(e)}")
+    finally:
+        db.close()
 
