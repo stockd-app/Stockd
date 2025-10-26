@@ -1,71 +1,149 @@
+@import "@/styles/variable.css";
+
 .dashboard__container {
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-white);
+  font-family: "Poppins", "Segoe UI", sans-serif;
+}
+
+/* Tabs */
+.dashboard__tab-header {
+  position: relative;
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-grey);
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  font-weight: 500;
+  color: var(--color-tertiary);
+  cursor: pointer;
+  transition: color 0.3s ease;
+  padding: 6px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.tab.active {
+  color: var(--color-dark-blue);
+}
+
+.tab:hover {
+  color: var(--color-deep-blue)
+}
+
+
+.dashboard__indicator {
+  position: absolute;
+  bottom: 0;
+  height: 2px;
+  background-color: var(--color-cyan);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* Item Cards */
+.dashboard__tabs {
+  width: 100%;
+  flex: 1;
+  box-sizing: border-box;
+}
+
+.dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 15px;
+  padding: 1rem;
+  padding-bottom: 80px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dashboard__placeholder {
+  text-align: center;
+  color: var(--color-dark);
+  font-size: 0.95rem;
+  margin-top: 2rem;
+}
+
+.dashboard__card {
+  background-color: var(--color-light);
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.dashboard__card:hover {
+  transform: translateY(-3px);
+}
+
+.dashboard__image {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+}
+
+.dashboard__info {
+  padding: 8px;
+}
+
+.dashboard__category {
+  font-size: 0.8rem;
+  color: var(--color-dark-grey);
+}
+
+.dashboard__name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+.dashboard__details {
+  font-size: 0.75rem;
+  color: var(--color-dark-grey);
+}
+
+/* Image wrapper for overlayed favorite button */
+.dashboard__image-wrapper {
+  position: relative;
+}
+
+.favorite__button {
+  position: absolute;
+  width: 18%;
+  top: 8px;
+  right: 8px;
+  background-color: rgba(255, 255, 255, 0.4);
+  border: none;
+  border-radius: 50%;
+  padding: 6px;
+  cursor: pointer;
+  backdrop-filter: blur(3px);
+  display: flex;
   align-items: center;
   justify-content: center;
-  height: 100dvh;
-  width: 100dvw;
-  background-color: #eef4ff;
-  color: #222;
-  font-family: "Segoe UI", sans-serif;
-  text-align: center;
-  transition: all 0.3s ease-in-out;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-h1 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
+.favorite__button:hover {
+  background-color: rgba(255, 255, 255, 0.7);
+  transform: scale(1.1);
 }
 
-p {
-  font-size: 1.1rem;
-  max-width: 500px;
+.favorite__button.favorited {
+  background-color: rgba(255, 255, 255, 0.8);
 }
 
-button {
-  background-color: #0077ff;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 20px;
-  font-size: 1rem;
-  transition: background-color 0.2s ease;
-}
 
-button:hover {
-  background-color: #005ecc;
-}
-
-/* 📱 Small screens (mobile) */
+/* Responsive */
 @media (max-width: 600px) {
-  h1 {
-    font-size: 1.6rem;
-  }
-
-  p {
-    font-size: 1rem;
-  }
-
-  button {
-    width: 80%;
-    padding: 12px;
-    font-size: 1rem;
-  }
-}
-
-/* 💻 Medium screens (tablets) */
-@media (min-width: 601px) and (max-width: 1024px) {
-  h1 {
-    font-size: 1.8rem;
-  }
-
-  p {
-    font-size: 1.05rem;
-  }
-
-  button {
-    padding: 12px 24px;
+  .dashboard__grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

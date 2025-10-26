@@ -8,15 +8,15 @@
   justify-content: center;
   height: 100dvh;
   width: 100dvw;
-  background-color: #ffffff;
-  color: #333;
+  background-color: var(--color-white);
+  color: var(--color-dark);
   font-family: "Segoe UI", sans-serif;
   text-align: center;
   transition: all 0.3s ease-in-out;
 }
 
 /* Stockd Title */
-.landingPage__header{
+.landingPage__header {
   font-size: 2.5rem;
   font-weight: 500;
   color: var(--color-primary);
@@ -27,7 +27,7 @@
 /* Subtitle */
 .landingPage__text {
   font-size: 1.2rem;
-  color: var(--color-secondary);
+  color: var(--color-tertiary);
   margin-bottom: 1.5rem;
 }
 
