@@ -4,3 +4,4 @@ ai_env/
 __pycache__/
 *.pyc
 *.parquet
+recipe_model.pkl
