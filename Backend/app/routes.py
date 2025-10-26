@@ -105,6 +105,7 @@ async def verify_google_token(request: Request):
                     email=user_info["email"],
                     name=user_info["name"],
                     picture=user_info["picture"],
+                    client_id=idinfo.get("sub"),
                     role="user"
                 )
                 db.add(new_user)
