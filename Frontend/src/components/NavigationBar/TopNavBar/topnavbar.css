@@ -1,0 +1,87 @@
+@import "@/styles/variable.css";
+
+/*  Top Navigation */
+.topnav__container {
+  padding: 1rem 1rem 0 1rem;
+  background-color: var(--color-white);
+}
+
+.topnav__logo-search {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.topnav__logo {
+  width: 50px;
+}
+
+.topnav__search {
+  flex: 1;
+  border: none;
+  background-color: var(--color-light);
+  padding: 10px 15px;
+  border-radius: 18px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+.topnav__search:focus {
+  box-shadow: 0 0 0 2px var(--color-secondary);
+  background-color: var(--color-white);
+}
+
+.topnav__separator {
+  border: none;
+  height: 8px;
+  background-color: var(--color-grey);
+  margin-top: 2rem;
+  /* Stretch beyond container padding */
+  margin-left: -1rem;
+  margin-right: -1rem;
+}
+
+
+/* Category Section */
+.category__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-deep-blue);
+  margin: 1rem 0 1rem 0;
+}
+
+.category__filters {
+  display: flex;
+  justify-content: flex-start;
+  gap: 1rem;
+}
+
+.category__button {
+  border: none;
+  outline: none;
+  width: fit-content;
+  white-space: nowrap;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 0 0 1px transparent;
+}
+
+.category__button.active {
+  background-color: var(--color-secondary);
+  color: var(--color-dark-blue);
+  box-shadow: inset 0 0 0 1px transparent;
+}
+
+.category__button:hover {
+  background-color: var(--color-light-blue);
+}
+
+button:focus {
+  outline: none;
+}
