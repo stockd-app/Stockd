@@ -5,4 +5,4 @@ joblib
 pandas
 scikit-learn
 sentence-transformers
-faiss
+faiss-cpu
