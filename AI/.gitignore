@@ -5,3 +5,6 @@ __pycache__/
 *.pyc
 *.parquet
 recipe_model.pkl
+*.DS_Store
+zero_shot_food_classifier
+
