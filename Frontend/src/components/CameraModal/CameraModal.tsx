@@ -1,88 +1,151 @@
 import React, { useRef, useState, useEffect } from "react";
 
-import './cameramodal.css'
+import "./cameramodal.css";
 
 interface CameraModalProps {
   onClose: () => void;
 }
 
 /**
- * TODO : Once PWA is accessible, start further development on this. (Image transfer + Styling)
- * TODO : Do not make the image persistent, as it may violate GDPR.
- * Currently the image is stored in "photo" react state as Base64 image string.
+ * Camera Modal component
+ * 
+ *  Displays a full-screen modal camera interface that allows the user to:
+ * - Open the **rear (environment)** camera using `getUserMedia`.
+ * - Capture a still image from the video stream.
+ * - Preview the captured photo before confirming or retaking it.
+ * 
+ * TODO : Expand on camera modal functionality based on Figma
  * @param param0 
  * @returns 
  */
 const CameraModal: React.FC<CameraModalProps> = ({ onClose }) => {
+  // Reference to the <video> element displaying the live camera feed
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Holds the captured photo as a Base64 image string
+  // Holds the captured image in Base64 format (used for preview)
   const [photo, setPhoto] = useState<string | null>(null);
 
+  // Stores the active MediaStream (so we can stop/restart the camera)
+  const [stream, setStream] = useState<MediaStream | null>(null);
+
   /**
-   * Requests access to the user's camera and streams it into the <video> tag.
+   * Initializes the camera.
+   * 
+   * Attempts to open the **rear camera** first.
+   * If unavailable (e.g. desktop or older phone), it falls back to the default camera.
+   */
+  const startCamera = async () => {
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { exact: "environment" } },
+      });
+      if (videoRef.current) {
+        videoRef.current.srcObject = s;
+      }
+      setStream(s);
+    } catch (err) {
+      console.warn("Rear camera not found, falling back:", err);
+      const fallback = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (videoRef.current) {
+        videoRef.current.srcObject = fallback;
+      }
+      setStream(fallback);
+    }
+  };
+
+  /**
+   * Starts the camera when the modal mounts.
+   * Cleans up the camera stream when the modal is closed/unmounted.
    */
   useEffect(() => {
-    const startCamera = async () => {
-      try {
-        // Ask for permission to use the camera
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-
-        // Assign the live stream to the video element if available
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      } catch (err) {
-        console.error("Camera access denied:", err);
-      }
-    };
-
-    // Start the camera when modal opens
     startCamera();
-
-    // Cleanup function: stops the camera when modal closes or unmounts
     return () => {
-      const stream = videoRef.current?.srcObject as MediaStream;
-      stream?.getTracks().forEach(track => track.stop());
+      stream?.getTracks().forEach((track) => track.stop());
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
-   * - Takes a snapshot from the current video frame
-   * - Draws it onto a hidden <canvas>
-   * - Converts the image to Base64 format
-   * - Saves it to state (so we can preview or send it to backend later)
+   * Captures the current frame from the live camera feed.
+   * 
+   * Steps:
+   * 1. Draws the video frame onto a temporary <canvas>.
+   * 2. Converts the canvas image into a Base64 PNG.
+   * 3. Stops the video stream to release the camera.
+   * 4. Displays the captured photo in preview mode.
    */
   const capturePhoto = () => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Create a temporary canvas to draw the current video frame
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-
-    // Draw the live video frame onto the canvas
     const ctx = canvas.getContext("2d");
     if (ctx) ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Convert canvas image to Base64 PNG format and store in state 
+    // Stop stream to release camera resource
+    stream?.getTracks().forEach((track) => track.stop());
     setPhoto(canvas.toDataURL("image/png"));
   };
 
+  /**
+   * Retakes the photo.
+   * 
+   * Clears the captured image and reinitializes the camera.
+   */
+  const retakePhoto = async () => {
+    setPhoto(null);
+    await startCamera(); // Restart camera feed
+  };
+
+  /**
+   * Confirms the captured photo.
+   * 
+   * Currently logs the photo and closes the modal.
+   * TODO : Can be extended to upload or process the image later.
+   */
+  const usePhoto = () => {
+    console.log("Photo accepted:", photo);
+    onClose();
+  };
+
+  /**
+   * UI rendering logic:
+   * 
+   * - If `photo` is null → show **live camera view** and capture controls.
+   * - If `photo` is set → show **captured image preview** with retake/use options.
+   */
   return (
     <div className="camera-modal">
-      <div className="camera-frame">
-        <video ref={videoRef} autoPlay playsInline />
-        <div className="camera-outline"></div>
-      </div>
+      {!photo ? (
+        <>
+          {/* ===== Live Camera View ===== */}
+          <div className="camera-frame">
+            <video ref={videoRef} autoPlay playsInline muted />
+            <div className="camera-outline"></div>
+          </div>
 
-      <div className="camera-controls">
-        <button onClick={capturePhoto}>Capture</button>
-        <button onClick={onClose}>Close</button>
-      </div>
+          {/* Capture Controls (Shutter + Close) */}
+          <div className="camera-controls">
+            <button className="capture-btn" onClick={capturePhoto}></button>
+            <button className="close-btn" onClick={onClose}>✕</button>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* ===== Photo Preview ===== */}
+          <div className="photo-preview">
+            <img src={photo} alt="Captured" className="captured-photo" />
+          </div>
 
-      {photo && <img src={photo} alt="Captured" className="preview" />}
+          {/* Preview Controls (Retake / Use Photo) */}
+          <div className="preview-controls">
+            <button className="retake-btn" onClick={retakePhoto}>Retake</button>
+            <button className="use-btn" onClick={usePhoto}>Use Photo</button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

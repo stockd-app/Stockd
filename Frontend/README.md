@@ -17,6 +17,17 @@ npm run dev
 ```
 - The server will run at: http://localhost:5173/
 
+### Deploy to HTTPS
+```bash
+npm run deploy
+```
+- This automated script will:
+- 1. npm run build -> Builds distribution folder and its content
+- 2. Copy over dist content to Backend/app/static/frontend to be served in a single tunnel(Frontend + Backend) by ngrok.
+- 3. Activate virtual environment
+- 4. uvicorn app.main:app --reload
+- 5. ngrok http 8000
+
 ### Frontend Development Guideline.
 1. React Components starts with capital letter. (e.g. Profile.tsx)
 2. Static variable store in consts.ts, with capitalised variable name. (e.g. GOOGLE_CLIENT_ID)
