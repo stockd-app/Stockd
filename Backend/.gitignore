@@ -3,3 +3,5 @@
 __pycache__/
 venv/
 app/static/frontend/
+*-venv/
+*.DS_Store
