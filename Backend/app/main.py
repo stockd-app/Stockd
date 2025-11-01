@@ -2,7 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from dotenv import load_dotenv
 import os
+
+load_dotenv()
+
+HOST_IP = os.getenv("HOST_IP", "127.0.0.1")
 
 app = FastAPI(
     title="Stockd Backend",
@@ -37,7 +42,7 @@ if ENV == "dev":
     origins = [
         "http://localhost:5173",
         "https://localhost:5173",
-        "http://192.168.1.14:5173",
+        f"http://{HOST_IP}:5173",
     ]
     app.add_middleware(
         CORSMiddleware,
