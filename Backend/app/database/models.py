@@ -2,6 +2,8 @@ from sqlalchemy import Column, Integer, String, Float, Enum, DateTime, ForeignKe
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database.database import Base
+from pydantic import BaseModel
+from typing import List, Optional
 
 class User(Base):
     __tablename__ = "Users"
@@ -28,6 +30,17 @@ class PantryItem(Base):
 
     owner = relationship("User", back_populates="pantry_items")
     recipe_ingredients = relationship("RecipeIngredient", back_populates="pantry_item")
+    
+class PantryItemInput(BaseModel):
+    item_name: str
+    quantity_value: Optional[float] = 0
+    quantity_unit: Optional[str] = "pcs"
+    category: Optional[str] = "Uncategorized"
+    storage: Optional[str] = "Pantry"
+
+class PantryItemsRequest(BaseModel):
+    user_id: int
+    items: List[PantryItemInput]
 
 class Recipe(Base):
     __tablename__ = "Recipes"

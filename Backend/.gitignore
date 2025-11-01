@@ -2,4 +2,6 @@
 *.pyc
 __pycache__/
 venv/
+*-venv/
+*.DS_Store
 app/static/frontend/

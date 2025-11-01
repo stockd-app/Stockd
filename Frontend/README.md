@@ -21,12 +21,14 @@ npm run dev
 ```bash
 npm run deploy
 ```
+- Before running script, ensure .env in Backend folder are updated (ENV=prod/ENV=dev + your device's IPv4 address)
 - This automated script will:
 - 1. npm run build -> Builds distribution folder and its content
 - 2. Copy over dist content to Backend/app/static/frontend to be served in a single tunnel(Frontend + Backend) by ngrok.
-- 3. Activate virtual environment
-- 4. uvicorn app.main:app --reload
-- 5. ngrok http 8000
+- 3. Activate virtual environment (Creates one and activate if none exist)
+- 4. pip install -r requirements.txt
+- 5. uvicorn app.main:app --reload
+- 6. ngrok http 8000
 
 ### Frontend Development Guideline.
 1. React Components starts with capital letter. (e.g. Profile.tsx)

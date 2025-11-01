@@ -1,9 +1,12 @@
+import datetime
 import time
+import traceback
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests # for token verification
 from google.auth.exceptions import InvalidValue
+from pymysql import IntegrityError
 from app.database.database import SessionLocal
-from app.database.models import User
+from app.database.models import PantryItemsRequest, User, PantryItem
 from fastapi import APIRouter, File, UploadFile, HTTPException, Request # incoming requests from frontend
 import requests as httpx # for outgoing API requests (e.g., Google OAuth token exchange)
 import os
@@ -125,3 +128,96 @@ async def verify_google_token(request: Request):
     finally:
         db.close()
 
+@router.post("/pantry_items", tags=["Pantry"])
+async def add_update_pantry_items(request_data: PantryItemsRequest):
+    """
+    Add or update pantry items in the database for a specific user.
+
+    Expects JSON like:
+    ```
+    {
+        "user_id": 1,
+        "items": [
+            {
+                "item_name": "Milk",
+                "quantity_value": 2,
+                "quantity_unit": "L",
+                "category": "Dairy",
+                "storage": "Fridge"
+            },
+            ...
+        ]
+    }
+    ```
+    If an item with the same `item_name` already exists for the user, it will be updated.
+    """
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.id == request_data.user_id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        processed_items = []
+        for item in request_data.items:
+            # Replace blanks or None with default values
+            item_name = item.item_name.strip() if item.item_name else "Unnamed Item"
+            quantity_value = item.quantity_value if item.quantity_value not in [None, ""] else 0
+            quantity_unit = item.quantity_unit.strip() if item.quantity_unit else "pcs"
+            category = item.category.strip() if item.category else "Uncategorized"
+            storage = item.storage.strip() if item.storage else "Pantry"
+
+            # Check if item already exists for this user
+            existing_item = (
+                db.query(PantryItem)
+                .filter(PantryItem.user_id == request_data.user_id)
+                .filter(PantryItem.item_name == item_name)
+                .first()
+            )
+
+            if existing_item:
+                # Update existing item
+                existing_item.quantity_value = quantity_value
+                existing_item.quantity_unit = quantity_unit
+                existing_item.category = category
+                existing_item.storage = storage
+                existing_item.added_on = datetime.datetime.utcnow()
+                processed_items.append(existing_item)
+            else:
+                # Add new item
+                new_item = PantryItem(
+                    user_id=request_data.user_id,
+                    item_name=item_name,
+                    quantity_value=quantity_value,
+                    quantity_unit=quantity_unit,
+                    category=category,
+                    storage=storage,
+                    added_on=datetime.datetime.utcnow()
+                )
+                db.add(new_item)
+                processed_items.append(new_item)
+
+        db.commit()
+
+        return {
+            "status": "success",
+            "processed_items": len(processed_items),
+            "items": [item.item_name for item in processed_items]
+        }
+
+    except IntegrityError as ie:
+        db.rollback()
+        print("IntegrityError traceback:", traceback.format_exc())
+        raise HTTPException(status_code=400, detail=f"Database integrity error: {str(ie.orig)}")
+    
+    except SQLAlchemyError as e:
+        db.rollback()
+        print("SQLAlchemyError traceback:", traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    
+    except Exception as e:
+        db.rollback()
+        print("Unexpected error traceback:", traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+    
+    finally:
+        db.close()
