@@ -37,7 +37,11 @@ const CameraModal: React.FC<CameraModalProps> = ({ onClose }) => {
   const startCamera = async () => {
     try {
       const s = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { exact: "environment" } },
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+        },
       });
       if (videoRef.current) {
         videoRef.current.srcObject = s;
@@ -62,7 +66,6 @@ const CameraModal: React.FC<CameraModalProps> = ({ onClose }) => {
     return () => {
       stream?.getTracks().forEach((track) => track.stop());
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**

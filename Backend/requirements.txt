@@ -6,3 +6,4 @@ python-dotenv
 google-auth
 sqlalchemy
 pymysql
+cryptography
