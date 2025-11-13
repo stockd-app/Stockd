@@ -29,3 +29,6 @@ DELETE FROM PantryItems WHERE item_name = 'Sugar';
 
 -- Check audit logs
 SELECT * FROM audit_logs;
+
+-- Display audit logs in readable format
+SELECT * FROM audit_logs\G;
