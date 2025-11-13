@@ -2,6 +2,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { API_ROUTES, GOOGLE_CONSTS } from "../../config/consts";
 import { useNavigate } from "react-router-dom";
+
 import "./customGoogleButton.css";
 
 /**
@@ -39,10 +40,10 @@ export const CustomGoogleButton: React.FC = () => {
   return (
     <button className="custom__google-btn" onClick={() => login()}>
       <img
-        src= {GOOGLE_CONSTS.GOOGLE_IMAGE_URL}
-        alt= {GOOGLE_CONSTS.GOOGLE_ALT_TEXT}
-        width= {GOOGLE_CONSTS.GOOGLE_ICON_SIZE}
-        height= {GOOGLE_CONSTS.GOOGLE_ICON_SIZE}
+        src={GOOGLE_CONSTS.GOOGLE_IMAGE_URL}
+        alt={GOOGLE_CONSTS.GOOGLE_ALT_TEXT}
+        width={GOOGLE_CONSTS.GOOGLE_ICON_SIZE}
+        height={GOOGLE_CONSTS.GOOGLE_ICON_SIZE}
       />
       {GOOGLE_CONSTS.GOOGLE_TEXT}
     </button>

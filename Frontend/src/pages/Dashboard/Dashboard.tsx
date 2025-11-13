@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Heart } from "lucide-react";
 import { DASHBOARD } from "../../config/consts";
 import TopNavBar from "../../components/NavigationBar/TopNavBar/TopNavBar";
@@ -26,6 +27,14 @@ const Dashboard: React.FC = () => {
 
   const tabsRef = useRef<HTMLDivElement>(null);
   const tabs = DASHBOARD.TABS;
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (!user) navigate("/");
+  }, []);
+
 
   // TODO : Replace with real data when backend is ready
   const items = [

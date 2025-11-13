@@ -7,11 +7,13 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npm run build && node scripts/deploy.js"
   },
   "dependencies": {
     "@react-oauth/google": "^0.12.2",
     "axios": "^1.12.2",
+    "fs-extra": "^11.3.2",
     "lucide-react": "^0.548.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

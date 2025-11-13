@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Home, RefreshCw, ScanLine, Bell, User } from "lucide-react";
+import CameraModal from "../../CameraModal/CameraModal";
 import { BOTTOM_NAV_ICON_SIZE } from "../../../config/consts";
 
 import "./bottomnavbar.css";
@@ -11,6 +12,7 @@ import "./bottomnavbar.css";
  * @returns 
  */
 const BottomNavBar: React.FC = () => {
+  const [showCamera, setShowCamera] = useState(false);
   const [activeItem, setActiveItem] = useState("home");
   const containerRef = useRef<HTMLDivElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: "0px", width: "0px" });
@@ -60,7 +62,7 @@ const BottomNavBar: React.FC = () => {
         <p>Update</p>
       </div>
 
-      <div className="bottomnav__item scan__button">
+      <div className="bottomnav__item scan__button" onClick={() => setShowCamera(true)}>
         <ScanLine size={BOTTOM_NAV_ICON_SIZE.LARGE} />
       </div>
 
@@ -85,6 +87,7 @@ const BottomNavBar: React.FC = () => {
         className={`bottomnav__indicator ${isMoving ? "moving" : ""}`}
         style={indicatorStyle}
       ></div>
+      {showCamera && <CameraModal onClose={() => setShowCamera(false)} />}
     </div>
   );
 };
