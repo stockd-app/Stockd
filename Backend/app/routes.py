@@ -51,55 +51,124 @@ async def upload_receipt(file: UploadFile = File(...)):
 @router.post("/auth/google", tags=["Google OAuth"])
 async def verify_google_token(request: Request):
     """
-    1. Get temporary authorization code from frontend and exchange it for ID token.
-    2. Verify the ID token and extract user info.
+    - Exchanges temporary auth code for Google ID token
+    - Verifies ID token authenticity and audience
+    - Safely inserts user into DB if new
+    - Handles clock-skew errors (Token used too early)
+    - Returns detailed, frontend-friendly error responses
+    ==================
+    - Possible errors:
+    ==================
+    - 400 (Bad Request) - Invalid JSON body
+    - 400 (Bad Request) - Missing Google authorization code
+    - 400 (Bad Request) - Google did not return an ID token during exchange
+    - 400 (Bad Request) - Google account email missing from ID token
+    - 401 (Unauthorized) - Google token exchange failed
+    - 401 (Unauthorized) - Google ID token was used too early and is still invalid
+    - 401 (Unauthorized) - Invalid Google ID token
+    - 401 (Unauthorized) - Google ID token verification failed
+    - 500 (Internal server error) - Invalid response from Google token endpoint
+    - 500 (Internal server error) - Database error
+    - 500 (Internal server error) - OAuth exchange failed
+    - 503 (Unable to handle request) - Failed to reach Google token endpoint
+
+    - Provide & Expose error_code for frontend logic, e.g.:
+        switch (errorCode) {
+            case "MISSING_AUTH_CODE":
+            case "NO_ID_TOKEN_FROM_GOOGLE":
+            case "EMAIL_NOT_FOUND":
+                display("Google login failed. Please try again.");
+                break;
+
+            default:
+                display("An unexpected error occurred.");
+        }
     """
     db = SessionLocal()
     try:
-        data = await request.json()
+        # ============================
+        # 1. Validate incoming request
+        # ============================
+        try:
+            data = await request.json()
+        except Exception:
+            raise HTTPException(status_code=400, detail={"error_code": "INVALID_JSON", "message": "Invalid JSON body"
+                })
+
         auth_code = data.get("token")
-
         if not auth_code:
-            raise HTTPException(status_code=400, detail="Missing token")
+            raise HTTPException(status_code=400, detail={"error_code": "MISSING_AUTH_CODE", "message": "Missing Google authorization code"})
 
-        # Exchange the authorization code for tokens
-        token_url = GOOGLE_CLIENT_URI
-        payload = {
-            "client_id": GOOGLE_CLIENT_ID,
-            "client_secret": GOOGLE_CLIENT_SECRET,
-            "code": auth_code,
-            "grant_type": "authorization_code",
-            "redirect_uri": "postmessage",  # required for installed apps
-        }
+        # ======================================================
+        # 2. Exchange the authorisation code for Google ID token
+        # ======================================================
+        try:
+            token_url = GOOGLE_CLIENT_URI
+            payload = {
+                "client_id": GOOGLE_CLIENT_ID,
+                "client_secret": GOOGLE_CLIENT_SECRET,
+                "code": auth_code,
+                "grant_type": "authorization_code",
+                "redirect_uri": "postmessage",
+            }
 
-        # Send the temporary code to Google token endpoint to check if the code is designated for our app + user verification
-        response = httpx.post(token_url, data=payload)
-        token_data = response.json()
+            # Send the temporary auth code to Google token endpoint 
+            # to check if the auth code is designated for our app + 
+            # user verification
+            token_response = httpx.post(token_url, data=payload)
+        except Exception as e:
+            raise HTTPException(status_code=503, detail={"error_code": "GOOGLE_TOKEN_ENDPOINT_UNREACHABLE", "message": "Failed to reach Google token endpoint"})
+
+        if token_response.status_code != 200:
+            raise HTTPException(status_code=401, detail={"error_code": "GOOGLE_TOKEN_EXCHANGE_FAILED", "message": f"Google token exchange failed: {token_response.text}"})
+
+        try:
+            token_data = token_response.json()
+        except Exception:
+            raise HTTPException(status_code=500, detail={"error_code": "INVALID_GOOGLE_RESPONSE", "message": "Invalid response from Google token endpoint"})
 
         if "id_token" not in token_data:
-            raise HTTPException(status_code=400, detail="Failed to exchange code for ID token")
+            raise HTTPException(status_code=400, detail={"error_code": "NO_ID_TOKEN_FROM_GOOGLE", "message": "Google did not return an ID token during exchange"})
 
-        # Verify the ID token
+        # ======================
+        # 3. Verify the ID token
+        # ======================
         try:
             idinfo = id_token.verify_oauth2_token(
                 token_data["id_token"], google_requests.Request(), GOOGLE_CLIENT_ID
             )
         except InvalidValue as e:
+            # Clock-skew safety
             if "Token used too early" in str(e):
-                # Wait a second and retry — Google's token clock skew safety
+                # Wait 2 second and retry — Google's token clock skew safety
                 time.sleep(2)
-                idinfo = id_token.verify_oauth2_token(
-                    token_data["id_token"], google_requests.Request(), GOOGLE_CLIENT_ID
-                )
+                try:
+                    idinfo = id_token.verify_oauth2_token(
+                        token_data["id_token"],
+                        google_requests.Request(),
+                        GOOGLE_CLIENT_ID
+                    )
+                except Exception:
+                    raise HTTPException(status_code=401, detail={"error_code": "TOKEN_USED_TOO_EARLY", "message": "Google ID token was used too early and is still invalid"})
             else:
-                raise HTTPException(status_code=401, detail="Invalid ID Token")
-
+                raise HTTPException(status_code=401, detail={"error_code": "INVALID_GOOGLE_ID_TOKEN", "message": "Invalid Google ID Token"})
+        except Exception:
+            raise HTTPException(status_code=401, detail={"error_code": "ID_TOKEN_VERIFICATION_FAILED", "message": "Google ID token verification failed"})
+    
+        # Extract user info
         user_info = {
             "email": idinfo.get("email"),
             "name": idinfo.get("name"),
             "picture": idinfo.get("picture"),
         }
+
+        if not user_info["email"]:
+            raise HTTPException(status_code=400, detail={"error_code": "EMAIL_NOT_FOUND", "message": "Google account email missing from ID token"})
+
         
+        # ============================
+        # 4. Save or update user in DB
+        # ============================
         try:
             existing_user = db.query(User).filter(User.email == user_info["email"]).first()
 
@@ -117,14 +186,20 @@ async def verify_google_token(request: Request):
 
         except SQLAlchemyError as e:
             db.rollback()
-            raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+            raise HTTPException(status_code=500, detail={"error_code": "DATABASE_ERROR", "message": f"Database error: {str(e)}"})
 
+        # ==========================
+        # 5. Return success response
+        # ==========================
         return {"status": "success", "user": user_info}
 
+    # =======================================================
+    # Top-level exception handling for safe & clear responses
+    # =======================================================
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"OAuth exchange failed: {str(e)}")
+        raise HTTPException(status_code=500, detail={"error_code": "OAUTH_EXCHANGE_FAILED", "message": f"OAuth exchange failed: {str(e)}"})
     finally:
         db.close()
 
