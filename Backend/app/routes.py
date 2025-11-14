@@ -56,39 +56,15 @@ async def verify_google_token(request: Request):
     - Safely inserts user into DB if new
     - Handles clock-skew errors (Token used too early)
     - Returns detailed, frontend-friendly error responses
-    ==================
     - Possible errors:
-    ==================
-    - 400 - INVALID_JSON
-    - 400 - MISSING_AUTH_CODE
-    - 400 - NO_ID_TOKEN_FROM_GOOGLE
-    - 400 - EMAIL_NOT_FOUND
-    - 401 - GOOGLE_TOKEN_EXCHANGE_FAILED
-    - 401 - TOKEN_USED_TOO_EARLY
-    - 401 - INVALID_GOOGLE_ID_TOKEN
-    - 401 - ID_TOKEN_VERIFICATION_FAILED
-    - 500 - INVALID_GOOGLE_RESPONSE
-    - 500 - DATABASE_ERROR
-    - 500 - OAUTH_EXCHANGE_FAILED
-    - 503 - GOOGLE_TOKEN_ENDPOINT_UNREACHABLE
-
-    - Provide & Expose error_code for frontend logic, e.g.:
-        switch (errorCode) {
-            case "MISSING_AUTH_CODE":
-            case "NO_ID_TOKEN_FROM_GOOGLE":
-            case "EMAIL_NOT_FOUND":
-                display("Google login failed. Please try again.");
-                break;
-
-            default:
-                display("An unexpected error occurred.");
-        }
+    - 400 - Bad Request
+    - 401 - Unauthorized
+    - 500 - Internal server error
+    - 504 - Unable to handle request
     """
     db = SessionLocal()
     try:
-        # ============================
         # 1. Validate incoming request
-        # ============================
         try:
             data = await request.json()
         except Exception:
@@ -99,9 +75,7 @@ async def verify_google_token(request: Request):
         if not auth_code:
             raise HTTPException(status_code=400, detail={"error_code": "MISSING_AUTH_CODE", "message": "Missing Google authorization code"})
 
-        # ======================================================
         # 2. Exchange the authorisation code for Google ID token
-        # ======================================================
         try:
             token_url = GOOGLE_CLIENT_URI
             payload = {
@@ -130,9 +104,7 @@ async def verify_google_token(request: Request):
         if "id_token" not in token_data:
             raise HTTPException(status_code=400, detail={"error_code": "NO_ID_TOKEN_FROM_GOOGLE", "message": "Google did not return an ID token during exchange"})
 
-        # ======================
         # 3. Verify the ID token
-        # ======================
         try:
             idinfo = id_token.verify_oauth2_token(
                 token_data["id_token"], google_requests.Request(), GOOGLE_CLIENT_ID
@@ -166,9 +138,7 @@ async def verify_google_token(request: Request):
             raise HTTPException(status_code=400, detail={"error_code": "EMAIL_NOT_FOUND", "message": "Google account email missing from ID token"})
 
         
-        # ============================
         # 4. Save or update user in DB
-        # ============================
         try:
             existing_user = db.query(User).filter(User.email == user_info["email"]).first()
 
@@ -188,14 +158,10 @@ async def verify_google_token(request: Request):
             db.rollback()
             raise HTTPException(status_code=500, detail={"error_code": "DATABASE_ERROR", "message": f"Database error: {str(e)}"})
 
-        # ==========================
         # 5. Return success response
-        # ==========================
         return {"status": "success", "user": user_info}
 
-    # =======================================================
     # Top-level exception handling for safe & clear responses
-    # =======================================================
     except HTTPException:
         raise
     except Exception as e:
