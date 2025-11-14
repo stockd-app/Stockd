@@ -59,18 +59,18 @@ async def verify_google_token(request: Request):
     ==================
     - Possible errors:
     ==================
-    - 400 (Bad Request) - Invalid JSON body
-    - 400 (Bad Request) - Missing Google authorization code
-    - 400 (Bad Request) - Google did not return an ID token during exchange
-    - 400 (Bad Request) - Google account email missing from ID token
-    - 401 (Unauthorized) - Google token exchange failed
-    - 401 (Unauthorized) - Google ID token was used too early and is still invalid
-    - 401 (Unauthorized) - Invalid Google ID token
-    - 401 (Unauthorized) - Google ID token verification failed
-    - 500 (Internal server error) - Invalid response from Google token endpoint
-    - 500 (Internal server error) - Database error
-    - 500 (Internal server error) - OAuth exchange failed
-    - 503 (Unable to handle request) - Failed to reach Google token endpoint
+    - 400 - INVALID_JSON
+    - 400 - MISSING_AUTH_CODE
+    - 400 - NO_ID_TOKEN_FROM_GOOGLE
+    - 400 - EMAIL_NOT_FOUND
+    - 401 - GOOGLE_TOKEN_EXCHANGE_FAILED
+    - 401 - TOKEN_USED_TOO_EARLY
+    - 401 - INVALID_GOOGLE_ID_TOKEN
+    - 401 - ID_TOKEN_VERIFICATION_FAILED
+    - 500 - INVALID_GOOGLE_RESPONSE
+    - 500 - DATABASE_ERROR
+    - 500 - OAUTH_EXCHANGE_FAILED
+    - 503 - GOOGLE_TOKEN_ENDPOINT_UNREACHABLE
 
     - Provide & Expose error_code for frontend logic, e.g.:
         switch (errorCode) {
