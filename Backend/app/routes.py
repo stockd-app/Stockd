@@ -20,6 +20,7 @@ load_dotenv()
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GOOGLE_CLIENT_URI = os.getenv("GOOGLE_TOKEN_URI")
+GOOGLE_REVOKE_CLIENT_URI = os.getenv("GOOGLE_REVOKE_TOKEN_URI")
 
 router = APIRouter()
 
@@ -168,6 +169,54 @@ async def verify_google_token(request: Request):
         raise HTTPException(status_code=500, detail={"error_code": "OAUTH_EXCHANGE_FAILED", "message": f"OAuth exchange failed: {str(e)}"})
     finally:
         db.close()
+
+@router.post("/auth/google/logout", tags=["Google OAuth"])
+async def google_logout(request: Request):
+    """
+    Logs out a Google-authenticated user.
+    - Validate JSON body
+    - Extract access_token
+    - Attempt to revoke the access token via Google OAuth API
+    - Return frontend-friendly error codes
+    - Possible errors:
+    - 400 - Bad Request
+    - 401 - Unauthorized
+    - 500 - Internal server error
+    - 504 - Unable to handle request
+    """
+
+    # 1. Parse and validate JSON
+    try:
+        data = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail={"error_code": "INVALID_JSON", "message": "Invalid JSON body"})
+
+    access_token = data.get("access_token")
+
+    if not access_token:
+        raise HTTPException(status_code=400, detail={"error_code": "MISSING_ACCESS_TOKEN", "message": "Missing Google access token for logout"})
+
+    # 2. Attempt Google OAuth token revocation
+    revoke_url = GOOGLE_REVOKE_CLIENT_URI
+    params = {"token": access_token}
+
+    try:
+        revoke_response = httpx.post(
+            revoke_url,
+            params=params,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            timeout=5
+        )
+    except Exception:
+        raise HTTPException(status_code=503, detail={"error_code": "GOOGLE_REVOKE_ENDPOINT_UNREACHABLE", "message": "Failed to reach Google revoke endpoint"})
+
+    # Google returns HTTP 200 on success, anything else is failure
+    if revoke_response.status_code != 200:
+        raise HTTPException(status_code=401, detail={"error_code": "GOOGLE_TOKEN_REVOKE_FAILED", "message": f"Google token revoke failed: {revoke_response.text}"})
+
+    # 3. Successfully logged out
+    return {"status": "success", "message": "Google user logged out successfully"}
+
 
 @router.post("/pantry_items", tags=["Pantry"])
 async def add_update_pantry_items(request_data: PantryItemsRequest):
