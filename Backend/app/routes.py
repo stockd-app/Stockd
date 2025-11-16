@@ -1,19 +1,20 @@
 import datetime
+import os
 import time
 import traceback
+from dotenv import load_dotenv
+from fastapi import APIRouter, File, UploadFile, HTTPException, Request, Depends
 from google.oauth2 import id_token
-from google.auth.transport import requests as google_requests # for token verification
+from google.auth.transport import requests as google_requests 
 from google.auth.exceptions import InvalidValue
 from pymysql import IntegrityError
-from app.database.database import SessionLocal
-from app.database.models import PantryItemsRequest, User, PantryItem
-from fastapi import APIRouter, File, UploadFile, HTTPException, Request # incoming requests from frontend
-import requests as httpx # for outgoing API requests (e.g., Google OAuth token exchange)
-import os
 from sqlalchemy.exc import SQLAlchemyError
-from dotenv import load_dotenv
+import requests as httpx
 from app.asprise_api import send_receipt_to_asprise
 from app.utils.receipt_parser import parse_asprise_response
+from app.dependencies.auth import require_google_token
+from app.database.database import SessionLocal
+from app.database.models import PantryItemsRequest, User, PantryItem
 
 load_dotenv()
 
@@ -23,13 +24,8 @@ GOOGLE_CLIENT_URI = os.getenv("GOOGLE_TOKEN_URI")
 
 router = APIRouter()
 
-@router.get("/hello/{name}", tags=["Test"])
-async def say_hello(name: str):
-    return {"message": f"Hello {name} from Stockd!"}
-
-
 @router.post("/upload-receipt", tags=["OCR"])
-async def upload_receipt(file: UploadFile = File(...)):
+async def upload_receipt(file: UploadFile = File(...), user=Depends(require_google_token)):
     """
     Upload an image of a receipt and send it to Asprise OCR API
     """
@@ -170,7 +166,7 @@ async def verify_google_token(request: Request):
         db.close()
 
 @router.post("/pantry_items", tags=["Pantry"])
-async def add_update_pantry_items(request_data: PantryItemsRequest):
+async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends(require_google_token)):
     """
     Add or update pantry items in the database for a specific user.
 
