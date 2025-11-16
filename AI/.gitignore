@@ -7,3 +7,6 @@ __pycache__/
 recipe_model.pkl
 venv
 venv/
+*.DS_Store
+zero_shot_food_classifier
+
