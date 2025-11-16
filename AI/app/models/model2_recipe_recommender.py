@@ -5,6 +5,7 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 import faiss
 import hashlib
+from sklearn.metrics.pairwise import cosine_similarity
 
 # build path to data file since relative paths can be unreliable
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -69,10 +70,71 @@ def recommend_recipes(pantry_items, top_n=10, user_id=None):
 
     return results[['Name', 'similarity']]
 
-if __name__ == "__main__":
-    test_pantry = ["chicken breast", "wholewheat noodles", "oriental vegetables"]
-    print("\nUser pantry:", test_pantry)
+# ----------------------------- Collaborative filtering -----------------------------
+users = {
+    "user_1": {
+        "pantry": ["chicken breast", "wholewheat noodles", "oriental vegetables"],
+        "liked_recipes": ["Garlic Chicken Stir Fry", "Teriyaki Chicken"]
+    },
+    "user_2": {
+        "pantry": ["tomatoes", "basil", "olive oil"],
+        "liked_recipes": ["Caprese Salad", "Tomato Soup"]
+    },
+    "user_3": {
+        "pantry": ["blueberries", "lemon juice", "sugar"],
+        "liked_recipes": ["Blueberry Muffin", "Lemon Tart"]
+    }
+}
 
-    recommendations = recommend_recipes(test_pantry, 10)
-    print("\nTop Recipe Recommendations:")
-    print(recommendations)
+interactions = []
+for user, data in users.items():
+    for recipe in data["liked_recipes"]:
+        interactions.append({
+            "user_id": user,
+            "recipe_name": recipe,
+            "rating": 1
+        })
+
+df_interactions = pd.DataFrame(interactions)
+user_item_matrix = df_interactions.pivot_table(
+    index='user_id', columns='recipe_name', values='rating', fill_value=0
+)
+
+user_similarity = cosine_similarity(user_item_matrix)
+user_similarity_df = pd.DataFrame(
+    user_similarity,
+    index=user_item_matrix.index,
+    columns=user_item_matrix.index
+)
+
+def recommend_from_similar_users(target_user, top_n=3):
+    similar_users = user_similarity_df[target_user].sort_values(ascending=False).drop(target_user)
+    recommended_recipes = set()
+    for sim_user in similar_users.index:
+        liked = set(df_interactions[df_interactions.user_id == sim_user]['recipe_name'])
+        target_liked = set(df_interactions[df_interactions.user_id == target_user]['recipe_name'])
+        recommended_recipes.update(liked - target_liked)
+        if len(recommended_recipes) >= top_n:
+            break
+    return list(recommended_recipes)[:top_n]
+
+def hybrid_recommend(user_id, pantry_items, top_n=5):
+    content_recipes = recommend_recipes(pantry_items, top_n=top_n*2)['Name'].tolist()
+    cf_recipes = recommend_from_similar_users(user_id, top_n=top_n*2)
+    
+    final = list(cf_recipes) + [r for r in content_recipes if r not in cf_recipes]
+    return final[:top_n]
+
+if __name__ == "__main__":
+    test_user = "user_1"
+    test_pantry = users[test_user]["pantry"]
+
+    print(f"\nUser pantry: {test_pantry}")
+    print("\nContent-based recommendations:")
+    print(recommend_recipes(test_pantry, top_n=5))
+
+    print("\nCollaborative filtering recommendations:")
+    print(recommend_from_similar_users(test_user, top_n=5))
+
+    print("\nHybrid recommendations:")
+    print(hybrid_recommend(test_user, test_pantry, top_n=5))
