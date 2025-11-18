@@ -3,116 +3,58 @@ from transformers import pipeline
 from sklearn.metrics import accuracy_score, classification_report
 import torch 
 
-# Food vs Non-Food classification
-food_labels = ["food", "non-food"]
+class FoodLabeler:
+    def __init__(self):
+        self.clf = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
+        self.food_labels = ["food", "non-food"]
+        self.storage_labels = ["a cool dry pantry", "a refrigerator", "a freezer"]
+        self.storage_map = {
+            "a cool dry pantry": "Pantry",
+            "a refrigerator": "Refrigerator",
+            "a freezer": "Freezer"
+        }
+        self.food_categories = [
+            "cereal","coffee","sweets","snacks","beverage","dairy",
+            "fruit","vegetable","meat","grain"
+        ]
 
-classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
+    def classify(self, item):
+        # 1. food vs non-food
+        food_res = self.clf(item, self.food_labels, hypothesis_template="This is a {}.")
+        food_label = food_res['labels'][0]
 
-def classify_food_or_non_food(item):
-    premise = item
-    results = classifier(premise, food_labels, hypothesis_template="This is a {}.")
+        if food_label == "non-food":
+            return {
+                "item": item,
+                "is_food": "non-food",
+                "storage": None,
+                "category": None,
+            }
+
+        # 2. storage
+        storage_res = self.clf(item, self.storage_labels,
+                               hypothesis_template="This food item should be stored in the {}.")
+        storage_label = self.storage_map[storage_res['labels'][0]]
+
+        # 3. specific food category
+        cat_res = self.clf(item, self.food_categories,
+                           hypothesis_template="This is a {}.")
+        category = cat_res['labels'][0]
+
+        return {
+            "item": item,
+            "is_food": "food",
+            "storage": storage_label,
+            "category": category,
+        }
     
-    print(f"Item: {item}")
-    print("Food vs Non-Food Classification Results:")
-    for label, score in zip(results['labels'], results['scores']):
-        print(f"{label}: {score:.4f}")
-    print("-" * 40)
-    
-    return results['labels'][0], results['scores'][0]
 
-print("Zero-shot classifier loaded!")
-print(f"Candidate labels: {food_labels}")
+if __name__ == "__main__":
+    model = FoodLabeler()
+    tesco_products = [ "Tesco Choco Snaps Cereal 350g", "Tesco Gold Instant Coffee 200g", "Tesco Whole Cucumber", "Oaities Chocolate Chip Cookies 300g", "Tesco 4711 Acqua Colonia “Floral Fields of Ireland” Eau de Cologne 50ml", "Tesco F&F Ottoman Storage Chair", "Tesco Household Washing Liquid", "Tesco Frozen Mixed Berries 300g", ]
+    result = []
+    for product in tesco_products:
+        classification = model.classify(product)
+        result.append(classification)
+    print("Model's Result", result)
 
-items_to_classify = [
-    "Apple", "Shampoo", "Frozen Pizza", "Milk", "Lamp",
-    "Bread", "Toothpaste", "Socks"
-]
-
-
-tesco_products = [
-    "Tesco Choco Snaps Cereal 350g",       
-    "Tesco Gold Instant Coffee 200g",      
-    "Tesco Whole Cucumber",                 
-    "Oaities Chocolate Chip Cookies 300g",      
-    "Tesco 4711 Acqua Colonia “Floral Fields of Ireland” Eau de Cologne 50ml",  
-    "Tesco F&F Ottoman Storage Chair", 
-    "Tesco Household Washing Liquid",       
-    "Tesco Frozen Mixed Berries 300g",         
-]
-
-classified_items = []
-for item in tesco_products:
-    label, score = classify_food_or_non_food(item)
-    if label == "food":
-        classified_items.append(item)
-
-print(f"Food Items: {classified_items}")
-
-# Storage classification
-storage_labels = [
-    "a cool dry pantry",
-    "a refrigerator",
-    "a freezer"
-]
-
-label_map = {
-    "a cool dry pantry": "Pantry",
-    "a refrigerator": "Refrigerator",
-    "a freezer": "Freezer"
-}
-
-def classify_storage(item):
-    premise = item 
-    results = classifier(premise, storage_labels, hypothesis_template="This food item should be stored in the {}.")
-    
-    print(f"Item: {item}")
-    print("Storage Classification Results:")
-    for label, score in zip(results['labels'], results['scores']):
-        print(f"{label}: {score:.4f}")
-    print("-" * 40)
-    
-    clean_label = label_map[results['labels'][0]]
-    return clean_label, results['scores'][0]
-
-food_storage_classified = {}
-for item in classified_items:
-    label, score = classify_storage(item)
-    food_storage_classified[item] = [{'storage': label}]
-
-print("Food Storage Classification Results:")
-# for item, storage in food_storage_classified.items():
-#     print(f"{item}: {storage}")
-print(f"Food Items: {food_storage_classified}")
-
-# Specific food category classification
-specific_food_labels = [
-    "cereal", "coffee", "sweets", "snacks", 
-    "beverage", "dairy", "fruit", "vegetable", "meat", "grain",
-]
-
-def classify_specific_food(item):
-    premise = item  
-    results = classifier(premise, specific_food_labels, hypothesis_template="This is a {}.")
-
-    best_label = results['labels'][0]
-    best_score = results['scores'][0]
-
-    print(f"Item: {item}")
-    print(f"Item: {item:15} → {best_label} ({best_score:.3f})")
-    # for label, score in zip(results['labels'], results['scores']):
-    #     print(f"{label}: {score:.4f}")
-        
-    print("-------------")
-    
-    return best_label, best_score
-
-# Testing
-specific_food_classified = {}
-
-for item in food_storage_classified:
-    label, score = classify_specific_food(item)
-    specific_food_classified[item] = food_storage_classified[item][0], {"type":label}
-
-# for item, food_category in specific_food_classified.items():
-#     print(f"{item}: {food_category}")
-print(f"Specific Food Categories: {specific_food_classified}")
