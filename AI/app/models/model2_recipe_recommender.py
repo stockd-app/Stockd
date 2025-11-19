@@ -36,17 +36,17 @@ else:
         batch_size=256,
         normalize_embeddings=True
     )
+    
+    # build FAISS index
+    dim = embeddings.shape[1]
+    index = faiss.IndexFlatIP(dim)
+    index.add(embeddings.astype('float32'))
 
-# build FAISS index
-dim = embeddings.shape[1]
-index = faiss.IndexFlatIP(dim)
-index.add(embeddings.astype('float32'))
+    # cache model and index for future runs
+    joblib.dump((model, df), MODEL_PATH)
+    faiss.write_index(index, INDEX_PATH)
 
-# cache model and index for future runs
-joblib.dump((model, df), MODEL_PATH)
-faiss.write_index(index, INDEX_PATH)
-
-print("model and FAISS index ready")
+    print("model and FAISS index ready")
 
 pantry_cache = {}
 
