@@ -15,7 +15,8 @@ class User(Base):
     role = Column(Enum("admin", "user", "guest"), default="guest")
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    pantry_items = relationship("PantryItem", back_populates="owner")
+    pantry_items = relationship("PantryItem", back_populates="owner", 
+        passive_deletes=True )
 
 class PantryItem(Base):
     __tablename__ = "PantryItems"
