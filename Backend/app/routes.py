@@ -167,7 +167,7 @@ async def verify_google_token(request: Request):
         db.close()
 
 @router.post("/auth/google/logout", tags=["Google OAuth"])
-async def google_logout(request: Request):
+async def google_logout(request: Request, user=Depends(require_google_token)):
     """
     Logs out a Google-authenticated user.
     - Validate JSON body
@@ -213,6 +213,38 @@ async def google_logout(request: Request):
     # 3. Successfully logged out
     return {"status": "success", "message": "Google user logged out successfully"}
 
+
+@router.delete("/delete_user/{user_id}", tags=["Users"])
+async def delete_user(user_id: int, user=Depends(require_google_token)):
+    """
+    Delete a user by ID
+    Deletes user from Users table and PantryItems table
+    """
+
+    db = SessionLocal()
+
+    try:
+        # Look up the user
+        delete_user = db.query(User).filter(User.id == user_id).first()
+
+        if not delete_user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        db.delete(delete_user)
+        db.commit()
+
+        return {
+            "status": "success",
+            "message": f"User {user_id} deleted successfully"
+        }
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to delete user: {str(e)}")
+    
+    finally:
+        db.close()
+        
 
 @router.post("/pantry_items", tags=["Pantry"])
 async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends(require_google_token)):
