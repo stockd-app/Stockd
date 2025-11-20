@@ -1,0 +1,92 @@
+@import "@/styles/variable.css";
+
+.terms__container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100dvh;
+    background: var(--color-light);
+}
+
+.terms__card {
+    width: 70dvw;
+    max-width: 380px;
+    background: var(--color-white);
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    position: relative;
+}
+
+.terms__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 0 6px;
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.terms__title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--color-dark);
+}
+
+/* Logo styling */
+.terms__logo {
+    display: block;
+    margin: 0 auto 6px auto;
+}
+
+/* Stockd text under logo */
+.terms__stockd {
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-top: 4px;
+    margin-bottom: 8px;
+}
+
+.terms__text {
+    text-align: left;
+    font-size: 0.95rem;
+    color: var(--color-dark-grey);
+    margin-top: 12px;
+}
+
+.terms__link {
+    color: var(--color-primary);
+    margin: 14px 0;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.terms__checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.terms__continue {
+    width: 100%;
+    padding: 12px;
+    margin-top: 18px;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-tertiary);
+    color: var(--color-white);
+    cursor: not-allowed;
+    transition: 0.3s;
+}
+
+.terms__continue.active {
+    background: var(--color-primary);
+    cursor: pointer;
+}

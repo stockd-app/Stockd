@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import LandingPage from "./pages/LandingPage/LandingPage";
 import Dashboard from "./pages/Dashboard/Dashboard";
+import TermsPage from "./pages/TermsAndCondition/TermsPage";
+import FullTermsPage from "./pages/TermsAndCondition/FullTermsPage";
 
 const App: React.FC = () => {
   const [user, setUser] = useState<string | null>(localStorage.getItem("user"));
@@ -30,12 +32,14 @@ const App: React.FC = () => {
       <Route
         path="/"
         element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />}
-      />
+      />  
       {/* If not logged in, go back home */}
       <Route
         path="/dashboard"
         element={user ? <Dashboard /> : <Navigate to="/" replace />}
       />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route path="/terms-full" element={<FullTermsPage />} />
     </Routes>
   );
 };
