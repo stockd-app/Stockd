@@ -167,7 +167,7 @@ async def verify_google_token(request: Request):
         db.close()
 
 @router.post("/auth/google/logout", tags=["Google OAuth"])
-async def google_logout(request: Request):
+async def google_logout(request: Request, user=Depends(require_google_token)):
     """
     Logs out a Google-authenticated user.
     - Validate JSON body
@@ -215,7 +215,7 @@ async def google_logout(request: Request):
 
 
 @router.delete("/delete_user/{user_id}", tags=["Users"])
-async def delete_user(user_id: int):
+async def delete_user(user_id: int, user=Depends(require_google_token)):
     """
     Delete a user by ID
     Deletes user from Users table and PantryItems table
