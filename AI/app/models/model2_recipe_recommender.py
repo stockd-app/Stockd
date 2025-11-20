@@ -72,19 +72,18 @@ def recommend_recipes(pantry_items, top_n=10, user_id=None):
 
 # ----------------------------- Collaborative filtering -----------------------------
 users = {
-    "user_1": {
-        "pantry": ["chicken breast", "wholewheat noodles", "oriental vegetables"],
-        "liked_recipes": ["Garlic Chicken Stir Fry", "Teriyaki Chicken"]
-    },
-    "user_2": {
-        "pantry": ["tomatoes", "basil", "olive oil"],
-        "liked_recipes": ["Caprese Salad", "Tomato Soup"]
-    },
-    "user_3": {
-        "pantry": ["blueberries", "lemon juice", "sugar"],
-        "liked_recipes": ["Blueberry Muffin", "Lemon Tart"]
-    }
+    "user_1": {"pantry": ["chicken", "rice", "broccoli"], "liked_recipes": ["Garlic Chicken Stir Fry", "Teriyaki Chicken", "Chicken Fried Rice"]},
+    "user_2": {"pantry": ["chicken", "rice", "carrots"], "liked_recipes": ["Garlic Chicken Stir Fry", "Teriyaki Chicken", "Chicken Fried Rice", "Spaghetti Bolognese", "Oreos", "Chocolate Chip Cookies"]},
+    "user_3": {"pantry": ["chicken", "noodles", "broccoli"], "liked_recipes": ["Garlic Chicken Stir Fry", "Teriyaki Chicken", "Chicken Fried Rice", "Strawberry Smoothie", "Banana Pancakes", "Cereal"]},
+    "user_4": {"pantry": ["salmon", "lemon", "dill"], "liked_recipes": ["Grilled Lemon Salmon", "Salmon Pasta"]},
+    "user_5": {"pantry": ["beef", "onion", "garlic"], "liked_recipes": ["Beef Stir Fry", "Beef Tacos"]},
+    "user_6": {"pantry": ["pasta", "tomato sauce", "cheese"], "liked_recipes": ["Lasagna"]},
+    "user_7": {"pantry": ["potatoes", "cheddar", "bacon"], "liked_recipes": ["Loaded Baked Potato", "Cheesy Potato Bake"]},
+    "user_8": {"pantry": ["shrimp", "garlic", "butter"], "liked_recipes": ["Garlic Butter Shrimp", "Shrimp Scampi"]},
+    "user_9": {"pantry": ["spinach", "feta", "phyllo"], "liked_recipes": ["Spinach Pie", "Greek Salad"]},
+    "user_10": {"pantry": ["chocolate", "flour", "sugar"], "liked_recipes": ["Chocolate Cake", "Brownies"]},
 }
+
 
 interactions = []
 for user, data in users.items():
@@ -118,13 +117,6 @@ def recommend_from_similar_users(target_user, top_n=3):
             break
     return list(recommended_recipes)[:top_n]
 
-def hybrid_recommend(user_id, pantry_items, top_n=5):
-    content_recipes = recommend_recipes(pantry_items, top_n=top_n*2)['Name'].tolist()
-    cf_recipes = recommend_from_similar_users(user_id, top_n=top_n*2)
-    
-    final = list(cf_recipes) + [r for r in content_recipes if r not in cf_recipes]
-    return final[:top_n]
-
 if __name__ == "__main__":
     test_user = "user_1"
     test_pantry = users[test_user]["pantry"]
@@ -135,6 +127,3 @@ if __name__ == "__main__":
 
     print("\nCollaborative filtering recommendations:")
     print(recommend_from_similar_users(test_user, top_n=5))
-
-    print("\nHybrid recommendations:")
-    print(hybrid_recommend(test_user, test_pantry, top_n=5))
