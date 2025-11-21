@@ -15,6 +15,7 @@ from app.utils.receipt_parser import parse_asprise_response
 from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
 from app.database.models import PantryItemsRequest, User, PantryItem
+from AI.app.models.model2_recipe_recommender import recommend_recipes, recommend_from_similar_users
 
 load_dotenv()
 
@@ -339,3 +340,29 @@ async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends
     
     finally:
         db.close()
+
+@router.get("/recommendations/{user_id}")
+async def get_recommendations(user_id: str, top_n: int = 10):
+
+    # get pantry from DB
+    pantry_items = get_user_pantry(user_id)
+
+    all_user_ids = get_all_user_ids()  # list like ["1", "2", "3", ...]
+
+    content = recommend_recipes(pantry_items, top_n=top_n, user_id=user_id)
+
+    collaborative = recommend_from_similar_users(
+        target_user=user_id,
+        all_user_ids=all_user_ids,
+        top_n=top_n
+    )
+
+    return {
+        "user_id": user_id,
+        "pantry": pantry_items,
+        "content_based": [
+            {"name": row["Name"], "similarity": float(row["similarity"])}
+            for _, row in content.iterrows()
+        ],
+        "collaborative": collaborative
+    }

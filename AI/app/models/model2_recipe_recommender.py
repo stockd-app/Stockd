@@ -71,59 +71,76 @@ def recommend_recipes(pantry_items, top_n=10, user_id=None):
     return results[['Name', 'similarity']]
 
 # ----------------------------- Collaborative filtering -----------------------------
-users = {
-    "user_1": {"pantry": ["chicken", "rice", "broccoli"], "liked_recipes": ["Garlic Chicken Stir Fry", "Teriyaki Chicken", "Chicken Fried Rice"]},
-    "user_2": {"pantry": ["chicken", "rice", "carrots"], "liked_recipes": ["Garlic Chicken Stir Fry", "Teriyaki Chicken", "Chicken Fried Rice", "Spaghetti Bolognese", "Oreos", "Chocolate Chip Cookies"]},
-    "user_3": {"pantry": ["chicken", "noodles", "broccoli"], "liked_recipes": ["Garlic Chicken Stir Fry", "Teriyaki Chicken", "Chicken Fried Rice", "Strawberry Smoothie", "Banana Pancakes", "Cereal"]},
-    "user_4": {"pantry": ["salmon", "lemon", "dill"], "liked_recipes": ["Grilled Lemon Salmon", "Salmon Pasta"]},
-    "user_5": {"pantry": ["beef", "onion", "garlic"], "liked_recipes": ["Beef Stir Fry", "Beef Tacos"]},
-    "user_6": {"pantry": ["pasta", "tomato sauce", "cheese"], "liked_recipes": ["Lasagna"]},
-    "user_7": {"pantry": ["potatoes", "cheddar", "bacon"], "liked_recipes": ["Loaded Baked Potato", "Cheesy Potato Bake"]},
-    "user_8": {"pantry": ["shrimp", "garlic", "butter"], "liked_recipes": ["Garlic Butter Shrimp", "Shrimp Scampi"]},
-    "user_9": {"pantry": ["spinach", "feta", "phyllo"], "liked_recipes": ["Spinach Pie", "Greek Salad"]},
-    "user_10": {"pantry": ["chocolate", "flour", "sugar"], "liked_recipes": ["Chocolate Cake", "Brownies"]},
-}
+# users = {
+#     "user_1": {"pantry": ["chicken", "rice", "broccoli"], "liked_recipes": ["Garlic Chicken Stir Fry", "Teriyaki Chicken", "Chicken Fried Rice"]},
+#     "user_2": {"pantry": ["chicken", "rice", "carrots"], "liked_recipes": ["Garlic Chicken Stir Fry", "Teriyaki Chicken", "Chicken Fried Rice", "Spaghetti Bolognese", "Oreos", "Chocolate Chip Cookies"]},
+#     "user_3": {"pantry": ["chicken", "noodles", "broccoli"], "liked_recipes": ["Garlic Chicken Stir Fry", "Teriyaki Chicken", "Chicken Fried Rice", "Strawberry Smoothie", "Banana Pancakes", "Cereal"]},
+#     "user_4": {"pantry": ["salmon", "lemon", "dill"], "liked_recipes": ["Grilled Lemon Salmon", "Salmon Pasta"]},
+#     "user_5": {"pantry": ["beef", "onion", "garlic"], "liked_recipes": ["Beef Stir Fry", "Beef Tacos"]},
+#     "user_6": {"pantry": ["pasta", "tomato sauce", "cheese"], "liked_recipes": ["Lasagna"]},
+#     "user_7": {"pantry": ["potatoes", "cheddar", "bacon"], "liked_recipes": ["Loaded Baked Potato", "Cheesy Potato Bake"]},
+#     "user_8": {"pantry": ["shrimp", "garlic", "butter"], "liked_recipes": ["Garlic Butter Shrimp", "Shrimp Scampi"]},
+#     "user_9": {"pantry": ["spinach", "feta", "phyllo"], "liked_recipes": ["Spinach Pie", "Greek Salad"]},
+#     "user_10": {"pantry": ["chocolate", "flour", "sugar"], "liked_recipes": ["Chocolate Cake", "Brownies"]},
+# }
 
 
-interactions = []
-for user, data in users.items():
-    for recipe in data["liked_recipes"]:
-        interactions.append({
-            "user_id": user,
-            "recipe_name": recipe,
-            "rating": 1
-        })
+# This will later be replaced with the user's liked recipes fetched from the database. Eevery user has the same liked recipes until real data is used.
+FAKE_LIKED_RECIPES = [
+    "Garlic Chicken Stir Fry",
+    "Teriyaki Chicken",
+    "Chicken Fried Rice",
+    "Chocolate Chip Cookies",
+    "Spaghetti Bolognese",
+]
 
-df_interactions = pd.DataFrame(interactions)
-user_item_matrix = df_interactions.pivot_table(
-    index='user_id', columns='recipe_name', values='rating', fill_value=0
-)
+def build_interaction_matrix(user_ids):
+    interactions = []
+    for uid in user_ids:
+        for recipe in FAKE_LIKED_RECIPES: # Temporary, later replace with actual user liked recipes
+            interactions.append({
+                "user_id": uid,
+                "recipe_name": recipe,
+                "rating": 1
+            })
+    df_interactions = pd.DataFrame(interactions)
 
-user_similarity = cosine_similarity(user_item_matrix)
-user_similarity_df = pd.DataFrame(
-    user_similarity,
-    index=user_item_matrix.index,
-    columns=user_item_matrix.index
-)
+    user_item_matrix = df_interactions.pivot_table(
+        index="user_id", columns="recipe_name", values="rating", fill_value=0
+    )
 
-def recommend_from_similar_users(target_user, top_n=3):
-    similar_users = user_similarity_df[target_user].sort_values(ascending=False).drop(target_user)
-    recommended_recipes = set()
+    user_similarity = cosine_similarity(user_item_matrix)
+    similarity_df = pd.DataFrame(
+        user_similarity,
+        index=user_item_matrix.index,
+        columns=user_item_matrix.index
+    )
+
+    return df_interactions, similarity_df
+
+def recommend_from_similar_users(target_user, all_user_ids, top_n=5):
+    df_interactions, sim_df = build_interaction_matrix(all_user_ids)
+
+    similar_users = sim_df[target_user].sort_values(ascending=False).drop(target_user)
+
+    recommended = set()
     for sim_user in similar_users.index:
-        liked = set(df_interactions[df_interactions.user_id == sim_user]['recipe_name'])
-        target_liked = set(df_interactions[df_interactions.user_id == target_user]['recipe_name'])
-        recommended_recipes.update(liked - target_liked)
-        if len(recommended_recipes) >= top_n:
+        liked = set(df_interactions[df_interactions.user_id == sim_user]["recipe_name"])
+        target_liked = set(df_interactions[df_interactions.user_id == target_user]["recipe_name"])
+        recommended.update(liked - target_liked)
+        if len(recommended) >= top_n:
             break
-    return list(recommended_recipes)[:top_n]
+
+    return list(recommended)[:top_n]
 
 if __name__ == "__main__":
-    test_user = "user_1"
-    test_pantry = users[test_user]["pantry"]
+    # local tests
+    test_user_ids = ["user1", "user2", "user3"]
+    target_user = "user1"
 
-    print(f"\nUser pantry: {test_pantry}")
-    print("\nContent-based recommendations:")
+    print("\nTesting collaborative filtering:")
+    print(recommend_from_similar_users(target_user, test_user_ids, top_n=5))
+
+    test_pantry = ["chicken", "rice", "broccoli"]
+    print("\nTesting content-based (pantry) recommendations:")
     print(recommend_recipes(test_pantry, top_n=5))
-
-    print("\nCollaborative filtering recommendations:")
-    print(recommend_from_similar_users(test_user, top_n=5))

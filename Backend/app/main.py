@@ -16,7 +16,7 @@ app = FastAPI(
 )
 
 # Serve built React frontend
-app.mount("/assets", StaticFiles(directory="app/static/frontend/assets"), name="assets")
+# app.mount("/assets", StaticFiles(directory="app/static/frontend/assets"), name="assets")
 
 @app.get("/{full_path:path}")
 async def serve_react_app(full_path: str):
