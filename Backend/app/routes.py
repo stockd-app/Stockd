@@ -15,7 +15,6 @@ from app.utils.receipt_parser import parse_asprise_response
 from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
 from app.database.models import PantryItemsRequest, User, PantryItem
-from AI.app.models.model2_recipe_recommender import recommend_recipes, recommend_from_similar_users
 
 load_dotenv()
 
