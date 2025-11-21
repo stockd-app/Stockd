@@ -61,6 +61,6 @@ else:
         allow_headers=["*"],
     )
 
-# Include all routes
-from app.routes import router
-app.include_router(router)
+# # Include all routes
+# from app.routes import router
+# app.include_router(router)

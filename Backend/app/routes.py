@@ -341,28 +341,50 @@ async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends
     finally:
         db.close()
 
-@router.get("/recommendations/{user_id}")
-async def get_recommendations(user_id: str, top_n: int = 10):
+def get_user_pantry(user_id: int):
+    db = SessionLocal()
+    try:
+        items = db.query(PantryItem).filter(PantryItem.user_id == user_id).all()
+        return [item.item_name for item in items]
+    finally:
+        db.close()
 
-    # get pantry from DB
-    pantry_items = get_user_pantry(user_id)
+def get_all_user_ids():
+    db = SessionLocal()
+    try:
+        users = db.query(User.id).all()
+        return [u.id for u in users]
+    finally:
+        db.close()
 
-    all_user_ids = get_all_user_ids()  # list like ["1", "2", "3", ...]
+@router.get("/api/recommendations/pantry/{user_id}")
+async def get_pantry_recommendations(user_id: str, top_n: int = 10):
+    user_id_int = int(user_id)
+    pantry_items = get_user_pantry(user_id_int)
 
-    content = recommend_recipes(pantry_items, top_n=top_n, user_id=user_id)
-
-    collaborative = recommend_from_similar_users(
-        target_user=user_id,
-        all_user_ids=all_user_ids,
-        top_n=top_n
-    )
+    content = recommend_recipes(pantry_items, top_n=top_n, user_id=user_id_int)
 
     return {
-        "user_id": user_id,
+        "user_id": user_id_int,
         "pantry": pantry_items,
         "content_based": [
             {"name": row["Name"], "similarity": float(row["similarity"])}
             for _, row in content.iterrows()
         ],
+    }
+
+@router.get("/api/recommendations/collaborative/{user_id}")
+async def get_collaborative_recommendations(user_id: str, top_n: int = 5):
+    user_id_int = int(user_id)
+    all_user_ids = get_all_user_ids()
+
+    collaborative = recommend_from_similar_users(
+        target_user=user_id_int,
+        all_user_ids=all_user_ids,
+        top_n=top_n
+    )
+
+    return {
+        "user_id": user_id_int,
         "collaborative": collaborative
     }
