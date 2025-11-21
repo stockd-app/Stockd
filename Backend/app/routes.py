@@ -15,6 +15,7 @@ from app.utils.receipt_parser import parse_asprise_response
 from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
 from app.database.models import PantryItemsRequest, User, PantryItem
+from app.models.model2_recipe_recommender import recommend_recipes, recommend_from_similar_users
 
 load_dotenv()
 
@@ -129,6 +130,7 @@ async def verify_google_token(request: Request):
             "email": idinfo.get("email"),
             "name": idinfo.get("name"),
             "picture": idinfo.get("picture"),
+            "client_id": idinfo.get("sub")
         }
 
         if not user_info["email"]:
@@ -356,7 +358,7 @@ def get_all_user_ids():
     finally:
         db.close()
 
-@router.get("/api/recommendations/pantry/{user_id}")
+@router.get("/recommendations/pantry/{user_id}")
 async def get_pantry_recommendations(user_id: str, top_n: int = 10):
     user_id_int = int(user_id)
     pantry_items = get_user_pantry(user_id_int)
@@ -372,7 +374,7 @@ async def get_pantry_recommendations(user_id: str, top_n: int = 10):
         ],
     }
 
-@router.get("/api/recommendations/collaborative/{user_id}")
+@router.get("/recommendations/collaborative/{user_id}")
 async def get_collaborative_recommendations(user_id: str, top_n: int = 5):
     user_id_int = int(user_id)
     all_user_ids = get_all_user_ids()

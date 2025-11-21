@@ -31,33 +31,38 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (!user) navigate("/");
+  console.log("Dashboard useEffect mounted");
+  const storedUser = localStorage.getItem("user");
+  if (!storedUser) {
+    navigate("/");
+    return;
+  }
 
-     const userId = localStorage.getItem("user");
-    if (!userId) return;
+  const user = JSON.parse(storedUser);
+  const clientId = user.client_id; // <-- use the client_id now
+  if (!clientId) return;
 
-    const fetchRecommendations = async () => {
-      try {
-        // Pantry recommendations
-        const pantryRes = await fetch(`http://127.0.0.1:8000/recommendations/pantry/${userId}?top_n=5`);
-        const pantryData = await pantryRes.json();
-        console.log("Pantry-based recommendations:", pantryData.content_based);
+  const fetchRecommendations = async () => {
+    try {
+      // Pantry recommendations
+      const pantryRes = await fetch(`http://127.0.0.1:8000/recommendations/pantry/${clientId}?top_n=5`);
+      const pantryData = await pantryRes.json();
+      console.log("Pantry-based recommendations:", pantryData.content_based);
 
-        // Collaborative recommendations
-        const collabRes = await fetch(`http://127.0.0.1:8000/recommendations/collaborative/${userId}?top_n=5`);
-        const collabData = await collabRes.json();
-        console.log("Collaborative recommendations:", collabData.collaborative);
+      // Collaborative recommendations
+      const collabRes = await fetch(`http://127.0.0.1:8000/recommendations/collaborative/${clientId}?top_n=5`);
+      const collabData = await collabRes.json();
+      console.log("Collaborative recommendations:", collabData.collaborative);
 
-        console.log("Pantry response:", pantryData);
-        console.log("Collaborative response:", collabData);
-      } catch (err) {
-        console.error("Error fetching recommendations:", err);
-      }
-    };
+      console.log("Pantry response:", pantryData);
+      console.log("Collaborative response:", collabData);
+    } catch (err) {
+      console.error("Error fetching recommendations:", err);
+    }
+  };
 
-    fetchRecommendations();
-  }, []);
+  fetchRecommendations();
+}, []);
 
   // TODO : Replace with real data when backend is ready
   const items = [
