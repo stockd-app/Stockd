@@ -7,4 +7,13 @@ __pycache__/
 recipe_model.pkl
 *.DS_Store
 zero_shot_food_classifier
-
+recipe_assets.pkl
+recipe_index.faiss
+/cache/
+sentence-transformers/
+venv/
+.env/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
