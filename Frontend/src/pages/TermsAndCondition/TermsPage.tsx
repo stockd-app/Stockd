@@ -30,8 +30,16 @@ const TermsPage: React.FC = () => {
                 localStorage.setItem("user", JSON.stringify(res.data.user));
 
                 navigate("/dashboard");
-            } catch (err) {
+            } catch (err: any) {
                 console.error("Google login failed:", err);
+
+                const status = err?.response?.status;
+
+                if (status === 400) navigate("/error/400");
+                else if (status === 401) navigate("/error/401");
+                else if (status === 500) navigate("/error/500");
+                else if (status === 503) navigate("/error/503");
+                else navigate("/error/500"); // fallback
             }
         },
         onError: () => console.error("Google login error"),

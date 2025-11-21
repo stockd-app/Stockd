@@ -57,7 +57,7 @@ async def verify_google_token(request: Request):
     - 400 - Bad Request
     - 401 - Unauthorized
     - 500 - Internal server error
-    - 504 - Unable to handle request
+    - 503 - Unable to handle request
     """
     db = SessionLocal()
     try:
@@ -178,7 +178,7 @@ async def google_logout(request: Request, user=Depends(require_google_token)):
     - 400 - Bad Request
     - 401 - Unauthorized
     - 500 - Internal server error
-    - 504 - Unable to handle request
+    - 503 - Unable to handle request
     """
 
     # 1. Parse and validate JSON
