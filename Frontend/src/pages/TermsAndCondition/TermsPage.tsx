@@ -35,11 +35,7 @@ const TermsPage: React.FC = () => {
 
                 const status = err?.response?.status;
 
-                if (status === 400) navigate("/error/400");
-                else if (status === 401) navigate("/error/401");
-                else if (status === 500) navigate("/error/500");
-                else if (status === 503) navigate("/error/503");
-                else navigate("/error/500"); // fallback
+                navigate(`/error/${status || 500}`);
             }
         },
         onError: () => console.error("Google login error"),

@@ -4,10 +4,7 @@ import LandingPage from "./pages/LandingPage/LandingPage";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import TermsPage from "./pages/TermsAndCondition/TermsPage";
 import FullTermsPage from "./pages/TermsAndCondition/FullTermsPage";
-import Error400 from "./pages/GoogleErrorHandling/Error400";
-import Error401 from "./pages/GoogleErrorHandling/Error401";
-import Error500 from "./pages/GoogleErrorHandling/Error500";
-import Error503 from "./pages/GoogleErrorHandling/Error503";
+import GoogleErrorScreen from "./pages/GoogleErrorHandling/GoogleErrorScreen";
 
 const App: React.FC = () => {
   const [user, setUser] = useState<string | null>(localStorage.getItem("user"));
@@ -44,10 +41,7 @@ const App: React.FC = () => {
       />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/terms-full" element={<FullTermsPage />} />
-      <Route path="/error/400" element={<Error400 />} />
-      <Route path="/error/401" element={<Error401 />} />
-      <Route path="/error/500" element={<Error500 />} />
-      <Route path="/error/503" element={<Error503 />} />
+      <Route path="/error/:code" element={<GoogleErrorScreen />} />
     </Routes>
   );
 };
