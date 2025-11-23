@@ -4,6 +4,7 @@ import LandingPage from "./pages/LandingPage/LandingPage";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import TermsPage from "./pages/TermsAndCondition/TermsPage";
 import FullTermsPage from "./pages/TermsAndCondition/FullTermsPage";
+import GoogleErrorScreen from "./pages/GoogleErrorHandling/GoogleErrorScreen";
 
 const App: React.FC = () => {
   const [user, setUser] = useState<string | null>(localStorage.getItem("user"));
@@ -32,7 +33,7 @@ const App: React.FC = () => {
       <Route
         path="/"
         element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />}
-      />  
+      />
       {/* If not logged in, go back home */}
       <Route
         path="/dashboard"
@@ -40,6 +41,7 @@ const App: React.FC = () => {
       />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/terms-full" element={<FullTermsPage />} />
+      <Route path="/error/:code" element={<GoogleErrorScreen />} />
     </Routes>
   );
 };
