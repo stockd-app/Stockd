@@ -1,0 +1,75 @@
+@import "@/styles/variable.css";
+
+/* Container that holds all notifications (stack) */
+.notification__stack {
+    position: fixed;
+    bottom: 13dvh;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 999;
+}
+
+/* Individual notification */
+.notification__container {
+    padding: 12px 20px;
+    background: var(--color-dark);
+    color: var(--color-white);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 180px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.4);
+    animation: slideInLeft 0.35s ease forwards;
+}
+
+/* EXIT animation */
+.notification__container.leaving {
+    animation: slideOutLeft 0.3s ease forwards;
+}
+
+@keyframes slideOutLeft {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(-40px);
+    }
+}
+
+
+/* Icons based on type */
+.added .notification__icon {
+    color: var(--color-primary);
+}
+
+.updated .notification__icon {
+    color: var(--color-deep-blue);
+}
+
+.deleted .notification__icon {
+    color: var(--color-red);
+}
+
+.notification__message {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Slide from left animation */
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-40px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
