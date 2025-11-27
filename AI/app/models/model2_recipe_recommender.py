@@ -94,28 +94,35 @@ FAKE_LIKED_RECIPES = [
     "Spaghetti Bolognese",
 ]
 
+FAKE_USER_LIKES = {
+    "user1": ["Garlic Chicken Stir Fry", "Teriyaki Chicken"],
+    "user2": ["Spaghetti Bolognese", "Chocolate Chip Cookies"],
+    "user3": ["Chicken Fried Rice", "Brownies"],
+}
+
 def build_interaction_matrix(user_ids):
     interactions = []
     for uid in user_ids:
-        for recipe in FAKE_LIKED_RECIPES: # Temporary, later replace with actual user liked recipes
+        liked_recipes = FAKE_USER_LIKES.get(uid, [])
+        for recipe in liked_recipes:
             interactions.append({
                 "user_id": uid,
                 "recipe_name": recipe,
                 "rating": 1
             })
     df_interactions = pd.DataFrame(interactions)
-
+    
     user_item_matrix = df_interactions.pivot_table(
         index="user_id", columns="recipe_name", values="rating", fill_value=0
     )
-
+    
     user_similarity = cosine_similarity(user_item_matrix)
     similarity_df = pd.DataFrame(
         user_similarity,
         index=user_item_matrix.index,
         columns=user_item_matrix.index
     )
-
+    
     return df_interactions, similarity_df
 
 def recommend_from_similar_users(target_user, all_user_ids, top_n=5):
