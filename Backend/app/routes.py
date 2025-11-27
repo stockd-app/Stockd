@@ -345,9 +345,8 @@ async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends
 
 
 @router.get("/recommendations/pantry/{user_id}")
-async def get_pantry_recommendations(user_id: int, top_n: int = 10):
+async def get_pantry_recommendations(user_id: str, top_n: int = 10):
     pantry_items = get_user_pantry(user_id)
-
     payload = {
         "user_id": user_id,
         "pantry_items": pantry_items,
@@ -359,10 +358,20 @@ async def get_pantry_recommendations(user_id: int, top_n: int = 10):
         try:
             resp = await client.post(f"{AI_SERVER_URL}/recommend", json=payload)
             resp.raise_for_status()
+            ai_data = resp.json()
         except httpx.HTTPError as e:
             raise HTTPException(status_code=500, detail=f"AI server request failed: {str(e)}")
 
-    return resp.json()
+    formatted_recommendations = [
+        {"name": r["name"], "similarity": float(r["similarity"])} for r in ai_data.get("recommendations", [])
+    ]
+
+    return {
+        "status": "success",
+        "user_id": user_id,
+        "top_n": top_n,
+        "content_based": formatted_recommendations
+    }
 
 def get_user_pantry(user_id: int):
     db = SessionLocal()
