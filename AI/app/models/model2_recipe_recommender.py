@@ -95,9 +95,9 @@ FAKE_LIKED_RECIPES = [
 ]
 
 FAKE_USER_LIKES = {
-    "user1": ["Garlic Chicken Stir Fry", "Teriyaki Chicken"],
-    "user2": ["Spaghetti Bolognese", "Chocolate Chip Cookies"],
-    "user3": ["Chicken Fried Rice", "Brownies"],
+    1: ["Garlic Chicken Stir Fry", "Teriyaki Chicken"],
+    2: ["Spaghetti Bolognese", "Chocolate Chip Cookies"],
+    3: ["Chicken Fried Rice", "Brownies"],
 }
 
 def build_interaction_matrix(user_ids):
@@ -142,8 +142,8 @@ def recommend_from_similar_users(target_user, all_user_ids, top_n=5):
 
 if __name__ == "__main__":
     # local tests
-    test_user_ids = ["user1", "user2", "user3"]
-    target_user = "user1"
+    test_user_ids = [1, 2, 3]
+    target_user = 1
 
     print("\nTesting collaborative filtering:")
     print(recommend_from_similar_users(target_user, test_user_ids, top_n=5))

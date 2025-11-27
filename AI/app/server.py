@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict, Union
+from typing import List, Dict
 import uvicorn
 from app.models.model1_item_classifier import FoodLabeler
 from app.models.model2_recipe_recommender import recommend_recipes, recommend_from_similar_users
