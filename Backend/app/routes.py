@@ -14,7 +14,7 @@ from app.asprise_api import send_receipt_to_asprise
 from app.utils.receipt_parser import parse_asprise_response
 from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
-from app.database.models import PantryItemsRequest, User, PantryItem
+from app.database.models import LikedRecipe, PantryItemsRequest, Recipe, User, PantryItem
 
 load_dotenv()
 
@@ -337,5 +337,84 @@ async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends
         print("Unexpected error traceback:", traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
     
+    finally:
+        db.close()
+        
+@router.post("/recipes/{recipe_id}/like", tags=["Recipes"])
+async def toggle_like_recipe(recipe_id: int, user=Depends(require_google_token)):
+    """
+    Like or unlike a recipe for the authenticated user.
+    - If the user has not liked the recipe, it will be added
+    - If the user has already liked the recipe, it will be removed
+    """
+    db = SessionLocal()
+    
+    try:
+        recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+        if not recipe:
+            raise HTTPException(status_code=404, detail="Recipe not found")
+
+        existing_like = (
+            db.query(LikedRecipe)
+            .filter(LikedRecipe.user_id == user.id)
+            .filter(LikedRecipe.recipe_id == recipe_id)
+            .first()
+        )
+
+        if existing_like:
+            db.delete(existing_like)
+            db.commit()
+            return {"liked": False, "message": "Recipe unliked"}
+        else:
+            new_like = LikedRecipe(
+                user_id=user.id,
+                recipe_id=recipe_id,
+                liked_at=datetime.datetime.utcnow()
+            )
+            db.add(new_like)
+            db.commit()
+            return {"liked": True, "message": "Recipe liked"}
+
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+
+    finally:
+        db.close()
+        
+@router.get("/users/current/liked-recipes", tags=["Recipes"])
+async def get_liked_recipes(user=Depends(require_google_token)):
+    """
+    Returns a list of recipes liked by the currently authenticated user.
+    """
+    db = SessionLocal()
+    try:
+        liked_recipes = (
+            db.query(Recipe)
+            .join(LikedRecipe, LikedRecipe.recipe_id == Recipe.id)
+            .filter(LikedRecipe.user_id == user.id)
+            .all()
+        )
+
+        result = []
+        for recipe in liked_recipes:
+            result.append({
+                "id": recipe.id,
+                "recipe_name": recipe.recipe_name,
+                "recipe_image": recipe.recipe_image,
+                "prep_time": recipe.prep_time,
+                "cook_time": recipe.cook_time
+            })
+
+        return {"liked_recipes": result}
+
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
     finally:
         db.close()
