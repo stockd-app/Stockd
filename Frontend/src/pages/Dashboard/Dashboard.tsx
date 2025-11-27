@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart } from "lucide-react";
-import { DASHBOARD } from "../../config/consts";
+import { DASHBOARD, NOTIFICATION_MESSAGES, NOTIFICATION_TYPES } from "../../config/consts";
+import { useNotification } from "../../components/Notification/NotificationContext";
 import TopNavBar from "../../components/NavigationBar/TopNavBar/TopNavBar";
 import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
 
@@ -24,6 +25,8 @@ const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"Discover" | "Recommend" | "Saved">("Discover");
   const [indicatorStyle, setIndicatorStyle] = useState<{ left: string; width: string }>({ left: "0px", width: "0px" });
   const [favorites, setFavorites] = useState<number[]>([]);
+
+  const notify = useNotification();
 
   const tabsRef = useRef<HTMLDivElement>(null);
   const tabs = DASHBOARD.TABS;
@@ -63,8 +66,22 @@ const Dashboard: React.FC = () => {
 
   // Toggle favourite
   // If item is already favourited, remove it; otherwise, add it
+  // const toggleFavorite = (id: number) => {
+  //   setFavorites(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
+  // TEMPORARILY COMMENTED OUT to test notification feature
+
   const toggleFavorite = (id: number) => {
-    setFavorites(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
+    setFavorites(prev => {
+      const isFav = prev.includes(id);
+
+      if (isFav) {
+        notify(NOTIFICATION_MESSAGES.DELETED, NOTIFICATION_TYPES.DELETED);
+        return prev.filter(x => x !== id);
+      } else {
+        notify(NOTIFICATION_MESSAGES.ADDED, NOTIFICATION_TYPES.ADDED);
+        return [...prev, id];
+      }
+    });
   };
 
   // Decide which list to show based on the current page/tab

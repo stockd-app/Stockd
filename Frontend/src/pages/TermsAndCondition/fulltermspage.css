@@ -1,0 +1,80 @@
+@import "@/styles/variable.css";
+
+/* Entire page is white like Figma */
+.fullterms__container {
+    background: white;
+    min-height: 100dvh;
+    padding: 24px;
+    text-align: justify;
+}
+
+/* Back button */
+.fullterms__back {
+    background: transparent;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-bottom: 12px;
+    color: var(--color-dark);
+}
+
+/* Header */
+.fullterms__header {
+    text-align: center;
+}
+
+/* Terms & Conditions title (green) */
+.fullterms__title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-dark);
+    margin: 16px 0;
+}
+
+.fullterms__logo {
+    width: 90px;
+    display: block;
+    margin: 10px auto 6px auto;
+}
+
+/* Stockd title under logo */
+.fullterms__stockd {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 4px;
+}
+
+/* Divider under title */
+.fullterms__divider {
+    width: 100%;
+    height: 1px;
+    background: var(--color-grey);
+    margin: 16px 0;
+}
+
+/* Content */
+.fullterms__content h4 {
+    color: var(--color-dark);
+    font-size: 1.05rem;
+    margin-top: 22px;
+    font-weight: 600;
+}
+
+.fullterms__content p {
+    color: var(--color-dark-grey);
+    line-height: 1.6;
+    margin-top: 8px;
+    font-size: 0.95rem;
+}
+
+.fullterms__content ul {
+    margin-top: 10px;
+    padding-left: 20px;
+}
+
+.fullterms__content ul li {
+    color: var(--color-dark-grey);
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
