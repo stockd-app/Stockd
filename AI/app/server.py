@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict
 import uvicorn
-from app.models.model1_item_classifier import FoodLabeler
+from models.model1_item_classifier import FoodLabeler
 
 class ReceiptRequest(BaseModel):
     store: str
