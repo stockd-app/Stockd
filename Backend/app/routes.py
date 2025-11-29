@@ -86,7 +86,7 @@ async def verify_google_token(request: Request):
             # Send the temporary auth code to Google token endpoint 
             # to check if the auth code is designated for our app + 
             # user verification
-            token_response = httpx.post(token_url, data=payload)
+            token_response = httpx.post(url=token_url, data=payload)
         except Exception as e:
             raise HTTPException(status_code=503, detail={"error_code": "GOOGLE_TOKEN_ENDPOINT_UNREACHABLE", "message": "Failed to reach Google token endpoint"})
 

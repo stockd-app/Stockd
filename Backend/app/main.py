@@ -15,17 +15,6 @@ app = FastAPI(
     description="A simple backend powered by FastAPI with Swagger UI"
 )
 
-# Serve built React frontend
-app.mount("/assets", StaticFiles(directory="app/static/frontend/assets"), name="assets")
-
-@app.get("/{full_path:path}")
-async def serve_react_app(full_path: str):
-    """Catch-all route for React Router paths"""
-    index_path = os.path.join("app", "static", "frontend", "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
-    return {"error": "index.html not found"}
-
 # CORS setup (everything under same ngrok domain now)
 app.add_middleware(
     CORSMiddleware,
@@ -38,10 +27,12 @@ app.add_middleware(
 ENV = os.getenv("ENV", "dev")  # set ENV=prod when deploying
 
 if ENV == "dev":
-    # Allow frontend origin (Vite)
+    # Allow frontend origin (Vite dev server and Docker container)
     origins = [
         "http://localhost:5173",
         "https://localhost:5173",
+        "http://localhost",
+        "http://localhost:80",
         f"http://{HOST_IP}:5173",
     ]
     app.add_middleware(
@@ -61,6 +52,22 @@ else:
         allow_headers=["*"],
     )
 
-# Include all routes
+# Include all routes FIRST (before catch-all)
 from app.routes import router
 app.include_router(router)
+
+# Serve built React frontend (only if static files exist)
+# This must come AFTER API routes to avoid intercepting them
+try:
+    app.mount("/assets", StaticFiles(directory="app/static/frontend/assets"), name="assets")
+    
+    @app.get("/{full_path:path}")
+    async def serve_react_app(full_path: str):
+        """Catch-all route for React Router paths"""
+        index_path = os.path.join("app", "static", "frontend", "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+        return {"error": "index.html not found"}
+except Exception:
+    # Static frontend files don't exist, skip serving them
+    pass
