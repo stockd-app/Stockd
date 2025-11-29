@@ -493,7 +493,7 @@ async def get_collaborative_recommendations(user_id: int, top_n: int = 5):
     payload = {
         "user_id": user_id,
         "pantry_items": pantry_items,
-        "all_user_ids": all_user_ids,
+        "all_user_ids": [1, 2, 3], # replace this with all_user_ids later
         "top_n": top_n,
         "mode": "collaborative"
     }
