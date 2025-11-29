@@ -29,7 +29,7 @@ router = APIRouter()
 AI_SERVER_URL = "http://localhost:9000"
 
 @router.post("/upload-receipt", tags=["OCR"])
-async def upload_receipt(file: UploadFile = File(...), user=Depends(require_google_token)):
+async def upload_receipt(file: UploadFile = File(...)):
     """
     Upload an image of a receipt and send it to Asprise OCR API
     """
