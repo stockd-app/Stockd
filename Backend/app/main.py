@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 import os
+from app.routes import router
 
 load_dotenv()
 
@@ -53,7 +54,6 @@ else:
     )
 
 # Include all routes FIRST (before catch-all)
-from app.routes import router
 app.include_router(router)
 
 # Serve built React frontend (only if static files exist)
