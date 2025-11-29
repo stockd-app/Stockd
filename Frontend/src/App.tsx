@@ -6,6 +6,7 @@ import Profile from "./pages/Profile/Profile";
 import TermsPage from "./pages/TermsAndCondition/TermsPage";
 import FullTermsPage from "./pages/TermsAndCondition/FullTermsPage";
 import GoogleErrorScreen from "./pages/GoogleErrorHandling/GoogleErrorScreen";
+import PantryPage from "./pages/PantryPage/PantryPage";
 
 const App: React.FC = () => {
   const [user, setUser] = useState<string | null>(localStorage.getItem("user"));
@@ -39,6 +40,10 @@ const App: React.FC = () => {
       <Route
         path="/dashboard"
         element={user ? <Dashboard /> : <Navigate to="/" replace />}
+      />
+      <Route
+        path="/pantry"
+        element={user ? <PantryPage /> : <Navigate to="/" replace />}
       />
       <Route
         path="/profile"

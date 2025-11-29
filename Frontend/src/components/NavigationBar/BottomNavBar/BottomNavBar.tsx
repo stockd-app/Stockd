@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Home, Refrigerator, ScanLine, Bookmark, User } from "lucide-react";
 import CameraModal from "../../CameraModal/CameraModal";
 import { BOTTOM_NAV_ICON_SIZE } from "../../../config/consts";
+import { useNavigate } from "react-router-dom";
 
 import "./bottomnavbar.css";
 
@@ -70,7 +71,7 @@ const BottomNavBar: React.FC = () => {
 
       <div
         className={`bottomnav__item ${activeItem === "pantry" ? "active" : ""}`}
-        onClick={() => { setActiveItem("pantry"); navigate("/dashboard") }}
+        onClick={() => { setActiveItem("pantry"); navigate("/pantry") }}
       >
         <Refrigerator size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
         <p>Pantry</p>
