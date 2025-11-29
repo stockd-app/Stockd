@@ -5,13 +5,14 @@ import traceback
 from dotenv import load_dotenv
 from fastapi import APIRouter, File, UploadFile, HTTPException, Request, Depends
 from google.oauth2 import id_token
-from google.auth.transport import requests as google_requests 
+from google.auth.transport import requests as google_requests
 from google.auth.exceptions import InvalidValue
 from pymysql import IntegrityError
 from sqlalchemy.exc import SQLAlchemyError
 import requests as httpx
 from app.asprise_api import send_receipt_to_asprise
 from app.utils.receipt_parser import parse_asprise_response
+from app.utils.ai_classifier import classify_receipt_items
 from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
 from app.database.models import LikedRecipe, PantryItemsRequest, Recipe, User, PantryItem
@@ -28,19 +29,33 @@ router = APIRouter()
 @router.post("/upload-receipt", tags=["OCR"])
 async def upload_receipt(file: UploadFile = File(...), user=Depends(require_google_token)):
     """
-    Upload an image of a receipt and send it to Asprise OCR API
+    Upload an image of a receipt and send it to Asprise OCR API,
+    then classify items using the AI model
     """
     try:
         image_bytes = await file.read()
 
-        # Send to Asprise API
+        # Send to Asprise API and parse the response
         asprise_data = send_receipt_to_asprise(image_bytes, file.filename)
         parsed = parse_asprise_response(asprise_data)
 
-        return {
-            "status": "success",
-            "response": parsed
-        }
+        # Call AI model to classify items
+        try:
+            ai_data = classify_receipt_items(parsed)
+            
+            return {
+                "status": "success",
+                "asprise_parsed": parsed,
+                "ai_classified": ai_data
+            }
+        except Exception as e:
+            # If AI model is unavailable, return parsed data without classification
+            return {
+                "status": "partial_success",
+                "message": "Receipt parsed but AI classification failed",
+                "asprise_parsed": parsed,
+                "ai_error": str(e)
+            }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
