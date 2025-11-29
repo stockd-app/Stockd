@@ -1,8 +1,9 @@
 import React, { useState } from "react"; //add useEffect for future data fetching
 import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
 
-import "@/styles/variable.css";
+
 import "./pantrypage.css";
+import ItemSection from "../../components/ItemSection/ItemSection";
 
 /**
  * Pantry Page (Based on figma)
@@ -18,25 +19,25 @@ const PantryPage: React.FC = () => {
         {
             section: "Fridge",
             items: [
-                { id: 1, name: "Soy Milk", qty: "2", image: "https://images.openfoodfacts.org/images/products/506/040/608/0223/front_en.34.200.jpg" },
-                { id: 2, name: "Nuggets", qty: "3", image: "https://images.openfoodfacts.org/images/products/377/001/893/4402/front_fr.27.200.jpg" },
-                { id: 9, name: "Eggs", qty: "6", image: "https://images.openfoodfacts.org/images/products/000/000/121/7155/front_en.27.200.jpg" },
+                { id: 1, name: "Soy Milk", qty: "x2", image: "https://images.openfoodfacts.org/images/products/506/040/608/0223/front_en.34.200.jpg" },
+                { id: 2, name: "Nuggets", qty: "x3", image: "https://images.openfoodfacts.org/images/products/377/001/893/4402/front_fr.27.200.jpg" },
+                { id: 9, name: "Eggs", qty: "x6", image: "https://images.openfoodfacts.org/images/products/000/000/121/7155/front_en.27.200.jpg" },
             ],
         },
         {
             section: "Pantry",
             items: [
-                { id: 3, name: "Banana Chips", qty: "1", image: "https://images.openfoodfacts.org/images/products/871/840/388/7518/front_fr.34.200.jpg" },
-                { id: 4, name: "Plain Flour", qty: "2", image: "https://images.openfoodfacts.org/images/products/408/860/008/6309/front_en.13.200.jpg" },
-                { id: 5, name: "Cruseli Cereal", qty: "1", image: "https://images.openfoodfacts.org/images/products/316/893/001/0821/front_fr.37.200.jpg" },
+                { id: 3, name: "Banana Chips", qty: "x1", image: "https://images.openfoodfacts.org/images/products/871/840/388/7518/front_fr.34.200.jpg" },
+                { id: 4, name: "Plain Flour", qty: "x2", image: "https://images.openfoodfacts.org/images/products/408/860/008/6309/front_en.13.200.jpg" },
+                { id: 5, name: "Cruseli Cereal", qty: "x1", image: "https://images.openfoodfacts.org/images/products/316/893/001/0821/front_fr.37.200.jpg" },
             ],
         },
         {
             section: "Freezer",
             items: [
-                { id: 6, name: "Mixed Vegetables", qty: "1", image: "https://images.openfoodfacts.org/images/products/408/860/025/7730/front_en.3.200.jpg" },
-                { id: 7, name: "Ben & Jerry's", qty: "2", image: "https://images.openfoodfacts.org/images/products/871/132/737/0708/front_en.161.200.jpg" },
-                { id: 8, name: "King Prawns", qty: "1", image: "https://images.openfoodfacts.org/images/products/405/648/982/5067/front_en.3.200.jpg" },
+                { id: 6, name: "Mixed Vegetables", qty: "x1", image: "https://images.openfoodfacts.org/images/products/408/860/025/7730/front_en.3.200.jpg" },
+                { id: 7, name: "Ben & Jerry's", qty: "x2", image: "https://images.openfoodfacts.org/images/products/871/132/737/0708/front_en.161.200.jpg" },
+                { id: 8, name: "King Prawns", qty: "x1", image: "https://images.openfoodfacts.org/images/products/405/648/982/5067/front_en.3.200.jpg" },
             ],
         }
     ]);
@@ -45,30 +46,14 @@ const PantryPage: React.FC = () => {
     return (
         <div className="pantry__container">
             <div className="pantry__content">
-                {pantryData.map(section => (
-                    <div key={section.section} className="pantry__section">
-                        <div className="pantry__header">
-                            <h2>{section.section}</h2>
-                            <p className="see__more">See more</p>
-                        </div>
-
-                        <div className="pantry__items">
-                            {section.items.map(item => (
-                                <div key={item.id} className="pantry__card">
-                                    <div className="pantry__image__Container">
-                                        <img src={item.image} alt={item.name} className="pantry__image" />
-                                    </div>
-                                    <div className="pantry__info">
-                                        <span className="pantry__name">{item.name}</span>
-                                        <span className="pantry__qty">{item.qty}</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                {pantryData.map((section) => (
+                    <ItemSection
+                        key={section.section}
+                        section={section.section}
+                        items={section.items}
+                    />
                 ))}
             </div>
-
             <BottomNavBar />
         </div>
     );
