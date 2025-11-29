@@ -34,6 +34,7 @@ echo -e "${GREEN}✓${NC} Docker is running"
 if [ ! -d "dist" ]; then
     echo -e "${YELLOW}⚠${NC} Frontend not built yet. Building now..."
     npm install
+    cp .env.docker .env.production
     npm run build
     echo -e "${GREEN}✓${NC} Frontend built successfully"
 else
