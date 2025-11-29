@@ -26,9 +26,27 @@ Open browser: **http://localhost**
 1. **Dockerfile** - Creates an Nginx container with your React app
 2. **nginx-docker.conf** - Configures Nginx to:
    - Serve your React static files
-   - Proxy `/api/*` requests to your backend (running separately)
+   - Proxy `/api/*` requests to backend container
+   - Strip `/api` prefix before forwarding (backend routes don't include `/api`)
    - Handle React Router (SPA routing)
 3. **docker-compose.yml** - Manages the container lifecycle
+
+## Connecting with Backend
+
+The nginx config proxies API requests to the backend container:
+
+```nginx
+location /api/ {
+    rewrite ^/api/(.*) /$1 break;  # Strips /api prefix
+    proxy_pass http://backend:8000;
+}
+```
+
+**Example:**
+- Frontend calls: `http://localhost/api/auth/google`
+- Nginx forwards to: `http://backend:8000/auth/google`
+
+**Important:** Both containers must be on the same Docker network (`stockd-network`)
 
 ## Commands
 
@@ -61,20 +79,18 @@ ports:
 Then access: http://localhost:8080
 
 ### Backend Connection
-The Nginx config proxies API requests to your backend. Make sure your backend is running on port 8000.
-
-If backend is in a Docker container, update `nginx-docker.conf`:
-```nginx
-location /api/ {
-    proxy_pass http://backend:8000;  # Use container name
-}
+Make sure backend container is running:
+```bash
+cd ../Backend
+./start.sh
 ```
 
-If backend is running on your laptop (not in Docker):
-```nginx
-location /api/ {
-    proxy_pass http://host.docker.internal:8000;  # Current setting
-}
+Both containers must use the same network name in their `docker-compose.yml`:
+```yaml
+networks:
+  stockd-network:
+    driver: bridge
+    name: stockd-network
 ```
 
 ## Troubleshooting
@@ -99,16 +115,38 @@ npm run build
 
 # Restart container
 docker-compose restart frontend
+
+# Hard refresh browser (Cmd+Shift+R)
 ```
 
-### API calls failing
-- Make sure backend is running on port 8000
-- Check nginx config has correct proxy_pass URL
-- Check browser console for CORS errors
+### API calls failing (404)
+- Make sure backend container is running: `docker ps | grep stockd-backend`
+- Check both containers are on same network: `docker network inspect stockd-network`
+- Check nginx logs: `docker-compose logs frontend`
 
+### API calls failing (500)
+- This is a backend error, not nginx/docker
+- Check backend logs: `cd ../Backend && docker-compose logs backend`
+- Check backend environment variables in `.env`
+
+## Development Workflow
+
+### For active development:
+Use the dev server (hot reload):
+```bash
+npm run dev
+```
+
+### For testing production build:
+Use Docker container:
+```bash
+npm run build
+./start.sh
+```
 
 ## Notes
 
 - The `dist` folder is mounted as a volume, so rebuilding React updates the container automatically
 - No need to rebuild the Docker image for frontend code changes
 - Just run `npm run build` and restart the container
+- Backend must be running for API calls to work
