@@ -1,111 +1,114 @@
-## 🚀 Stockd: Frontend Repo
+# Frontend Docker Setup
 
-### 1️⃣ Clone the repository
-```bash
-git clone https://github.com/stockd-app/Stockd.git
-cd Frontend
-```
+## Overview
 
-### 2️⃣ Install dependencies
+The frontend is containerized using Docker with Nginx serving the built React application.
+
+## Quick Start
+
+### 1. Build the React app
 ```bash
 npm install
+npm run build
 ```
 
-### 3️⃣ Run main.tsx
+### 2. Start the container
 ```bash
-npm run dev
+chmod +x start.sh stop.sh
+./start.sh
 ```
-- The server will run at: http://localhost:5173/
 
-### Deploy to HTTPS
+### 3. Access the app
+Open browser: **http://localhost**
+
+## How It Works
+
+1. **Dockerfile** - Creates an Nginx container with your React app
+2. **nginx-docker.conf** - Configures Nginx to:
+   - Serve your React static files
+   - Proxy `/api/*` requests to your backend (running separately)
+   - Handle React Router (SPA routing)
+3. **docker-compose.yml** - Manages the container lifecycle
+
+## Commands
+
 ```bash
-npm run deploy
-```
-- Before running script, ensure .env in Backend folder are updated (ENV=prod/ENV=dev + your device's IPv4 address)
-- This automated script will:
-- 1. npm run build -> Builds distribution folder and its content
-- 2. Copy over dist content to Backend/app/static/frontend to be served in a single tunnel(Frontend + Backend) by ngrok.
-- 3. Activate virtual environment (Creates one and activate if none exist)
-- 4. pip install -r requirements.txt
-- 5. uvicorn app.main:app --reload
-- 6. ngrok http 8000
+# Start container
+./start.sh
 
-### Frontend Development Guideline.
-1. React Components starts with capital letter. (e.g. Profile.tsx)
-2. Static variable store in consts.ts, with capitalised variable name. (e.g. GOOGLE_CLIENT_ID)
-3. For each function implemented, comment it's functionality, parameters, and returns.
-4. Follow BEM convention for CSS classname, Block__Element-Modifier.
+# Stop container
+./stop.sh
 
-# React + TypeScript + Vite
+# View logs
+docker-compose logs -f frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Restart after changes
+npm run build
+docker-compose restart frontend
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Rebuild container
+docker-compose up -d --build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Configuration
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Change Port
+If port 80 is busy, edit `docker-compose.yml`:
+```yaml
+ports:
+  - "8080:80"  # Changed from "80:80"
 ```
+Then access: http://localhost:8080
+
+### Backend Connection
+The Nginx config proxies API requests to your backend. Make sure your backend is running on port 8000.
+
+If backend is in a Docker container, update `nginx-docker.conf`:
+```nginx
+location /api/ {
+    proxy_pass http://backend:8000;  # Use container name
+}
+```
+
+If backend is running on your laptop (not in Docker):
+```nginx
+location /api/ {
+    proxy_pass http://host.docker.internal:8000;  # Current setting
+}
+```
+
+## Troubleshooting
+
+### Container won't start
+```bash
+# Check logs
+docker-compose logs frontend
+
+# Check if port is in use
+lsof -i :80
+
+# Remove and recreate
+docker-compose down
+docker-compose up -d
+```
+
+### Changes not showing
+```bash
+# Rebuild React app
+npm run build
+
+# Restart container
+docker-compose restart frontend
+```
+
+### API calls failing
+- Make sure backend is running on port 8000
+- Check nginx config has correct proxy_pass URL
+- Check browser console for CORS errors
+
+
+## Notes
+
+- The `dist` folder is mounted as a volume, so rebuilding React updates the container automatically
+- No need to rebuild the Docker image for frontend code changes
+- Just run `npm run build` and restart the container
