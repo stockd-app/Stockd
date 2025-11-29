@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-AI_MODEL_URL = os.getenv("AI_MODEL_URL", "http://localhost:9000")
+FOOD_CLASSIFIER_MODEL_URL = os.getenv("FOOD_CLASSIFIER_MODEL_URL", "http://localhost:9000")
 
 
 def classify_receipt_items(parsed_data: dict) -> dict:
@@ -12,7 +12,7 @@ def classify_receipt_items(parsed_data: dict) -> dict:
     Takes parsed receipt data (from Asprise) and sends it to the AI model
     for classification.
     """
-    ai_endpoint = f"{AI_MODEL_URL}/classify-items"
+    ai_endpoint = f"{FOOD_CLASSIFIER_MODEL_URL}/classify-items"
     
     ai_payload = {
         "store": parsed_data.get("store", "Unknown"),

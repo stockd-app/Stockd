@@ -9,13 +9,15 @@ from google.auth.transport import requests as google_requests
 from google.auth.exceptions import InvalidValue
 from pymysql import IntegrityError
 from sqlalchemy.exc import SQLAlchemyError
-import requests as httpx
+import httpx
+from fastapi import APIRouter, HTTPException
 from app.asprise_api import send_receipt_to_asprise
 from app.utils.receipt_parser import parse_asprise_response
 from app.utils.ai_classifier import classify_receipt_items
 from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
 from app.database.models import LikedRecipe, PantryItemsRequest, Recipe, User, PantryItem
+from app.utils.ai_recommender import get_recipe_recommendations
 
 load_dotenv()
 
@@ -25,6 +27,7 @@ GOOGLE_CLIENT_URI = os.getenv("GOOGLE_TOKEN_URI")
 GOOGLE_REVOKE_CLIENT_URI = os.getenv("GOOGLE_REVOKE_TOKEN_URI")
 
 router = APIRouter()
+AI_SERVER_URL_RECIPE_RECOMMENDER = os.getenv("RECIPE_RECOMMENDER_MODEL_URL")
 
 @router.post("/upload-receipt", tags=["OCR"])
 async def upload_receipt(file: UploadFile = File(...), user=Depends(require_google_token)):
@@ -144,6 +147,7 @@ async def verify_google_token(request: Request):
             "email": idinfo.get("email"),
             "name": idinfo.get("name"),
             "picture": idinfo.get("picture"),
+            "client_id": idinfo.get("sub")
         }
 
         if not user_info["email"]:
@@ -433,3 +437,72 @@ async def get_liked_recipes(user=Depends(require_google_token)):
 
     finally:
         db.close()
+
+
+@router.get("/recommendations/pantry/{user_id}")
+async def get_pantry_recommendations(user_id: int, top_n: int = 10):
+    
+    pantry_items = get_user_pantry(user_id)
+
+    if not pantry_items:
+        return {
+            "status": "success",
+            "user_id": user_id,
+            "top_n": top_n,
+            "content_based": [],
+            "message": "No pantry items found for this user."
+        }
+
+    try:
+        ai_data = get_recipe_recommendations(user_id, pantry_items, top_n)
+
+        return {
+            "status": "success",
+            "user_id": user_id,
+            "top_n": top_n,
+            "content_based": ai_data.get("recommendations", [])
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+def get_user_pantry(user_id: int):
+    db = SessionLocal()
+    try:
+        items = db.query(PantryItem).filter(PantryItem.user_id == user_id).all()
+        return [item.item_name for item in items]
+    finally:
+        db.close()
+
+def get_all_user_ids():
+    db = SessionLocal()
+    try:
+        users = db.query(User.id).all()
+        return [u.id for u in users]
+    finally:
+        db.close()
+
+@router.get("/recommendations/collaborative/{user_id}")
+async def get_collaborative_recommendations(user_id: int, top_n: int = 5):
+    pantry_items = get_user_pantry(user_id)
+    all_user_ids = get_all_user_ids()
+
+    if not all_user_ids:
+        raise HTTPException(status_code=400, detail="No users found for collaborative filtering.")
+
+    payload = {
+        "user_id": user_id,
+        "pantry_items": pantry_items,
+        "all_user_ids": [1, 2, 3], # replace this with all_user_ids later
+        "top_n": top_n,
+        "mode": "collaborative"
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.post(f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend", json=payload)
+            resp.raise_for_status()
+        except httpx.HTTPError as e:
+            raise HTTPException(status_code=500, detail=f"AI server request failed: {str(e)}")
+
+    return resp.json()
