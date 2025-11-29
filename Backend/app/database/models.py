@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Enum, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Float, Enum, DateTime, ForeignKey, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database.database import Base
@@ -15,8 +15,8 @@ class User(Base):
     role = Column(Enum("admin", "user", "guest"), default="guest")
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    pantry_items = relationship("PantryItem", back_populates="owner", 
-        passive_deletes=True )
+    pantry_items = relationship("PantryItem", back_populates="owner", passive_deletes=True )
+    liked_recipes = relationship("LikedRecipe", back_populates="user", passive_deletes=True)
 
 class PantryItem(Base):
     __tablename__ = "PantryItems"
@@ -64,3 +64,17 @@ class RecipeIngredient(Base):
 
     recipe = relationship("Recipe", back_populates="ingredients")
     pantry_item = relationship("PantryItem", back_populates="recipe_ingredients")
+    
+class LikedRecipe(Base):
+    __tablename__ = "LikedRecipes"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("Users.id", ondelete="CASCADE"), nullable=False)
+    recipe_id = Column(Integer, ForeignKey("Recipes.id", ondelete="CASCADE"), nullable=False)
+    liked_at = Column(DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'recipe_id', name='unique_user_recipe_like'),
+    )
+    user = relationship("User", back_populates="liked_recipes", passive_deletes=True)
+
+

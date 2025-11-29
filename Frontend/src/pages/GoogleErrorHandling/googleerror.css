@@ -1,0 +1,75 @@
+@import "@/styles/variable.css";
+
+.error__container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100dvh;
+    padding: 0 24px;
+    overflow: hidden;
+    background: var(--color-white);
+    text-align: center;
+}
+
+.error__code {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0;
+}
+
+.error__title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin: 0;
+}
+
+.error__image {
+    width: 400px;
+    max-width: 90%;
+}
+
+.error__message {
+    font-size: 1rem;
+    color: var(--color-dark);
+    max-width: 320px;
+    line-height: 1.4;
+    margin: 0 0 2% 0;
+}
+
+.error__subtext {
+    font-size: 0.95rem;
+    color: var(--color-dark-grey);
+    max-width: 300px;
+    line-height: 1.45;
+    margin: 0 0 2% 0;
+}
+
+.error__retry-btn {
+    background: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+    padding: 12px 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.error__retry-btn:hover {
+    background: var(--color-cyan);
+}
+
+@media (max-height: 700px) {
+    .error__image {
+        width: 200px;
+    }
+
+    .error__message,
+    .error__subtext {
+        margin: 0;
+    }
+}

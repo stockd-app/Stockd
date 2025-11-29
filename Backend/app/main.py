@@ -16,8 +16,7 @@ app = FastAPI(
 )
 
 # Serve built React frontend
-# app.mount("/assets", StaticFiles(directory="app/static/frontend/assets"), name="assets")
-
+app.mount("/assets", StaticFiles(directory="app/static/frontend/assets"), name="assets")
 
 # CORS setup (everything under same ngrok domain now)
 app.add_middleware(
@@ -57,6 +56,14 @@ else:
 # Include all routes
 from app.routes import router
 app.include_router(router)
+
+@app.get("/{full_path:path}")
+async def serve_react_app(full_path: str):
+    """Catch-all route for React Router paths"""
+    index_path = os.path.join("app", "static", "frontend", "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"error": "index.html not found"}
 
 @app.get("/{full_path:path}")
 async def serve_react_app(full_path: str):

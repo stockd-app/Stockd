@@ -47,6 +47,17 @@ CREATE TABLE RecipeIngredients (
     FOREIGN KEY (pantry_item_id) REFERENCES PantryItems(id) ON DELETE SET NULL
 );
 
+-- LIKED RECIPES
+CREATE TABLE LikedRecipes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    recipe_id INT NOT NULL,
+    liked_at DATETIME DEFAULT CURRENT_TIMESTAMP,    
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
+    FOREIGN KEY (recipe_id) REFERENCES Recipes(id) ON DELETE CASCADE,
+    UNIQUE (user_id, recipe_id)
+);
+
 -- AUDIT LOG
 CREATE TABLE audit_logs (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
