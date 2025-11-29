@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Home, Refrigerator, ScanLine, Bookmark, User } from "lucide-react";
 import CameraModal from "../../CameraModal/CameraModal";
 import { BOTTOM_NAV_ICON_SIZE } from "../../../config/consts";
-import { useNavigate } from "react-router-dom";
 
 import "./bottomnavbar.css";
 
