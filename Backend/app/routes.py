@@ -26,7 +26,7 @@ GOOGLE_CLIENT_URI = os.getenv("GOOGLE_TOKEN_URI")
 GOOGLE_REVOKE_CLIENT_URI = os.getenv("GOOGLE_REVOKE_TOKEN_URI")
 
 router = APIRouter()
-AI_SERVER_URL = "http://localhost:9000"
+AI_SERVER_URL_RECIPE_RECOMMENDER = os.getenv("AI_SERVER_URL")
 
 @router.post("/upload-receipt", tags=["OCR"])
 async def upload_receipt(file: UploadFile = File(...)):
@@ -407,7 +407,7 @@ async def get_collaborative_recommendations(user_id: int, top_n: int = 5):
 
     async with httpx.AsyncClient() as client:
         try:
-            resp = await client.post(f"{AI_SERVER_URL}/recommend", json=payload)
+            resp = await client.post(f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend", json=payload)
             resp.raise_for_status()
         except httpx.HTTPError as e:
             raise HTTPException(status_code=500, detail=f"AI server request failed: {str(e)}")
