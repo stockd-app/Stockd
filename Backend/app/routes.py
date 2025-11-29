@@ -26,7 +26,7 @@ GOOGLE_CLIENT_URI = os.getenv("GOOGLE_TOKEN_URI")
 GOOGLE_REVOKE_CLIENT_URI = os.getenv("GOOGLE_REVOKE_TOKEN_URI")
 
 router = APIRouter()
-AI_SERVER_URL_RECIPE_RECOMMENDER = os.getenv("AI_SERVER_URL")
+AI_SERVER_URL_RECIPE_RECOMMENDER = os.getenv("RECIPE_RECOMMENDER_MODEL_URL")
 
 @router.post("/upload-receipt", tags=["OCR"])
 async def upload_receipt(file: UploadFile = File(...)):
