@@ -7,6 +7,8 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 export const API_ROUTES = {
   UPLOAD_RECEIPT: `${API_BASE_URL}/upload-receipt`,
   VERIFY_GOOGLE: `${API_BASE_URL}/auth/google`,
+  //Pantry route *
+  GET_PANTRY: `${API_BASE_URL}/pantry`,
 };
 
 // Google OAuth related constants
