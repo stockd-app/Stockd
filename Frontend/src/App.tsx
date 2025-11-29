@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import LandingPage from "./pages/LandingPage/LandingPage";
 import Dashboard from "./pages/Dashboard/Dashboard";
+import Profile from "./pages/Profile/Profile";
 import TermsPage from "./pages/TermsAndCondition/TermsPage";
 import FullTermsPage from "./pages/TermsAndCondition/FullTermsPage";
 import GoogleErrorScreen from "./pages/GoogleErrorHandling/GoogleErrorScreen";
@@ -38,6 +39,21 @@ const App: React.FC = () => {
       <Route
         path="/dashboard"
         element={user ? <Dashboard /> : <Navigate to="/" replace />}
+      />
+      <Route
+        path="/profile"
+        element={
+          user ? (
+            <Profile
+              name={JSON.parse(localStorage.getItem("user")!)?.name || "Guest"}
+              email={JSON.parse(localStorage.getItem("user")!)?.email || ""}
+              picture={JSON.parse(localStorage.getItem("user")!)?.picture || ""}
+              userId={JSON.parse(localStorage.getItem("user")!)?.id || null}
+            />
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
       />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/terms-full" element={<FullTermsPage />} />
