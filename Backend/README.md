@@ -1,52 +1,65 @@
-# 🚀 Stockd: Backend Repo
+# Backend Docker Setup
 
-## `.env`
-```
-ASPRISE_API_URL=xxx
-ASPRISE_CLIENT_ID=TEST
+## Overview
 
-GOOGLE_CLIENT_ID=xxx
-GOOGLE_CLIENT_SECRET=xxx
-GOOGLE_TOKEN_URI=xxx
-GOOGLE_CLOCK_SKEW=300
+The backend is containerized using Docker running FastAPI with Uvicorn.
 
-DB_USER=root
-DB_PASSWORD=your_mysql_password
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_NAME=stockd_db
-```
+## Quick Start
 
-## Backend Setup
-
-### 1️⃣ Clone the repository
+### 1. Setup environment
 ```bash
-git clone https://github.com/stockd-app/Stockd.git
-cd Backend
+# Copy sample env file
+cp .env-sample .env
+
+# Edit .env with your credentials
 ```
 
-### 2️⃣ Install dependencies
+### 2. Start container
 ```bash
-pip install -r requirements.txt
+chmod +x start.sh stop.sh
+./start.sh
 ```
 
-### 3️⃣ Configure Environment Variables
-Ensure `.env` is present and configured as shown above
+### 3. Access the API
+- API: http://localhost:8000
+- Docs: http://localhost:8000/docs
 
+## Commands
 
-### 4️⃣ Run main.py
 ```bash
-uvicorn app.main:app --reload
-```
-- The server will run at: http://127.0.0.1:8000
-- `-reload` enables auto-reloading when code changes
+# Start container
+./start.sh
 
-### 5️⃣ Test the API with Swagger UI
-Open your browser:
-```bash
-http://127.0.0.1:8000/docs
+# Stop container
+./stop.sh
+
+# View logs
+docker-compose logs -f backend
+
+# Restart after changes
+docker-compose restart backend
 ```
 
+## How It Works
+
+1. **Dockerfile** - Creates a Python container with FastAPI
+2. **docker-compose.yml** - Manages the container
+3. **Volumes** - Code is mounted so changes reflect immediately
+4. **Network** - Uses `stockd-network` to connect with frontend
+
+## Connecting with Frontend
+
+The frontend Nginx container can reach this backend at:
+```
+http://backend:8000
+```
+
+Update `Frontend/nginx-docker.conf`:
+```nginx
+location /api/ {
+    proxy_pass http://backend:8000;
+}
+```
 ## Database Setup
 
 ### 1️⃣ Install dependencies
@@ -78,3 +91,31 @@ _Note: For now, the project works without .env because default MySQL root access
 - Navigate to `cd Backend/app/database`
 - Run: `python test_db.py`
 - You should see success message with list of tables made
+
+
+## Environment Variables
+
+Required in `.env`:
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `ASPRISE_API_KEY`
+- `DATABASE_URL` (if using database)
+
+## Troubleshooting
+
+### Container won't start
+```bash
+docker-compose logs backend
+```
+
+### Port 8000 in use
+Edit `docker-compose.yml`:
+```yaml
+ports:
+  - "8001:8000"
+```
+
+### Changes not reflecting
+Code is mounted as volume, so changes should reflect automatically. If not:
+```bash
+docker-compose restart backend
