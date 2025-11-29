@@ -30,7 +30,7 @@ router = APIRouter()
 AI_SERVER_URL_RECIPE_RECOMMENDER = os.getenv("RECIPE_RECOMMENDER_MODEL_URL")
 
 @router.post("/upload-receipt", tags=["OCR"])
-async def upload_receipt(file: UploadFile = File(...)):
+async def upload_receipt(file: UploadFile = File(...), user=Depends(require_google_token)):
     """
     Upload an image of a receipt and send it to Asprise OCR API,
     then classify items using the AI model
@@ -113,7 +113,6 @@ async def verify_google_token(request: Request):
 
         try:
             token_data = token_response.json()
-            print(token_data)
         except Exception:
             raise HTTPException(status_code=500, detail={"error_code": "INVALID_GOOGLE_RESPONSE", "message": "Invalid response from Google token endpoint"})
 
