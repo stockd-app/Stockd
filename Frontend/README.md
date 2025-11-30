@@ -118,6 +118,7 @@ docker-compose restart frontend
 
 # Hard refresh browser (Cmd+Shift+R)
 ```
+Then access: http://localhost:8080
 
 ### API calls failing (404)
 - Make sure backend container is running: `docker ps | grep stockd-backend`
