@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Home, RefreshCw, ScanLine, Bell, User } from "lucide-react";
 import CameraModal from "../../CameraModal/CameraModal";
 import { BOTTOM_NAV_ICON_SIZE } from "../../../config/consts";
+import { useNavigate } from "react-router-dom";
 
 import "./bottomnavbar.css";
 
@@ -17,6 +18,7 @@ const BottomNavBar: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: "0px", width: "0px" });
   const [isMoving, setIsMoving] = useState(false);
+  const navigate = useNavigate();
 
   // Move & resize the indicator under the active item
   useEffect(() => {
@@ -48,7 +50,10 @@ const BottomNavBar: React.FC = () => {
     <div className="bottomnav__container" ref={containerRef}>
       <div
         className={`bottomnav__item ${activeItem === "home" ? "active" : ""}`}
-        onClick={() => setActiveItem("home")}
+        onClick={() => {
+          setActiveItem("home")
+          navigate("/dashboard")
+        }}
       >
         <Home size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
         <p>Home</p>
@@ -56,7 +61,12 @@ const BottomNavBar: React.FC = () => {
 
       <div
         className={`bottomnav__item ${activeItem === "update" ? "active" : ""}`}
-        onClick={() => setActiveItem("update")}
+        // onClick={() => setActiveItem("update")}
+        //navigate to pantry page on update click
+        onClick={() => {
+          setActiveItem("update")
+          navigate("/pantry")
+        }}
       >
         <RefreshCw size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
         <p>Update</p>

@@ -5,16 +5,19 @@ import traceback
 from dotenv import load_dotenv
 from fastapi import APIRouter, File, UploadFile, HTTPException, Request, Depends
 from google.oauth2 import id_token
-from google.auth.transport import requests as google_requests 
+from google.auth.transport import requests as google_requests
 from google.auth.exceptions import InvalidValue
 from pymysql import IntegrityError
 from sqlalchemy.exc import SQLAlchemyError
-import requests as httpx
+import httpx
+from fastapi import APIRouter, HTTPException
 from app.asprise_api import send_receipt_to_asprise
 from app.utils.receipt_parser import parse_asprise_response
+from app.utils.ai_classifier import classify_receipt_items
 from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
-from app.database.models import PantryItemsRequest, User, PantryItem
+from app.database.models import LikedRecipe, PantryItemsRequest, Recipe, User, PantryItem
+from app.utils.ai_recommender import get_recipe_recommendations
 
 load_dotenv()
 
@@ -24,23 +27,38 @@ GOOGLE_CLIENT_URI = os.getenv("GOOGLE_TOKEN_URI")
 GOOGLE_REVOKE_CLIENT_URI = os.getenv("GOOGLE_REVOKE_TOKEN_URI")
 
 router = APIRouter()
+AI_SERVER_URL_RECIPE_RECOMMENDER = os.getenv("RECIPE_RECOMMENDER_MODEL_URL")
 
 @router.post("/upload-receipt", tags=["OCR"])
 async def upload_receipt(file: UploadFile = File(...), user=Depends(require_google_token)):
     """
-    Upload an image of a receipt and send it to Asprise OCR API
+    Upload an image of a receipt and send it to Asprise OCR API,
+    then classify items using the AI model
     """
     try:
         image_bytes = await file.read()
 
-        # Send to Asprise API
+        # Send to Asprise API and parse the response
         asprise_data = send_receipt_to_asprise(image_bytes, file.filename)
         parsed = parse_asprise_response(asprise_data)
 
-        return {
-            "status": "success",
-            "response": parsed
-        }
+        # Call AI model to classify items
+        try:
+            ai_data = classify_receipt_items(parsed)
+            
+            return {
+                "status": "success",
+                "asprise_parsed": parsed,
+                "ai_classified": ai_data
+            }
+        except Exception as e:
+            # If AI model is unavailable, return parsed data without classification
+            return {
+                "status": "partial_success",
+                "message": "Receipt parsed but AI classification failed",
+                "asprise_parsed": parsed,
+                "ai_error": str(e)
+            }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -129,6 +147,7 @@ async def verify_google_token(request: Request):
             "email": idinfo.get("email"),
             "name": idinfo.get("name"),
             "picture": idinfo.get("picture"),
+            "client_id": idinfo.get("sub")
         }
 
         if not user_info["email"]:
@@ -339,3 +358,151 @@ async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends
     
     finally:
         db.close()
+        
+@router.post("/recipes/{recipe_id}/like", tags=["Recipes"])
+async def toggle_like_recipe(recipe_id: int, user=Depends(require_google_token)):
+    """
+    Like or unlike a recipe for the authenticated user.
+    - If the user has not liked the recipe, it will be added
+    - If the user has already liked the recipe, it will be removed
+    """
+    db = SessionLocal()
+    
+    try:
+        recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+        if not recipe:
+            raise HTTPException(status_code=404, detail="Recipe not found")
+
+        existing_like = (
+            db.query(LikedRecipe)
+            .filter(LikedRecipe.user_id == user.id)
+            .filter(LikedRecipe.recipe_id == recipe_id)
+            .first()
+        )
+
+        if existing_like:
+            db.delete(existing_like)
+            db.commit()
+            return {"liked": False, "message": "Recipe unliked"}
+        else:
+            new_like = LikedRecipe(
+                user_id=user.id,
+                recipe_id=recipe_id,
+                liked_at=datetime.datetime.utcnow()
+            )
+            db.add(new_like)
+            db.commit()
+            return {"liked": True, "message": "Recipe liked"}
+
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+
+    finally:
+        db.close()
+        
+@router.get("/users/current/liked-recipes", tags=["Recipes"])
+async def get_liked_recipes(user=Depends(require_google_token)):
+    """
+    Returns a list of recipes liked by the currently authenticated user.
+    """
+    db = SessionLocal()
+    try:
+        liked_recipes = (
+            db.query(Recipe)
+            .join(LikedRecipe, LikedRecipe.recipe_id == Recipe.id)
+            .filter(LikedRecipe.user_id == user.id)
+            .all()
+        )
+
+        result = []
+        for recipe in liked_recipes:
+            result.append({
+                "id": recipe.id,
+                "recipe_name": recipe.recipe_name,
+                "recipe_image": recipe.recipe_image,
+                "prep_time": recipe.prep_time,
+                "cook_time": recipe.cook_time
+            })
+
+        return {"liked_recipes": result}
+
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+    finally:
+        db.close()
+
+
+@router.get("/recommendations/pantry/{user_id}")
+async def get_pantry_recommendations(user_id: int, top_n: int = 10):
+    
+    pantry_items = get_user_pantry(user_id)
+
+    if not pantry_items:
+        return {
+            "status": "success",
+            "user_id": user_id,
+            "top_n": top_n,
+            "content_based": [],
+            "message": "No pantry items found for this user."
+        }
+
+    try:
+        ai_data = get_recipe_recommendations(user_id, pantry_items, top_n)
+
+        return {
+            "status": "success",
+            "user_id": user_id,
+            "top_n": top_n,
+            "content_based": ai_data.get("recommendations", [])
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+def get_user_pantry(user_id: int):
+    db = SessionLocal()
+    try:
+        items = db.query(PantryItem).filter(PantryItem.user_id == user_id).all()
+        return [item.item_name for item in items]
+    finally:
+        db.close()
+
+def get_all_user_ids():
+    db = SessionLocal()
+    try:
+        users = db.query(User.id).all()
+        return [u.id for u in users]
+    finally:
+        db.close()
+
+@router.get("/recommendations/collaborative/{user_id}")
+async def get_collaborative_recommendations(user_id: int, top_n: int = 5):
+    pantry_items = get_user_pantry(user_id)
+    all_user_ids = get_all_user_ids()
+
+    if not all_user_ids:
+        raise HTTPException(status_code=400, detail="No users found for collaborative filtering.")
+
+    payload = {
+        "user_id": user_id,
+        "pantry_items": pantry_items,
+        "all_user_ids": [1, 2, 3], # replace this with all_user_ids later
+        "top_n": top_n,
+        "mode": "collaborative"
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.post(f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend", json=payload)
+            resp.raise_for_status()
+        except httpx.HTTPError as e:
+            raise HTTPException(status_code=500, detail=f"AI server request failed: {str(e)}")
+
+    return resp.json()

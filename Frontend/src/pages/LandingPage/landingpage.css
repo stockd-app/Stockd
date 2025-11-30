@@ -36,7 +36,7 @@
   width: 24dvh;
 }
 
-/* 📱 Small screens (mobile) */
+/*Small screens (mobile) */
 @media (max-width: 600px) {
   h1 {
     font-size: 1.8rem;
@@ -47,7 +47,7 @@
   }
 }
 
-/* 💻 Medium screens (tablet) */
+/*Medium screens (tablet) */
 @media (min-width: 601px) and (max-width: 1024px) {
   h1 {
     font-size: 2rem;
