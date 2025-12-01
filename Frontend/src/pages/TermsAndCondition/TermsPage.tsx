@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
-import axios from "axios";
-
-import { API_ROUTES } from "../../config/consts";
+import { loginWithGoogle } from "../../services/api";
 import StockdLogo from "../../assets/images/StockdLogo.svg";
 
 import "./termspage.css";
@@ -21,21 +19,12 @@ const TermsPage: React.FC = () => {
         // Obtain temporary authorization code from Google for backend exchange
         flow: "auth-code",
         onSuccess: async (tokenResponse) => {
-            try {
-                // Send the authorization code to FastAPI backend for token exchange
-                const res = await axios.post(API_ROUTES.VERIFY_GOOGLE, {
-                    token: tokenResponse.code,
-                });
+            const res = await loginWithGoogle(tokenResponse.code);
 
-                localStorage.setItem("user", JSON.stringify(res.data.user));
-
+            if (res.success) {
                 navigate("/dashboard");
-            } catch (err: any) {
-                console.error("Google login failed:", err);
-
-                const status = err?.response?.status;
-
-                navigate(`/error/${status || 500}`);
+            } else {
+                navigate(`/error/${res.status}`);
             }
         },
         onError: () => console.error("Google login error"),

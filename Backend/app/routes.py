@@ -175,7 +175,18 @@ async def verify_google_token(request: Request):
             raise HTTPException(status_code=500, detail={"error_code": "DATABASE_ERROR", "message": f"Database error: {str(e)}"})
 
         # 5. Return success response
-        return {"status": "success", "user": user_info}
+        db_user = existing_user if existing_user else new_user
+        return {
+            "status": "success", 
+            "user": {
+                "id": db_user.id,
+                "email": user_info["email"],
+                "name": user_info["name"],
+                "picture": user_info["picture"],
+            },
+            "id_token": token_data.get("id_token"), 
+            "access_token": token_data.get("access_token"),
+            }
 
     # Top-level exception handling for safe & clear responses
     except HTTPException:

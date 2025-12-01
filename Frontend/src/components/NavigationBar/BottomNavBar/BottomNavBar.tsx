@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Home, RefreshCw, ScanLine, Bell, User } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Home, Refrigerator, ScanLine, Bookmark, User } from "lucide-react";
 import CameraModal from "../../CameraModal/CameraModal";
 import { BOTTOM_NAV_ICON_SIZE } from "../../../config/consts";
-import { useNavigate } from "react-router-dom";
 
 import "./bottomnavbar.css";
 
@@ -13,12 +13,22 @@ import "./bottomnavbar.css";
  * @returns 
  */
 const BottomNavBar: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [showCamera, setShowCamera] = useState(false);
   const [activeItem, setActiveItem] = useState("home");
   const containerRef = useRef<HTMLDivElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: "0px", width: "0px" });
   const [isMoving, setIsMoving] = useState(false);
-  const navigate = useNavigate();
+
+  // Sync activeItem with URL (persistent underline)
+  useEffect(() => {
+    if (location.pathname.startsWith("/dashboard")) setActiveItem("home");
+    else if (location.pathname.startsWith("/pantry")) setActiveItem("pantry");
+    else if (location.pathname.startsWith("/saved")) setActiveItem("saved");
+    else if (location.pathname.startsWith("/profile")) setActiveItem("profile");
+  }, [location.pathname]);
 
   // Move & resize the indicator under the active item
   useEffect(() => {
@@ -27,9 +37,11 @@ const BottomNavBar: React.FC = () => {
 
     const items = container.querySelectorAll(".bottomnav__item:not(.scan__button)");
     // Map activeItem to corresponding index. E.g., "home" -> 0, "update" -> 1, etc.
-    const activeIndex = ["home", "update", "notification", "profile"].indexOf(activeItem);
+    const activeIndex = ["home", "pantry", "saved", "profile"].indexOf(activeItem);
     // Get the active element
     const activeEl = items[activeIndex] as HTMLElement;
+
+    if (!activeEl) return;
 
     if (activeEl) {
       const { offsetLeft, offsetWidth } = activeEl;
@@ -50,26 +62,18 @@ const BottomNavBar: React.FC = () => {
     <div className="bottomnav__container" ref={containerRef}>
       <div
         className={`bottomnav__item ${activeItem === "home" ? "active" : ""}`}
-        onClick={() => {
-          setActiveItem("home")
-          navigate("/dashboard")
-        }}
+        onClick={() => { setActiveItem("home"); navigate("/dashboard") }}
       >
         <Home size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
         <p>Home</p>
       </div>
 
       <div
-        className={`bottomnav__item ${activeItem === "update" ? "active" : ""}`}
-        // onClick={() => setActiveItem("update")}
-        //navigate to pantry page on update click
-        onClick={() => {
-          setActiveItem("update")
-          navigate("/pantry")
-        }}
+        className={`bottomnav__item ${activeItem === "pantry" ? "active" : ""}`}
+        onClick={() => { setActiveItem("pantry"); navigate("/pantry") }}
       >
-        <RefreshCw size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
-        <p>Update</p>
+        <Refrigerator size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
+        <p>Pantry</p>
       </div>
 
       <div className="bottomnav__item scan__button" onClick={() => setShowCamera(true)}>
@@ -77,16 +81,16 @@ const BottomNavBar: React.FC = () => {
       </div>
 
       <div
-        className={`bottomnav__item ${activeItem === "notification" ? "active" : ""}`}
-        onClick={() => setActiveItem("notification")}
+        className={`bottomnav__item ${activeItem === "saved" ? "active" : ""}`}
+        onClick={() => { setActiveItem("saved"); navigate("/dashboard") }}
       >
-        <Bell size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
-        <p>Notification</p>
+        <Bookmark size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
+        <p>Saved</p>
       </div>
 
       <div
         className={`bottomnav__item ${activeItem === "profile" ? "active" : ""}`}
-        onClick={() => setActiveItem("profile")}
+        onClick={() => { setActiveItem("profile"); navigate("/profile") }}
       >
         <User size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
         <p>Profile</p>

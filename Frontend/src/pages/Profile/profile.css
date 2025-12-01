@@ -1,0 +1,88 @@
+@import "@/styles/variable.css";
+
+.profile__container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: var(--color-white);
+    font-family: "Poppins", "Segoe UI", sans-serif;
+}
+
+/* Header */
+.profile__header {
+    text-align: center;
+    padding: 25px 0 10px;
+}
+
+.profile__avatar-wrapper {
+    width: 95px;
+    height: 95px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    border: 4px solid var(--color-light-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile__avatar {
+    width: 95px;
+    height: 95px;
+    border-radius: 50%;
+}
+
+.profile__name {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--color-dark);
+    margin-top: 5px;
+}
+
+.profile__email {
+    font-size: 0.9rem;
+    color: var(--color-dark-grey);
+}
+
+/* Options List */
+.profile__options {
+    margin-top: 20px;
+    padding: 0 15px;
+}
+
+.profile__item {
+    display: flex;
+    align-items: center;
+    padding: 14px 10px;
+    background: var(--color-white);
+    border-bottom: 1px solid var(--color-grey);
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.profile__item:hover {
+    background: var(--color-light);
+}
+
+.profile__item span {
+    margin-left: 12px;
+    color: var(--color-dark);
+}
+
+.profile__icon {
+    color: var(--color-dark-blue);
+}
+
+/* Delete Section */
+.profile__item.delete {
+    margin-top: 30px;
+    border-top: 1px solid var(--color-grey);
+    color: var(--color-red);
+}
+
+.profile__item.delete span {
+    color: var(--color-red);
+}
+
+.profile__item.delete .delete-icon {
+    color: var(--color-red);
+}

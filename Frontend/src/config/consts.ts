@@ -7,8 +7,9 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 export const API_ROUTES = {
   UPLOAD_RECEIPT: `${API_BASE_URL}/upload-receipt`,
   VERIFY_GOOGLE: `${API_BASE_URL}/auth/google`,
-  //Pantry route *
   GET_PANTRY: `${API_BASE_URL}/pantry`,
+  LOGOUT_GOOGLE: `${API_BASE_URL}/auth/google/logout`,
+  DELETE_USER: `${API_BASE_URL}/delete_user`,
 };
 
 // Google OAuth related constants
@@ -73,3 +74,11 @@ export const NOTIFICATION_TIMEOUTS = {
   AUTO_REMOVE_MS: 1500,
   EXIT_ANIMATION_MS: 300,
 };
+
+export const CONFIRM_MODAL = {
+  YES: "Yes",
+  NO: "No",
+}
+
+export const CONFIRM_LOGOUT_TEXT = "Are you sure you want to log out?";
+export const CONFIRM_DELETE_TEXT = "Are you sure you want to delete your account? This action cannot be undone.";
