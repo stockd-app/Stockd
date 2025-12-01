@@ -23,8 +23,8 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
 
     const handleDelete = async () => {
         console.log("userId to delete: ", userId)
+        handleLogout();
         await deleteUserAccount(userId!);
-        handleLogout(); // after deleting, log the user out fully
     };
 
     return (
