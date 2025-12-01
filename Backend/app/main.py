@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 import os
+from app.routes import router
 
 load_dotenv()
 
@@ -14,9 +15,6 @@ app = FastAPI(
     version="1.0.0",
     description="A simple backend powered by FastAPI with Swagger UI"
 )
-
-# Serve built React frontend
-app.mount("/assets", StaticFiles(directory="app/static/frontend/assets"), name="assets")
 
 # CORS setup (everything under same ngrok domain now)
 app.add_middleware(
@@ -30,10 +28,12 @@ app.add_middleware(
 ENV = os.getenv("ENV", "dev")  # set ENV=prod when deploying
 
 if ENV == "dev":
-    # Allow frontend origin (Vite)
+    # Allow frontend origin (Vite dev server and Docker container)
     origins = [
         "http://localhost:5173",
         "https://localhost:5173",
+        "http://localhost",
+        "http://localhost:80",
         f"http://{HOST_IP}:5173",
     ]
     app.add_middleware(
@@ -53,14 +53,21 @@ else:
         allow_headers=["*"],
     )
 
-# Include all routes
-from app.routes import router
+# Include all routes FIRST (before catch-all)
 app.include_router(router)
 
-@app.get("/{full_path:path}")
-async def serve_react_app(full_path: str):
-    """Catch-all route for React Router paths"""
-    index_path = os.path.join("app", "static", "frontend", "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
-    return {"error": "index.html not found"}
+# Serve built React frontend (only if static files exist)
+# This must come AFTER API routes to avoid intercepting them
+try:
+    app.mount("/assets", StaticFiles(directory="app/static/frontend/assets"), name="assets")
+    
+    @app.get("/{full_path:path}")
+    async def serve_react_app(full_path: str):
+        """Catch-all route for React Router paths"""
+        index_path = os.path.join("app", "static", "frontend", "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+        return {"error": "index.html not found"}
+except Exception:
+    # Static frontend files don't exist, skip serving them
+    pass

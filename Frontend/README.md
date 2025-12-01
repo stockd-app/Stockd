@@ -1,111 +1,153 @@
-## 🚀 Stockd: Frontend Repo
+# Frontend Docker Setup
 
-### 1️⃣ Clone the repository
-```bash
-git clone https://github.com/stockd-app/Stockd.git
-cd Frontend
-```
+## Overview
 
-### 2️⃣ Install dependencies
+The frontend is containerized using Docker with Nginx serving the built React application.
+
+## Quick Start
+
+### 1. Build the React app
 ```bash
 npm install
+npm run build
 ```
 
-### 3️⃣ Run main.tsx
+### 2. Start the container
+```bash
+chmod +x start.sh stop.sh
+./start.sh
+```
+
+### 3. Access the app
+Open browser: **http://localhost**
+
+## How It Works
+
+1. **Dockerfile** - Creates an Nginx container with your React app
+2. **nginx-docker.conf** - Configures Nginx to:
+   - Serve your React static files
+   - Proxy `/api/*` requests to backend container
+   - Strip `/api` prefix before forwarding (backend routes don't include `/api`)
+   - Handle React Router (SPA routing)
+3. **docker-compose.yml** - Manages the container lifecycle
+
+## Connecting with Backend
+
+The nginx config proxies API requests to the backend container:
+
+```nginx
+location /api/ {
+    rewrite ^/api/(.*) /$1 break;  # Strips /api prefix
+    proxy_pass http://backend:8000;
+}
+```
+
+**Example:**
+- Frontend calls: `http://localhost/api/auth/google`
+- Nginx forwards to: `http://backend:8000/auth/google`
+
+**Important:** Both containers must be on the same Docker network (`stockd-network`)
+
+## Commands
+
+```bash
+# Start container
+./start.sh
+
+# Stop container
+./stop.sh
+
+# View logs
+docker-compose logs -f frontend
+
+# Restart after changes
+npm run build
+docker-compose restart frontend
+
+# Rebuild container
+docker-compose up -d --build
+```
+
+## Configuration
+
+### Change Port
+If port 80 is busy, edit `docker-compose.yml`:
+```yaml
+ports:
+  - "8080:80"  # Changed from "80:80"
+```
+Then access: http://localhost:8080
+
+### Backend Connection
+Make sure backend container is running:
+```bash
+cd ../Backend
+./start.sh
+```
+
+Both containers must use the same network name in their `docker-compose.yml`:
+```yaml
+networks:
+  stockd-network:
+    driver: bridge
+    name: stockd-network
+```
+
+## Troubleshooting
+
+### Container won't start
+```bash
+# Check logs
+docker-compose logs frontend
+
+# Check if port is in use
+lsof -i :80
+
+# Remove and recreate
+docker-compose down
+docker-compose up -d
+```
+
+### Changes not showing
+```bash
+# Rebuild React app
+npm run build
+
+# Restart container
+docker-compose restart frontend
+
+# Hard refresh browser (Cmd+Shift+R)
+```
+Then access: http://localhost:8080
+
+### API calls failing (404)
+- Make sure backend container is running: `docker ps | grep stockd-backend`
+- Check both containers are on same network: `docker network inspect stockd-network`
+- Check nginx logs: `docker-compose logs frontend`
+
+### API calls failing (500)
+- This is a backend error, not nginx/docker
+- Check backend logs: `cd ../Backend && docker-compose logs backend`
+- Check backend environment variables in `.env`
+
+## Development Workflow
+
+### For active development:
+Use the dev server (hot reload):
 ```bash
 npm run dev
 ```
-- The server will run at: http://localhost:5173/
 
-### Deploy to HTTPS
+### For testing production build:
+Use Docker container:
 ```bash
-npm run deploy
-```
-- Before running script, ensure .env in Backend folder are updated (ENV=prod/ENV=dev + your device's IPv4 address)
-- This automated script will:
-- 1. npm run build -> Builds distribution folder and its content
-- 2. Copy over dist content to Backend/app/static/frontend to be served in a single tunnel(Frontend + Backend) by ngrok.
-- 3. Activate virtual environment (Creates one and activate if none exist)
-- 4. pip install -r requirements.txt
-- 5. uvicorn app.main:app --reload
-- 6. ngrok http 8000
-
-### Frontend Development Guideline.
-1. React Components starts with capital letter. (e.g. Profile.tsx)
-2. Static variable store in consts.ts, with capitalised variable name. (e.g. GOOGLE_CLIENT_ID)
-3. For each function implemented, comment it's functionality, parameters, and returns.
-4. Follow BEM convention for CSS classname, Block__Element-Modifier.
-
-# React + TypeScript + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+npm run build
+./start.sh
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Notes
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- The `dist` folder is mounted as a volume, so rebuilding React updates the container automatically
+- No need to rebuild the Docker image for frontend code changes
+- Just run `npm run build` and restart the container
+- Backend must be running for API calls to work

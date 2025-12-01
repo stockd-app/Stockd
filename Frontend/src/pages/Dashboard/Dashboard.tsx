@@ -25,6 +25,7 @@ const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"Discover" | "Recommend" | "Saved">("Discover");
   const [indicatorStyle, setIndicatorStyle] = useState<{ left: string; width: string }>({ left: "0px", width: "0px" });
   const [favorites, setFavorites] = useState<number[]>([]);
+  const [recommendedItems, setRecommendedItems] = useState<any[]>([]);
 
   const notify = useNotification();
 
@@ -34,10 +35,38 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (!user) navigate("/");
-  }, []);
+  console.log("Dashboard useEffect mounted");
+  const storedUser = localStorage.getItem("user");
+  if (!storedUser) {
+    navigate("/");
+    return;
+  }
 
+  const user = JSON.parse(storedUser);
+  const clientId = user.client_id;
+  if (!clientId) return;
+
+  const fetchRecommendations = async () => {
+    try {
+      const pantryRes = await fetch(`http://127.0.0.1:8000/recommendations/pantry/${clientId}?top_n=5`);
+      const pantryData = await pantryRes.json();
+      console.log("Pantry-based recommendations:", pantryData.content_based);
+
+      const formatted = pantryData.content_based.map((recipe: any, index: number) => ({
+        id: index + 1,
+        category: "Recommended", // TODO get from recipe dataset
+        name: recipe.name, // TODO replace below image from recipe dataset
+        image: "https://imgs.search.brave.com/CX31bXPXmTWlpWh5q5_VpqdwO6ngivl3N7KgZSBtQOo/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzL2MwL2Zm/L2Q0L2MwZmZkNGRj/ZDFjY2NjZGZhNjBm/NWExN2UzNzIyZDY0/LmpwZw", // TODO replace with image from recipe dataset
+      }));
+
+      setRecommendedItems(formatted);
+    } catch (err) {
+      console.error("Error fetching recommendations:", err);
+    }
+  };
+
+  fetchRecommendations();
+}, []);
 
   // TODO : Replace with real data when backend is ready
   const items = [
@@ -48,10 +77,10 @@ const Dashboard: React.FC = () => {
   ];
 
   // Example recommended list (swap with real data when ready)
-  const recommendedItems = useMemo(
-    () => [items[1], items[3]].filter(Boolean),
-    [items]
-  );
+  // const recommendedItems = useMemo(
+  //   () => [items[1], items[3]].filter(Boolean),
+  //   [items]
+  // );
 
   // Move/resize the green tab indicator
   useEffect(() => {
