@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  # Frontend - Nginx serving React
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: stockd-frontend
+    ports:
+      - "80:80"
+    volumes:
+      - ./Frontend/dist:/usr/share/nginx/html:ro
+      - ./Frontend/nginx-docker.conf:/etc/nginx/conf.d/nginx-docker.conf:ro
+    depends_on:
+      - backend
+    networks:
+      - stockd-network
+    restart: unless-stopped
+
+  # Backend - FastAPI
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: stockd-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./Backend/.env
+    volumes:
+      - ./Backend:/app
+    networks:
+      - stockd-network
+    restart: unless-stopped
+
+networks:
+  stockd-network:
+    driver: bridge
+    name: stockd-network

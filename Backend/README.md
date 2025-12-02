@@ -1,121 +1,368 @@
-# Backend Docker Setup
+# 🔧 Stockd Backend
 
-## Overview
+FastAPI-based backend server for the Stockd virtual pantry management system.
 
-The backend is containerized using Docker running FastAPI with Uvicorn.
+## 🛠️ Tech Stack
 
-## Quick Start
+- **FastAPI** - Modern Python web framework
+- **SQLAlchemy** - ORM for database operations
+- **PostgreSQL/MySQL** - Database
+- **Pydantic** - Data validation
+- **Uvicorn** - ASGI server
+- **Docker** - Containerization
 
-### 1. Setup environment
+## 📋 Prerequisites
+
+- Python 3.9+
+- MySQL/PostgreSQL (if running without Docker)
+- Docker Desktop (for containerized setup)
+
+## 🚀 Running the Backend
+
+### Option 1: With Docker Container (Recommended for Production)
+
+**From Project Root:**
 ```bash
-# Copy sample env file
+# Start all services (Backend + Frontend together)
+./start-all.sh
+
+# Stop all services
+./stop-all.sh
+```
+
+**Setup Steps:**
+```bash
+cd Backend
+
+# Set up environment variables
 cp .env-sample .env
+# Edit .env with your database credentials and API keys
 
-# Edit .env with your credentials
+# Then start from project root
+cd ..
+./start-all.sh
 ```
 
-### 2. Start container
+Access the API at: **http://localhost:8000**  
+API Documentation: **http://localhost:8000/docs**
+
+### Option 2: Without Docker (Development Mode)
+
+For active development with hot reload:
+
 ```bash
-chmod +x start.sh stop.sh
-./start.sh
+cd Backend
+
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+source venv/bin/activate  # macOS/Linux
+# OR
+venv\Scripts\activate  # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set up environment variables
+cp .env-sample .env
+# Edit .env with your configuration
+
+# Run development server with hot reload
+uvicorn app.main:app --reload
 ```
 
-### 3. Access the API
-- API: http://localhost:8000
-- Docs: http://localhost:8000/docs
+Access the API at: **http://localhost:8000**  
+API Documentation: **http://localhost:8000/docs**
 
-## Commands
+**Note:** Make sure your database is running and configured in `.env` before starting.
+
+## 📁 Project Structure
+
+```
+Backend/
+├── app/
+│   ├── main.py              # FastAPI application entry point
+│   ├── routes.py            # API route definitions
+│   ├── database/            # Database models and connection
+│   │   ├── database.py      # Database connection
+│   │   ├── models.py        # SQLAlchemy models
+│   │   └── test_db.py       # Database connection test
+│   ├── dependencies/        # Dependency injection
+│   │   └── auth.py          # Authentication dependencies
+│   └── utils/               # Utility functions
+│       ├── ai_classifier.py # AI model integration
+│       ├── ai_recommender.py
+│       └── receipt_parser.py
+├── Dockerfile               # Docker container definition
+├── requirements.txt         # Python dependencies
+└── .env                     # Environment variables (create from .env-sample)
+```
+
+## 🗄️ Database Setup
+
+### Option 1: Using MySQL (XAMPP)
+
+#### 1️⃣ Install XAMPP
+- Download and install [XAMPP](https://www.apachefriends.org/index.html)
+- Start Apache and MySQL from XAMPP Control Panel
+
+#### 2️⃣ Create Database
+```bash
+# Navigate to MySQL bin folder
+cd C:\xampp\mysql\bin  # Windows
+# OR
+cd /Applications/XAMPP/bin  # macOS
+
+# Login to MySQL
+mysql -u root -p
+# Press Enter if no password is set
+```
+
+```sql
+-- Create database
+CREATE DATABASE stockd_db;
+USE stockd_db;
+
+-- Run the schema from Database/schema.sql
+-- Copy and paste the SQL commands from that file
+```
+
+#### 3️⃣ Configure .env
+```env
+DATABASE_URL=mysql://root:@localhost/stockd_db
+```
+
+#### 4️⃣ Test Connection
+```bash
+cd Backend/app/database
+python test_db.py
+```
+
+### Option 2: Using PostgreSQL
 
 ```bash
-# Start container
-./start.sh
+# Install PostgreSQL
+# Create database
+createdb stockd_db
 
-# Stop container
-./stop.sh
+# Configure .env
+DATABASE_URL=postgresql://username:password@localhost/stockd_db
+```
 
+## 🔧 Available Commands
+
+### With Docker
+```bash
 # View logs
 docker-compose logs -f backend
 
-# Restart after changes
+# Restart after code changes
 docker-compose restart backend
+
+# Rebuild container
+docker-compose up -d --build backend
+
+# Access container shell
+docker exec -it stockd-backend bash
 ```
 
-## How It Works
+### Without Docker
+```bash
+# Run with hot reload (development)
+uvicorn app.main:app --reload
+
+# Run on different port
+uvicorn app.main:app --reload --port 8001
+
+# Run with specific host
+uvicorn app.main:app --reload --host 0.0.0.0
+
+# Run tests
+pytest
+
+# Check code style
+flake8 app/
+```
+
+## 🔌 API Endpoints
+
+### Authentication
+- `POST /auth/google` - Google OAuth login
+- `GET /auth/verify` - Verify authentication token
+
+### Pantry Management
+- `GET /pantry` - Get user's pantry items
+- `POST /pantry/item` - Add item to pantry
+- `PUT /pantry/item/{id}` - Update pantry item
+- `DELETE /pantry/item/{id}` - Remove item from pantry
+
+### Receipt Processing
+- `POST /receipt/upload` - Upload and process receipt
+- `GET /receipt/history` - Get receipt history
+
+### AI Features
+- `POST /ai/classify` - Classify food item
+- `POST /ai/recommend` - Get recipe recommendations
+
+For complete API documentation, visit: **http://localhost:8000/docs**
+
+## ⚙️ Environment Variables
+
+Create `.env` from `.env-sample` and configure:
+
+```env
+# Google OAuth
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# Receipt OCR
+ASPRISE_API_KEY=your_asprise_api_key
+
+# Database
+DATABASE_URL=mysql://root:@localhost/stockd_db
+
+# JWT Secret (generate a secure random string)
+JWT_SECRET=your_jwt_secret_key
+
+# AI Model URLs (if using separate AI services)
+AI_CLASSIFIER_URL=http://localhost:9000
+AI_RECOMMENDER_URL=http://localhost:9001
+```
+
+## 🐳 Docker Setup Details
+
+### How It Works
 
 1. **Dockerfile** - Creates a Python container with FastAPI
-2. **docker-compose.yml** - Manages the container
+2. **docker-compose.yml** (in project root) - Manages all containers
 3. **Volumes** - Code is mounted so changes reflect immediately
 4. **Network** - Uses `stockd-network` to connect with frontend
 
-## Connecting with Frontend
+### Connecting with Frontend
 
 The frontend Nginx container can reach this backend at:
 ```
 http://backend:8000
 ```
 
-Update `Frontend/nginx-docker.conf`:
-```nginx
-location /api/ {
-    proxy_pass http://backend:8000;
-}
-```
-## Database Setup
+Both containers must be on the same Docker network (`stockd-network`).
 
-### 1️⃣ Install dependencies
-- Install [XAMPP](https://www.apachefriends.org/index.html) to run MySQL locally
-- ```pip install -r requirements.txt```
+## 🛠️ Development Workflow
 
-### 2️⃣ Set up MySQL Database
-- Open XAMPP and start Apache and MySQL
-<img width="709" height="161" alt="image" src="https://github.com/user-attachments/assets/113800c4-e86f-4046-9bc4-1662f0214d4d" />
-
-- Open CMD and navigate to MySQL bin folder: `cd C:\xampp\mysql\bin`
-- Login to MySQL
-```
-mysql -u root -p
-# Enter your MySQL root password if you set one, otherwise press Enter
-```
-- Create the database
-```
-CREATE DATABASE stockd_db;
-USE stockd_db;
-```
-- Create the tables by copying the SQL code from `Database/schema.sql` and executing it in MySQL
-
-### 3️⃣ Configure Environment Variables
-Ensure `.env` is present and configured as shown above
-_Note: For now, the project works without .env because default MySQL root access is used_
-
-### 4️⃣ Test Database Connection
-- Navigate to `cd Backend/app/database`
-- Run: `python test_db.py`
-- You should see success message with list of tables made
-
-
-## Environment Variables
-
-Required in `.env`:
-- `GOOGLE_CLIENT_ID`
-- `GOOGLE_CLIENT_SECRET`
-- `ASPRISE_API_KEY`
-- `DATABASE_URL` (if using database)
-
-## Troubleshooting
-
-### Container won't start
+### For Active Development (Hot Reload)
 ```bash
-docker-compose logs backend
+# Without Docker
+uvicorn app.main:app --reload
+```
+Changes reflect immediately without restarting.
+
+### For Testing with Docker
+```bash
+# Code changes reflect automatically due to volume mounting
+# Just save your files
+
+# If changes don't reflect, restart:
+docker-compose restart backend
 ```
 
-### Port 8000 in use
-Edit `docker-compose.yml`:
-```yaml
+### After Dependency Changes
+```bash
+# Rebuild container
+docker-compose up -d --build backend
+```
+
+## 🐛 Troubleshooting
+
+### Container Won't Start
+```bash
+# Check logs
+docker-compose logs backend
+
+# Check if .env file exists
+ls -la .env
+
+# Verify environment variables
+docker-compose config
+```
+
+### Port 8000 Already in Use
+```bash
+# Find what's using the port
+lsof -i :8000  # macOS/Linux
+netstat -ano | findstr :8000  # Windows
+
+# Or change port in docker-compose.yml
 ports:
   - "8001:8000"
 ```
 
-### Changes not reflecting
-Code is mounted as volume, so changes should reflect automatically. If not:
+### Database Connection Errors
 ```bash
+# Test database connection
+cd app/database
+python test_db.py
+
+# Check DATABASE_URL in .env
+# Ensure database server is running
+```
+
+### Import Errors
+```bash
+# Reinstall dependencies
+pip install -r requirements.txt
+
+# Or rebuild Docker container
+docker-compose up -d --build backend
+```
+
+### Changes Not Reflecting
+```bash
+# With Docker (code is mounted as volume)
 docker-compose restart backend
+
+# Without Docker (should auto-reload)
+# Check if --reload flag is used
+uvicorn app.main:app --reload
+```
+
+### API Returns 500 Errors
+```bash
+# Check backend logs
+docker-compose logs backend
+
+# Or without Docker
+# Check terminal where uvicorn is running
+```
+
+## 📚 Additional Resources
+
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [SQLAlchemy Documentation](https://docs.sqlalchemy.org/)
+- [Uvicorn Documentation](https://www.uvicorn.org/)
+- [Pydantic Documentation](https://docs.pydantic.dev/)
+
+## 🧪 Testing
+
+```bash
+# Run tests
+pytest
+
+# Run with coverage
+pytest --cov=app
+
+# Run specific test file
+pytest tests/test_routes.py
+```
+
+## 🤝 Contributing
+
+1. Create a feature branch
+2. Make your changes
+3. Test locally: `uvicorn app.main:app --reload`
+4. Test with Docker: `docker-compose restart backend`
+5. Submit a pull request
+
+---
+
+For frontend setup, see [Frontend README](../Frontend/README.md)
