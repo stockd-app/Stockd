@@ -72,12 +72,19 @@ else
     echo -e "${RED}✗${NC} Frontend - Not running"
 fi
 
+if docker ps | grep -q stockd-food-classifier; then
+    echo -e "${GREEN}✓${NC} Food Classifier - Running on port 9002"
+else
+    echo -e "${RED}✗${NC} Food Classifier - Not running"
+fi
+
 echo ""
 echo -e "${CYAN}All Services Started!${NC}"
 echo ""
 echo -e "${GREEN}Access your application:${NC}"
-echo -e "  🌐 Frontend:  ${BLUE}http://localhost${NC}"
-echo -e "  🔧 Backend:   ${BLUE}http://localhost:8000${NC}"
+echo -e "  Frontend:     ${BLUE}http://localhost${NC}"
+echo -e "  Backend:      ${BLUE}http://localhost:8000${NC}"
+echo -e "  Food Classifier:   ${BLUE}http://localhost:9002${NC}"
 echo ""
 echo -e "${YELLOW}Useful commands:${NC}"
 echo -e "  View logs:     ${BLUE}docker-compose logs -f [service-name]${NC}"

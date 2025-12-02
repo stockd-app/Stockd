@@ -30,6 +30,22 @@ services:
       - ./Backend/.env
     volumes:
       - ./Backend:/app
+    depends_on:
+      - food-classifier
+    networks:
+      - stockd-network
+    restart: unless-stopped
+
+  # AI Model 1 - Item Classifier
+  food-classifier:
+    build:
+      context: ./AI
+      dockerfile: Dockerfile
+    container_name: stockd-food-classifier
+    ports:
+      - "9002:9002"
+    volumes:
+      - ./AI/app:/app/app
     networks:
       - stockd-network
     restart: unless-stopped
