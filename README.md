@@ -68,6 +68,7 @@ This will start:
 
 - Frontend on `http://localhost` (port 80)
 - Backend on `http://localhost:8000`
+- AI Food Classifier on `http://localhost:9002`
 
 ### 5. Stop All Services
 
@@ -149,10 +150,12 @@ docker-compose logs -f
 # View logs for specific service
 docker-compose logs -f frontend
 docker-compose logs -f backend
+docker-compose logs -f food-classifier
 
 # Restart a specific service
 docker-compose restart frontend
 docker-compose restart backend
+docker-compose restart food-classifier
 
 # View running containers
 docker-compose ps
