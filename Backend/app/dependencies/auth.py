@@ -2,6 +2,7 @@ from fastapi import Security, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+from app.utils.crypto import hash_email
 from app.database.database import SessionLocal
 from app.database.models import User
 import os
@@ -20,7 +21,7 @@ def require_google_token(credentials: HTTPAuthorizationCredentials = Security(be
     try:
         idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), GOOGLE_CLIENT_ID)
         db = SessionLocal()
-        db_user = db.query(User).filter(User.email == idinfo["email"]).first()
+        db_user = db.query(User).filter(User.email_hash == hash_email(idinfo["email"])).first()
         db.close()
         if not db_user:
             raise HTTPException(status_code=401, detail="User not found")

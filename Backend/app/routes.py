@@ -9,6 +9,7 @@ from google.auth.transport import requests as google_requests
 from google.auth.exceptions import InvalidValue
 from pymysql import IntegrityError
 from sqlalchemy.exc import SQLAlchemyError
+from app.utils.crypto import hash_email
 import httpx
 from fastapi import APIRouter, HTTPException
 from app.asprise_api import send_receipt_to_asprise
@@ -156,11 +157,12 @@ async def verify_google_token(request: Request):
         
         # 4. Save or update user in DB
         try:
-            existing_user = db.query(User).filter(User.email == user_info["email"]).first()
+            existing_user = db.query(User).filter(User.email_hash == hash_email(user_info["email"])).first()
 
             if not existing_user:
                 new_user = User(
                     email=user_info["email"],
+                    email_hash=hash_email(user_info["email"]),
                     name=user_info["name"],
                     picture=user_info["picture"],
                     client_id=idinfo.get("sub"),
