@@ -517,3 +517,28 @@ async def get_collaborative_recommendations(user_id: int, top_n: int = 5):
             raise HTTPException(status_code=500, detail=f"AI server request failed: {str(e)}")
 
     return resp.json()
+
+@router.get("/recipes/search", tags=["Recipes"])
+async def search_recipes_route(query: str, limit: int = 20):
+    """
+    Search for recipes by name substring.
+    Example:
+        GET /recipes/search?query=chicken&limit=10
+    """
+    if not query or query.strip() == "":
+        raise HTTPException(status_code=400, detail="Query string cannot be empty.")
+
+    async with httpx.AsyncClient() as client:
+        try:
+            ai_response = await client.post(
+                f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/search-recipes",
+                json={"query": query, "limit": limit}
+            )
+            ai_response.raise_for_status()
+            return ai_response.json()
+
+        except httpx.HTTPStatusError:
+            raise HTTPException(status_code=ai_response.status_code, detail=ai_response.text)
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error contacting recipe AI service: {str(e)}")

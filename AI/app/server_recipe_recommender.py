@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
 import uvicorn
-from models.model2_recipe_recommender import recommend_recipes, recommend_from_similar_users
+from models.model2_recipe_recommender import recommend_recipes, recommend_from_similar_users, search_recipes
 
 class RecommendationRequest(BaseModel):
     user_id: int
@@ -26,6 +26,10 @@ class CollaborativeRecommendationResponse(BaseModel):
     status: str
     type: str
     recommendations: List[str]
+
+class SearchRequest(BaseModel):
+    query: str
+    limit: int = 20
 
 app = FastAPI(title="Recipe Recommender")
 
@@ -74,6 +78,18 @@ def recommend_ai(req: RecommendationRequest):
 
     except Exception as e:
         raise HTTPException(500, str(e))
+
+@app.post("/search-recipes")
+async def search_recipes_endpoint(req: SearchRequest):
+    try:
+        results = search_recipes(req.query, req.limit)
+        return {
+            "status": "success",
+            "count": len(results),
+            "results": results
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=9001)
