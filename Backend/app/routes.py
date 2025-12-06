@@ -292,6 +292,7 @@ async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends
                 "quantity_unit": "L",
                 "category": "Dairy",
                 "storage": "Fridge"
+                "item_image": "http://example.com/milk.jpg"
             },
             ...
         ]
@@ -313,6 +314,7 @@ async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends
             quantity_unit = item.quantity_unit.strip() if item.quantity_unit else "pcs"
             category = item.category.strip() if item.category else "Uncategorized"
             storage = item.storage.strip() if item.storage else "Pantry"
+            item_image = item.item_image if item.item_image else None
 
             # Check if item already exists for this user
             existing_item = (
@@ -328,6 +330,7 @@ async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends
                 existing_item.quantity_unit = quantity_unit
                 existing_item.category = category
                 existing_item.storage = storage
+                existing_item.item_image = item_image
                 existing_item.added_on = datetime.datetime.utcnow()
                 processed_items.append(existing_item)
             else:
@@ -339,6 +342,7 @@ async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends
                     quantity_unit=quantity_unit,
                     category=category,
                     storage=storage,
+                    item_image=item_image,
                     added_on=datetime.datetime.utcnow()
                 )
                 db.add(new_item)

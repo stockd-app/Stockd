@@ -22,6 +22,7 @@ CREATE TABLE PantryItems (
     storage VARCHAR(255),
     quantity_value FLOAT DEFAULT 0,
     quantity_unit VARCHAR(100),
+    item_image VARCHAR(255),
     added_on DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
 );
@@ -172,7 +173,8 @@ BEGIN
             'category', NEW.category,
             'storage', NEW.storage,
             'quantity_value', NEW.quantity_value,
-            'quantity_unit', NEW.quantity_unit
+            'quantity_unit', NEW.quantity_unit,
+            'item_image', NEW.item_image
         )
     );
 END$$
@@ -196,14 +198,16 @@ BEGIN
                 'category', OLD.category,
                 'storage', OLD.storage,
                 'quantity_value', OLD.quantity_value,
-                'quantity_unit', OLD.quantity_unit
+                'quantity_unit', OLD.quantity_unit,
+                'item_image', OLD.item_image
             ),
             'new', JSON_OBJECT(
                 'item_name', NEW.item_name,
                 'category', NEW.category,
                 'storage', NEW.storage,
                 'quantity_value', NEW.quantity_value,
-                'quantity_unit', NEW.quantity_unit
+                'quantity_unit', NEW.quantity_unit,
+                'item_image', NEW.item_image
             )
         )
     );
@@ -227,7 +231,8 @@ BEGIN
             'category', OLD.category,
             'storage', OLD.storage,
             'quantity_value', OLD.quantity_value,
-            'quantity_unit', OLD.quantity_unit
+            'quantity_unit', OLD.quantity_unit,
+            'item_image', OLD.item_image
         )
     );
 END$$
