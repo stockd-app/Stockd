@@ -20,7 +20,7 @@ export const GOOGLE_CONSTS = {
   GOOGLE_ICON_SIZE: 18,
 }
 
-export const SEARCH = "Search";
+export const SEARCH = "Search any recipes";
 export const LANDING_PAGE = {
   STOCKD: "Stockd",
   WELCOME_TEXT: "Let's join our community to cook better food!",
