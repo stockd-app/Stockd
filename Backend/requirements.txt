@@ -7,3 +7,4 @@ google-auth
 sqlalchemy
 pymysql
 cryptography
+httpx
