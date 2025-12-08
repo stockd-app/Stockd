@@ -25,7 +25,6 @@ def require_google_token(credentials: HTTPAuthorizationCredentials = Security(be
         print(f"Token verified for email: {idinfo.get('email')}")
         
         db = SessionLocal()
-<<<<<<< HEAD
         try:
             db_user = db.query(User).filter(User.email == idinfo["email"]).first()
             if not db_user:
@@ -40,13 +39,3 @@ def require_google_token(credentials: HTTPAuthorizationCredentials = Security(be
     except Exception as e:
         print(f"Token verification failed: {str(e)}")
         raise HTTPException(status_code=401, detail=f"Invalid or expired token: {str(e)}")
-=======
-        db_user = db.query(User).filter(User.email_hash == hash_email(idinfo["email"])).first()
-        db.close()
-        if not db_user:
-            raise HTTPException(status_code=401, detail="User not found")
-        print("Db user:", db_user)
-        return db_user
-    except Exception:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
->>>>>>> 4ac6b2a3bee11d0b4e518466d015bbe48de852d5
