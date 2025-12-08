@@ -451,33 +451,42 @@ async def get_liked_recipes(user=Depends(require_google_token)):
     finally:
         db.close()
 
-
 @router.get("/recommendations/pantry/{user_id}")
 async def get_pantry_recommendations(user_id: int, top_n: int = 10):
     
     pantry_items = get_user_pantry(user_id)
 
-    if not pantry_items:
-        return {
-            "status": "success",
-            "user_id": user_id,
-            "top_n": top_n,
-            "content_based": [],
-            "message": "No pantry items found for this user."
-        }
+    async with httpx.AsyncClient() as client:
+        ai_data = await client.post(
+            f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend",
+            json={
+                "user_id": user_id,
+                "pantry_items": pantry_items,
+                "top_n": top_n,
+                "mode": "content"
+            }
+        )
 
-    try:
-        ai_data = get_recipe_recommendations(user_id, pantry_items, top_n)
+    data = ai_data.json()
+    recipes = data.get("recommendations", [])
 
-        return {
-            "status": "success",
-            "user_id": user_id,
-            "top_n": top_n,
-            "content_based": ai_data.get("recommendations", [])
-        }
+    db = SessionLocal()
+    id_list = [r["RecipeId"] for r in recipes]
+    db_recipes = db.query(Recipe).filter(Recipe.id.in_(id_list)).all()
+    db.close()
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    merged = []
+    for r in recipes:
+        db_record = next((x for x in db_recipes if x.id == r["RecipeId"]), None)
+        merged.append({
+            **r,
+        })
+
+    return {
+        "status": "success",
+        "content_based": merged
+    }
+
 
 def get_user_pantry(user_id: int):
     db = SessionLocal()
