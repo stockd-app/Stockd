@@ -51,13 +51,11 @@ async def upload_receipt(file: UploadFile = File(...), user=Depends(require_goog
         # Call AI model to classify items
         ai_data = classify_receipt_items(parsed)
         
-        # AI response format: {"status": {"message": "success"}, "results": {item_name: {item, quantity, is_food, storage, category}}}
         classified_results = ai_data.get("results", {})
         
         processed_items = []
         
         for item_name, item_data in classified_results.items():
-            # Only process food items
             if not item_data.get("is_food", False):
                 continue
                 
@@ -135,9 +133,6 @@ async def upload_receipt(file: UploadFile = File(...), user=Depends(require_goog
         
         return {
             "status": "success",
-            "items": processed_items,
-            "grouped_items": grouped_items,
-            "total_items": len(processed_items)
         }
 
     except HTTPException:
@@ -369,12 +364,10 @@ async def get_pantry_items(user_id: int, user=Depends(require_google_token)):
     """
     db = SessionLocal()
     try:
-        # Verify user exists
         db_user = db.query(User).filter(User.id == user_id).first()
         if not db_user:
             raise HTTPException(status_code=404, detail="User not found")
         
-        # Get all pantry items for the user
         items = db.query(PantryItem).filter(PantryItem.user_id == user_id).all()
         
         # Group items by storage
@@ -404,7 +397,7 @@ async def get_pantry_items(user_id: int, user=Depends(require_google_token)):
     finally:
         db.close()
 
-@router.post("/pantry_items", tags=["Pantry"])
+@router.post("/add_update_pantry_items", tags=["Pantry"])
 async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends(require_google_token)):
     """
     Add or update pantry items in the database for a specific user.
