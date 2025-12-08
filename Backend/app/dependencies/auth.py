@@ -18,6 +18,7 @@ def require_google_token(credentials: HTTPAuthorizationCredentials = Security(be
     GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
     try:
+        print(token)
         idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), GOOGLE_CLIENT_ID)
         db = SessionLocal()
         db_user = db.query(User).filter(User.email == idinfo["email"]).first()
