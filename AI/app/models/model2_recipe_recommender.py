@@ -70,21 +70,6 @@ def recommend_recipes(pantry_items, top_n=10, user_id=None):
 
     return results[['Name', 'similarity']]
 
-# ----------------------------- Collaborative filtering -----------------------------
-# users = {
-#     "user_1": {"pantry": ["chicken", "rice", "broccoli"], "liked_recipes": ["Garlic Chicken Stir Fry", "Teriyaki Chicken", "Chicken Fried Rice"]},
-#     "user_2": {"pantry": ["chicken", "rice", "carrots"], "liked_recipes": ["Garlic Chicken Stir Fry", "Teriyaki Chicken", "Chicken Fried Rice", "Spaghetti Bolognese", "Oreos", "Chocolate Chip Cookies"]},
-#     "user_3": {"pantry": ["chicken", "noodles", "broccoli"], "liked_recipes": ["Garlic Chicken Stir Fry", "Teriyaki Chicken", "Chicken Fried Rice", "Strawberry Smoothie", "Banana Pancakes", "Cereal"]},
-#     "user_4": {"pantry": ["salmon", "lemon", "dill"], "liked_recipes": ["Grilled Lemon Salmon", "Salmon Pasta"]},
-#     "user_5": {"pantry": ["beef", "onion", "garlic"], "liked_recipes": ["Beef Stir Fry", "Beef Tacos"]},
-#     "user_6": {"pantry": ["pasta", "tomato sauce", "cheese"], "liked_recipes": ["Lasagna"]},
-#     "user_7": {"pantry": ["potatoes", "cheddar", "bacon"], "liked_recipes": ["Loaded Baked Potato", "Cheesy Potato Bake"]},
-#     "user_8": {"pantry": ["shrimp", "garlic", "butter"], "liked_recipes": ["Garlic Butter Shrimp", "Shrimp Scampi"]},
-#     "user_9": {"pantry": ["spinach", "feta", "phyllo"], "liked_recipes": ["Spinach Pie", "Greek Salad"]},
-#     "user_10": {"pantry": ["chocolate", "flour", "sugar"], "liked_recipes": ["Chocolate Cake", "Brownies"]},
-# }
-
-
 # This will later be replaced with the user's liked recipes fetched from the database. Eevery user has the same liked recipes until real data is used.
 FAKE_LIKED_RECIPES = [
     "Garlic Chicken Stir Fry",
@@ -139,6 +124,19 @@ def recommend_from_similar_users(target_user, all_user_ids, top_n=5):
             break
 
     return list(recommended)[:top_n]
+
+def search_recipes(query: str, limit: int = 20):
+    """
+    Simple substring search for recipes by name.
+    Case-insensitive.
+    """
+    q = query.lower().strip()
+
+    matches = df[df['Name'].str.lower().str.contains(q, na=False)]
+
+    matches = matches.head(limit)
+
+    return matches[['Name']].to_dict(orient="records")
 
 if __name__ == "__main__":
     # local tests

@@ -9,6 +9,7 @@ from google.auth.transport import requests as google_requests
 from google.auth.exceptions import InvalidValue
 from pymysql import IntegrityError
 from sqlalchemy.exc import SQLAlchemyError
+from app.utils.crypto import hash_email
 import httpx
 from fastapi import APIRouter, HTTPException
 from app.asprise_api import send_receipt_to_asprise
@@ -156,11 +157,12 @@ async def verify_google_token(request: Request):
         
         # 4. Save or update user in DB
         try:
-            existing_user = db.query(User).filter(User.email == user_info["email"]).first()
+            existing_user = db.query(User).filter(User.email_hash == hash_email(user_info["email"])).first()
 
             if not existing_user:
                 new_user = User(
                     email=user_info["email"],
+                    email_hash=hash_email(user_info["email"]),
                     name=user_info["name"],
                     picture=user_info["picture"],
                     client_id=idinfo.get("sub"),
@@ -517,3 +519,28 @@ async def get_collaborative_recommendations(user_id: int, top_n: int = 5):
             raise HTTPException(status_code=500, detail=f"AI server request failed: {str(e)}")
 
     return resp.json()
+
+@router.get("/recipes/search", tags=["Recipes"])
+async def search_recipes_route(query: str, limit: int = 20):
+    """
+    Search for recipes by name substring.
+    Example:
+        GET /recipes/search?query=chicken&limit=10
+    """
+    if not query or query.strip() == "":
+        raise HTTPException(status_code=400, detail="Query string cannot be empty.")
+
+    async with httpx.AsyncClient() as client:
+        try:
+            ai_response = await client.post(
+                f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/search-recipes",
+                json={"query": query, "limit": limit}
+            )
+            ai_response.raise_for_status()
+            return ai_response.json()
+
+        except httpx.HTTPStatusError:
+            raise HTTPException(status_code=ai_response.status_code, detail=ai_response.text)
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error contacting recipe AI service: {str(e)}")
