@@ -1,8 +1,9 @@
 import React from "react";
 import ItemCard from "../ItemCard/ItemCard";
-import "./itemsection.css";
 
-interface ItemSectionProps {
+import "./pantryitemsection.css";
+
+interface PantryItemSectionProps {
     section: string;
     items: {
         id: number;
@@ -12,15 +13,15 @@ interface ItemSectionProps {
     }[];
 }
 
-const ItemSection: React.FC<ItemSectionProps> = ({ section, items }) => {
+const ItemSection: React.FC<PantryItemSectionProps> = ({ section, items }) => {
     return (
-        <div className="pantry__section">
-            <div className="pantry__header">
+        <div className="pantryItem__section">
+            <div className="pantryItem__header">
                 <h2>{section}</h2>
                 <p className="see__more">See more</p>
             </div>
 
-            <div className="pantry__items">
+            <div className="pantryItem__items">
                 {items.map((item) => (
                     <ItemCard
                         key={item.id}

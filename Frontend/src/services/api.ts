@@ -48,6 +48,26 @@ export const loginWithGoogle = async (authCode: string) => {
 };
 
 /**
+ * Fetch recipe recommendations based on the user's pantry
+ * @param userId 
+ * @param topN 
+ * @returns
+ */
+export const getPantryRecommendations = async (userId: number, topN: number = 10) => {
+  try {
+    const url = `${API_ROUTES.GET_PANTRY_RECOMMENDATIONS}/${userId}?top_n=${topN}`;
+
+    const res = await axios.get(url);
+
+    return res.data;
+  } catch (err: any) {
+    console.error("Failed to fetch pantry recommendations:", err);
+    throw err;
+  }
+};
+
+
+/**
  * Logout from Google Account'
  * @returns
  */

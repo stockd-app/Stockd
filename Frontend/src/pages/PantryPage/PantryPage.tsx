@@ -1,9 +1,8 @@
-import React, { useState } from "react"; //add useEffect for future data fetching
+import React, { useState } from "react";
 import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
-
+import PantryItemSection from "../../components/PantryItemSection/PantryItemSection";
 
 import "./pantrypage.css";
-import ItemSection from "../../components/ItemSection/ItemSection";
 
 /**
  * Pantry Page (Based on figma)
@@ -47,7 +46,7 @@ const PantryPage: React.FC = () => {
         <div className="pantry__container">
             <div className="pantry__content">
                 {pantryData.map((section) => (
-                    <ItemSection
+                    <PantryItemSection
                         key={section.section}
                         section={section.section}
                         items={section.items}

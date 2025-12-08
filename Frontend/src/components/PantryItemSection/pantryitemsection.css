@@ -1,0 +1,28 @@
+.pantryItem__section {
+  margin-bottom: 28px;
+}
+
+.pantryItem__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pantryItem__items {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+@media (min-width: 600px) {
+  .pantry__items {
+    gap: 5px;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 1024px) {
+  .pantry__items {
+    gap: 15px;
+  }
+}
