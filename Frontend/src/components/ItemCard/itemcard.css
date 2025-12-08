@@ -1,64 +1,62 @@
 @import "@/styles/variable.css";
-/* var(--color-white); */
 
 .itemcard {
-    width: 150px;
-    flex-shrink: 0;
+  width: 150px;
+  flex-shrink: 0;
 }
 
 .itemcard__image__Container {
-    width: 100%;
-    height: 150px;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 4px 4px rgba(0,0,0,0.25);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  width: 100%;
+  height: 150px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .itemcard__image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    /* object-fit: contain; */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .pantry .pantry__info {
-    margin-top: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .pantry__name {
-    font-size: 14px;
-    font-weight: 800;
+  font-size: 14px;
+  font-weight: 800;
 }
 
 .pantry__qty {
-    font-size: 14px;
-    color: #808080;
+  font-size: 14px;
+  color: var(--color-dark-grey);
 }
 
 .dashboard__info {
-    margin-top: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-bottom: 20px;
-    align-items: center; 
-    text-align: center;    
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+  align-items: center;
+  text-align: center;
 }
 
 .dashboard__recipe__name {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--color-dark);
-    line-height: 1.2;
-    white-space: nowrap; 
-    overflow: hidden;          
-    text-overflow: ellipsis;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-dark);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .status--available {
@@ -72,7 +70,6 @@
   align-items: center;
 }
 
-/* 🟠 MISSING */
 .status--missing {
   background-color: #ffe8d6;
   color: #d88a2d;
@@ -94,50 +91,54 @@
 
 .dashboard__meta {
   display: flex;
-  justify-content: space-around; 
-  /* align-items: center; */
+  justify-content: space-around;
   gap: 20px;
   margin-top: 5px;
   font-size: 14px;
 }
 
+.meta__item svg {
+  position: relative;
+  top: 3px;
+}
+
 /*Small screens (mobile) */
 @media (min-width: 600px) {
-    .itemcard {
-        width: 165px;
-        padding: 14px;
-    }
+  .itemcard {
+    width: 165px;
+    padding: 14px;
+  }
 
-    .itemcard__image__Container {
-        height: 170px;
-    }
+  .itemcard__image__Container {
+    height: 170px;
+  }
 
-    .pantry__name {
-    font-size: 15px; 
-    }
+  .pantry__name {
+    font-size: 15px;
+  }
 
   .pantry__qty {
     font-size: 15px;
-    }
+  }
 
 }
-  
+
 /*Medium screens (tablet) */
 @media (min-width: 601px) and (max-width: 1024px) {
-    .itemcard {
-        width: 180px;
-        padding:16px
-    }
+  .itemcard {
+    width: 180px;
+    padding: 16px
+  }
 
-    .itemcard__image__Container {
-        height: 185px;
-    }
+  .itemcard__image__Container {
+    height: 185px;
+  }
 
-    .pantry__name {
+  .pantry__name {
     font-size: 16px;
-    }
+  }
 
   .pantry__qty {
     font-size: 16px;
-    }
+  }
 }

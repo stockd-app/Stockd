@@ -1,16 +1,15 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-// import { Heart } from "lucide-react";
-import { DASHBOARD, NOTIFICATION_MESSAGES, NOTIFICATION_TYPES } from "../../config/consts";
-import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
-import CategorySection from "../../components/Dashboard/CategorySection";
-import SearchBar from "../../components/Dashboard/SearchBar";
-import DashboardSection from "../../components/Dashboard/DashboardSection";
-import ExploreSection from "../../components/Dashboard/ExploreSection";
-
-import "@/styles/variable.css";
-import "./dashboard.css";
 import { getPantryRecommendations } from "../../services/api";
+import { formatPrepTime } from "../../utils/utils";
+import SearchBar from "../../components/SearchBar/SearchBar";
+import FoodCategorySection from "../../components/FoodCategoryCard/FoodCategorySection";
+import RecipeItemSection from "../../components/RecipeItemSection/RecipeItemSection";
+import ExploreSection from "../../components/Dashboard/ExploreSection";
+import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
+import image_placeholder from "../../assets/images/error_handling/image_placeholder.png"
+
+import "./dashboard.css";
 
 interface DashboardProps {
   userId: number | null;
@@ -18,7 +17,7 @@ interface DashboardProps {
 
 /**
  * Dashboard Page Component
- * TODO : Fetch and display dynamic data ***
+ * TODO : Fetch and display dynamic data for AI  ***
  * TODO : Handling the situation where the backend pantry has no ingredients (an empty pantry displays a blur layer) ***
  * TODO : Click on the recipe to go to the single recipe page
  * TODO : SearchBar needs improvement
@@ -27,10 +26,6 @@ interface DashboardProps {
  */
 const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
   const [recommendedItems, setRecommendedItems] = useState<any[]>([]);
-
-
-  // const tabsRef = useRef<HTMLDivElement>(null);
-  // const tabs = DASHBOARD.TABS;
 
   const navigate = useNavigate();
 
@@ -50,14 +45,19 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         console.log("FULL pantryData response:", pantryData);
         console.log("Pantry-based recommendations:", pantryData.content_based);
 
-        const formatted = pantryData.content_based.map((recipe: any, index: number) => ({
-          id: recipe.id ?? index + 1,
-          name: recipe.name,
-          image: recipe.image_url ?? "/placeholder.jpg",
-          rating: recipe.rating ?? 4.0,
-          time: recipe.time ?? "15m",
-          status: "Available",
-        }));
+        const formatted = pantryData.content_based.map((recipe: any, index: number) => {
+          const hasImages = Array.isArray(recipe.Images) && recipe.Images.length > 0;
+          const imageUrl = hasImages ? recipe.Images[0] : image_placeholder;
+
+          return {
+            id: recipe.RecipeId ?? index + 1,
+            name: recipe.Name,
+            image: imageUrl,
+            rating: recipe.AggregatedRating ?? 4.0,
+            time: formatPrepTime(recipe.PrepTime),
+            status: "Available",
+          };
+        });
 
         setRecommendedItems(formatted);
       } catch (err) {
@@ -90,19 +90,17 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
 
   return (
     <div className="dashboard__container">
-      <SearchBar /> {/* Search Bar Component */}
-      <CategorySection /> {/* Category Section Component */}
-      <DashboardSection title="Recommended Based on Your Pantry"
-        // items={recommendedItems.length > 0 ? recommendedItems : pantryRecommended}
-        items={recommendedItems} // mock data for now
+      <SearchBar />
+      <FoodCategorySection />
+      <RecipeItemSection title="Recommended Based on Your Pantry"
+        items={recommendedItems}
       />
 
-      {/* AI Recommended */}
-      <DashboardSection title="AI - Recommended Recipes For You"
+      <RecipeItemSection title="AI - Recommended Recipes For You"
         items={aiRecommended} // mock data for now
       />
-      <ExploreSection /> {/* Explore Section Component */}
-      <BottomNavBar /> {/* BottomNav Bar Component */}
+      <ExploreSection />
+      <BottomNavBar />
     </div>
   );
 };

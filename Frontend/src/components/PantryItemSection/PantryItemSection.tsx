@@ -13,7 +13,7 @@ interface PantryItemSectionProps {
     }[];
 }
 
-const ItemSection: React.FC<PantryItemSectionProps> = ({ section, items }) => {
+const PantryItemSection: React.FC<PantryItemSectionProps> = ({ section, items }) => {
     return (
         <div className="pantryItem__section">
             <div className="pantryItem__header">
@@ -35,4 +35,4 @@ const ItemSection: React.FC<PantryItemSectionProps> = ({ section, items }) => {
     );
 };
 
-export default ItemSection;
+export default PantryItemSection;

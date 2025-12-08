@@ -1,9 +1,10 @@
 import React from "react";
 import ItemCard from "../ItemCard/ItemCard";
 import EmptyFridge from "../../assets/images/Emptyfridge.png";
-import "./dashboardsection.css";
 
-interface DashboardSectionProps {
+import "./recipeitemsection.css";
+
+interface RecipeItemSectionProps {
     title: string;
     seeMore?: boolean;
     items: {
@@ -15,31 +16,31 @@ interface DashboardSectionProps {
     }[];
 }
 
-const DashboardSection: React.FC<DashboardSectionProps> = ({ title, seeMore = true, items }) => {
+const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = true, items }) => {
     return (
-        <div className="dashboard__section">
-            <div className="dashboard__section__header">
-                <h3>{title}</h3>
-                {seeMore && <span className="see__more">See more</span>}
+        <div className="recipeItemSection__container">
+            <div className="recipeItemSection__header">
+                <h3> {title} </h3>
+                {seeMore && <span className="recipeItemSection__seeMore">See more</span>}
             </div>
 
             {items.length === 0 ? (
-                <div className="dashboard__pantry__empty">
+                <div className="recipeItemSection__empty">
                     <img
                         src={EmptyFridge}
                         alt="Empty Pantry"
-                        className="dashboard__empty__image"
+                        className="recipeItemSection__empty_image"
                     />
 
-                    <div className="dashboard__empty__overlay">
-                        <p className="dashboard__empty__text">Let’s stock your pantry!</p>
-                        <p className="dashboard__empty__subtext">
+                    <div className="recipeItemSection__empty_overlay">
+                        <p className="recipeItemSection__empty_text">Let’s stock your pantry!</p>
+                        <p className="recipeItemSection__empty_subtext">
                             Add ingredients by uploading a receipt or other methods.
                         </p>
                     </div>
                 </div>
             ) : (
-                <div className="dashboard__items__scroll">
+                <div className="recipeItemSection__items_scroll">
                     {items.map((item, index) => (
                         <ItemCard
                             key={index}
@@ -58,4 +59,4 @@ const DashboardSection: React.FC<DashboardSectionProps> = ({ title, seeMore = tr
 };
 
 
-export default DashboardSection;
+export default RecipeItemSection;

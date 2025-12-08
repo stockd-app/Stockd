@@ -1,4 +1,6 @@
 import React from "react";
+import { Clock, Star } from "lucide-react";
+
 import "./itemcard.css";
 
 interface ItemCardProps {
@@ -33,14 +35,22 @@ const ItemCard: React.FC<ItemCardProps> = ({ name, qty, image, rating, time, sta
                 <div className="dashboard__info">
                     <span className="dashboard__recipe__name">{name}</span>
 
+                    <div className="dashboard__meta">
+                        {time && (
+                            <span className="meta__item">
+                                <Clock size={16} /> {time}
+                            </span>
+                        )}
+                        {rating !== undefined && rating !== null && (
+                            <span className="meta__item">
+                                <Star size={16} color="#FFD700" fill="#FFD700" /> {rating}
+                            </span>
+                        )}
+                    </div>
+
                     {status && (
                         <span className={statusClass}>{status}</span>
                     )}
-
-                    <div className="dashboard__meta">
-                        {time && <span className="meta__item">⏱ {time}</span>}
-                        {rating && <span className="meta__item">⭐ {rating}</span>}
-                    </div>
                 </div>
             )}
         </div>

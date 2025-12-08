@@ -36,16 +36,7 @@ export const BOTTOM_NAV_ICON_SIZE = {
   LARGE: 26,
 }
 
-export const DASHBOARD = {
-  TABS: ["Discover", "Recommend", "Saved"] as const,
-  DISCOVER: "Discover",
-  RECOMMEND: "Recommend",
-  SAVED: "Saved",
-  SAVED_PLACEHOLDER: "No saved items yet.",
-  RECOMMEND_PLACEHOLDER: "Recommended items will appear here.",
-  DISCOVER_PLACEHOLDER: "No items to display.",
-}
-
+/* Update for pantry add/edit/delete */
 export const NOTIFICATION_MESSAGES = {
   ADDED: "Food has been added",
   UPDATED: "Food has been updated",
