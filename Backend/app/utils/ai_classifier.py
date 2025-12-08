@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-FOOD_CLASSIFIER_MODEL_URL = os.getenv("FOOD_CLASSIFIER_MODEL_URL", "http://localhost:9000")
+FOOD_CLASSIFIER_MODEL_URL = os.getenv("FOOD_CLASSIFIER_MODEL_URL", "http://localhost:9002x")
 
 
 def classify_receipt_items(parsed_data: dict) -> dict:
@@ -22,7 +22,7 @@ def classify_receipt_items(parsed_data: dict) -> dict:
     response = requests.post(
         ai_endpoint,
         json=ai_payload,
-        timeout=30
+        timeout=120
     )
     
     response.raise_for_status()

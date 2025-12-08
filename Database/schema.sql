@@ -5,10 +5,11 @@ USE stockd_db;
 -- USERS
 CREATE TABLE Users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
+    name VARBINARY(512) NOT NULL,
+    email VARBINARY(512) NOT NULL UNIQUE,
+    email_hash CHAR(64) NOT NULL,          
     picture VARCHAR(255),
-    client_id VARCHAR(255),
+    client_id VARBINARY(512),
     role ENUM('admin', 'user', 'guest') DEFAULT 'guest',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
