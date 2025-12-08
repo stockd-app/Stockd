@@ -22,7 +22,7 @@ def get_product_image_from_openfoodfacts(product_name: str) -> Optional[str]:
             "page_size": 1
         }
         
-        response = requests.get(search_url, params=params, timeout=5)
+        response = requests.get(search_url, params=params, timeout=30)
         response.raise_for_status()
         data = response.json()
         
@@ -44,3 +44,10 @@ def get_product_image_from_openfoodfacts(product_name: str) -> Optional[str]:
     except Exception as e:
         print(f"Error fetching image for {product_name}: {str(e)}")
         return None
+
+# def main():
+#     result = get_product_image_from_openfoodfacts("TESCO COOKIES")
+#     print(result)
+
+# if __name__ == "__main__":
+#     main()

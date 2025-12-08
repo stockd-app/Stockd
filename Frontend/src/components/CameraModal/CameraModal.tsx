@@ -9,17 +9,20 @@ interface CameraModalProps {
 
 /**
  * Camera Modal component
- * 
+ *
  *  Displays a full-screen modal camera interface that allows the user to:
  * - Open the **rear (environment)** camera using `getUserMedia`.
  * - Capture a still image from the video stream.
  * - Preview the captured photo before confirming or retaking it.
- * 
+ *
  * TODO : Expand on camera modal functionality based on Figma
- * @param param0 
- * @returns 
+ * @param param0
+ * @returns
  */
-const CameraModal: React.FC<CameraModalProps> = ({ onClose, onUploadSuccess }) => {
+const CameraModal: React.FC<CameraModalProps> = ({
+  onClose,
+  onUploadSuccess,
+}) => {
   // Reference to the <video> element displaying the live camera feed
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -34,7 +37,7 @@ const CameraModal: React.FC<CameraModalProps> = ({ onClose, onUploadSuccess }) =
 
   /**
    * Initializes the camera.
-   * 
+   *
    * Attempts to open the **rear camera** first.
    * If unavailable (e.g. desktop or older phone), it falls back to the default camera.
    */
@@ -53,7 +56,9 @@ const CameraModal: React.FC<CameraModalProps> = ({ onClose, onUploadSuccess }) =
       setStream(s);
     } catch (err) {
       console.warn("Rear camera not found, falling back:", err);
-      const fallback = await navigator.mediaDevices.getUserMedia({ video: true });
+      const fallback = await navigator.mediaDevices.getUserMedia({
+        video: true,
+      });
       if (videoRef.current) {
         videoRef.current.srcObject = fallback;
       }
@@ -74,7 +79,7 @@ const CameraModal: React.FC<CameraModalProps> = ({ onClose, onUploadSuccess }) =
 
   /**
    * Captures the current frame from the live camera feed.
-   * 
+   *
    * Steps:
    * 1. Draws the video frame onto a temporary <canvas>.
    * 2. Converts the canvas image into a Base64 PNG.
@@ -98,7 +103,7 @@ const CameraModal: React.FC<CameraModalProps> = ({ onClose, onUploadSuccess }) =
 
   /**
    * Retakes the photo.
-   * 
+   *
    * Clears the captured image and reinitializes the camera.
    */
   const retakePhoto = async () => {
@@ -118,7 +123,7 @@ const CameraModal: React.FC<CameraModalProps> = ({ onClose, onUploadSuccess }) =
       // Convert base64 to blob
       const response = await fetch(photo);
       const blob = await response.blob();
-      
+
       // Create a file from the blob
       const file = new File([blob], "receipt.jpg", { type: "image/jpeg" });
 
@@ -133,15 +138,9 @@ const CameraModal: React.FC<CameraModalProps> = ({ onClose, onUploadSuccess }) =
       }
 
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Upload failed:", error);
-      const errorMessage = error.message || "Failed to upload receipt. Please try again.";
-      alert(errorMessage);
-      
-      // If session expired, redirect to login
-      if (errorMessage.includes("Session expired") || errorMessage.includes("log in")) {
-        window.location.href = "/";
-      }
+      alert("Failed to upload receipt. Please try again.");
     } finally {
       setIsUploading(false);
     }
@@ -149,7 +148,7 @@ const CameraModal: React.FC<CameraModalProps> = ({ onClose, onUploadSuccess }) =
 
   /**
    * UI rendering logic:
-   * 
+   *
    * - If `photo` is null → show **live camera view** and capture controls.
    * - If `photo` is set → show **captured image preview** with retake/use options.
    */
@@ -166,7 +165,9 @@ const CameraModal: React.FC<CameraModalProps> = ({ onClose, onUploadSuccess }) =
           {/* Capture Controls (Shutter + Close) */}
           <div className="camera-controls">
             <button className="capture-btn" onClick={capturePhoto}></button>
-            <button className="close-btn" onClick={onClose}>✕</button>
+            <button className="close-btn" onClick={onClose}>
+              ✕
+            </button>
           </div>
         </>
       ) : (
@@ -178,10 +179,18 @@ const CameraModal: React.FC<CameraModalProps> = ({ onClose, onUploadSuccess }) =
 
           {/* Preview Controls (Retake / Use Photo) */}
           <div className="preview-controls">
-            <button className="retake-btn" onClick={retakePhoto} disabled={isUploading}>
+            <button
+              className="retake-btn"
+              onClick={retakePhoto}
+              disabled={isUploading}
+            >
               Retake
             </button>
-            <button className="use-btn" onClick={usePhoto} disabled={isUploading}>
+            <button
+              className="use-btn"
+              onClick={usePhoto}
+              disabled={isUploading}
+            >
               {isUploading ? "Uploading..." : "Use Photo"}
             </button>
           </div>
