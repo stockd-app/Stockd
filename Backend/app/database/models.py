@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, Enum, DateTime, ForeignKey, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
+from app.utils.encrypted_type import EncryptedString
 from app.database.database import Base
 from pydantic import BaseModel
 from typing import List, Optional
@@ -8,10 +9,11 @@ from typing import List, Optional
 class User(Base):
     __tablename__ = "Users"
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(255), nullable=False)
-    email = Column(String(255), nullable=False, unique=True)
+    name = Column(EncryptedString, nullable=False)
+    email = Column(EncryptedString, nullable=False, unique=True)
+    email_hash = Column(String(64), nullable=False, unique=True)
     picture = Column(String(255))
-    client_id = Column(String(255))
+    client_id = Column(EncryptedString)
     role = Column(Enum("admin", "user", "guest"), default="guest")
     created_at = Column(DateTime, default=datetime.utcnow)
 
