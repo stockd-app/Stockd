@@ -14,7 +14,7 @@ MODEL_PATH = os.path.normpath(os.path.join(BASE_DIR, "recipe_assets.pkl"))
 INDEX_PATH = os.path.normpath(os.path.join(BASE_DIR, "recipe_index.faiss"))
 
 df = pd.read_parquet(DATA_PATH)
-df = df[['Name', 'RecipeIngredientParts']] # keeps these columns and drops everything else. later we should also import images, recipe instructions, preptime, cooktime, recipecategory, recipeingredientquantities, keywords for searching and maybe aggregatedrating 
+df = df.copy()
 df = df.sample(5000) # limit to 5000 recipes for faster testing. full 500k dataset will probably take 1-2 hours to compute. only need to compute once before prod
 
 # join each list in recipeingredientparts into a single string
@@ -68,7 +68,7 @@ def recommend_recipes(pantry_items, top_n=10, user_id=None):
     results = df.iloc[indices[0]].copy()
     results['similarity'] = similarities[0]
 
-    return results[['Name', 'similarity']]
+    return results
 
 # This will later be replaced with the user's liked recipes fetched from the database. Eevery user has the same liked recipes until real data is used.
 FAKE_LIKED_RECIPES = [
