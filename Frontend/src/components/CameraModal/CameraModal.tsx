@@ -1,9 +1,10 @@
 import React, { useRef, useState, useEffect } from "react";
-
+import { uploadReceipt } from "../../services/api";
 import "./cameramodal.css";
 
 interface CameraModalProps {
   onClose: () => void;
+  onUploadSuccess?: (data: any) => void;
 }
 
 /**
@@ -18,7 +19,7 @@ interface CameraModalProps {
  * @param param0 
  * @returns 
  */
-const CameraModal: React.FC<CameraModalProps> = ({ onClose }) => {
+const CameraModal: React.FC<CameraModalProps> = ({ onClose, onUploadSuccess }) => {
   // Reference to the <video> element displaying the live camera feed
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -27,6 +28,9 @@ const CameraModal: React.FC<CameraModalProps> = ({ onClose }) => {
 
   // Stores the active MediaStream (so we can stop/restart the camera)
   const [stream, setStream] = useState<MediaStream | null>(null);
+
+  // Loading state for upload
+  const [isUploading, setIsUploading] = useState(false);
 
   /**
    * Initializes the camera.
@@ -103,14 +107,44 @@ const CameraModal: React.FC<CameraModalProps> = ({ onClose }) => {
   };
 
   /**
-   * Confirms the captured photo.
-   * 
-   * Currently logs the photo and closes the modal.
-   * TODO : Can be extended to upload or process the image later.
+   * Confirms the captured photo and uploads it to the backend.
    */
-  const usePhoto = () => {
-    console.log("Photo accepted:", photo);
-    onClose();
+  const usePhoto = async () => {
+    if (!photo) return;
+
+    setIsUploading(true);
+
+    try {
+      // Convert base64 to blob
+      const response = await fetch(photo);
+      const blob = await response.blob();
+      
+      // Create a file from the blob
+      const file = new File([blob], "receipt.jpg", { type: "image/jpeg" });
+
+      // Upload to backend
+      const result = await uploadReceipt(file);
+
+      console.log("Upload successful:", result);
+
+      // Call success callback if provided
+      if (onUploadSuccess) {
+        onUploadSuccess(result);
+      }
+
+      onClose();
+    } catch (error: any) {
+      console.error("Upload failed:", error);
+      const errorMessage = error.message || "Failed to upload receipt. Please try again.";
+      alert(errorMessage);
+      
+      // If session expired, redirect to login
+      if (errorMessage.includes("Session expired") || errorMessage.includes("log in")) {
+        window.location.href = "/";
+      }
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   /**
@@ -144,8 +178,12 @@ const CameraModal: React.FC<CameraModalProps> = ({ onClose }) => {
 
           {/* Preview Controls (Retake / Use Photo) */}
           <div className="preview-controls">
-            <button className="retake-btn" onClick={retakePhoto}>Retake</button>
-            <button className="use-btn" onClick={usePhoto}>Use Photo</button>
+            <button className="retake-btn" onClick={retakePhoto} disabled={isUploading}>
+              Retake
+            </button>
+            <button className="use-btn" onClick={usePhoto} disabled={isUploading}>
+              {isUploading ? "Uploading..." : "Use Photo"}
+            </button>
           </div>
         </>
       )}

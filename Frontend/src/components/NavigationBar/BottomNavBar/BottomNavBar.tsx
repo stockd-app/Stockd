@@ -22,6 +22,14 @@ const BottomNavBar: React.FC = () => {
   const [indicatorStyle, setIndicatorStyle] = useState({ left: "0px", width: "0px" });
   const [isMoving, setIsMoving] = useState(false);
 
+  // Handle successful receipt upload
+  const handleUploadSuccess = (data: any) => {
+    console.log("Receipt uploaded successfully:", data);
+    // Navigate to pantry page to show the new items
+    setActiveItem("pantry");
+    navigate("/pantry");
+  };
+
   // Sync activeItem with URL (persistent underline)
   useEffect(() => {
     if (location.pathname.startsWith("/dashboard")) setActiveItem("home");
@@ -101,7 +109,12 @@ const BottomNavBar: React.FC = () => {
         className={`bottomnav__indicator ${isMoving ? "moving" : ""}`}
         style={indicatorStyle}
       ></div>
-      {showCamera && <CameraModal onClose={() => setShowCamera(false)} />}
+      {showCamera && (
+        <CameraModal
+          onClose={() => setShowCamera(false)}
+          onUploadSuccess={handleUploadSuccess}
+        />
+      )}
     </div>
   );
 };
