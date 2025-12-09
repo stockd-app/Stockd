@@ -15,6 +15,7 @@ from fastapi import APIRouter, HTTPException
 from app.asprise_api import send_receipt_to_asprise
 from app.utils.receipt_parser import parse_asprise_response
 from app.utils.ai_classifier import classify_receipt_items
+from app.utils.openfoodfacts import get_product_image_from_openfoodfacts
 from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
 from app.database.models import LikedRecipe, PantryItemsRequest, Recipe, User, PantryItem
@@ -33,36 +34,116 @@ AI_SERVER_URL_RECIPE_RECOMMENDER = os.getenv("RECIPE_RECOMMENDER_MODEL_URL")
 @router.post("/upload-receipt", tags=["OCR"])
 async def upload_receipt(file: UploadFile = File(...), user=Depends(require_google_token)):
     """
-    Upload an image of a receipt and send it to Asprise OCR API,
-    then classify items using the AI model
+    Upload an image of a receipt and:
+    1. Send it to Asprise OCR API
+    2. Classify items using the AI model
+    3. Fetch product images from OpenFoodFacts
+    4. Store items in the database
+    5. Return the processed items to frontend
     """
+    db = SessionLocal()
     try:
         image_bytes = await file.read()
 
         # Send to Asprise API and parse the response
-        asprise_data = send_receipt_to_asprise(image_bytes, file.filename)
+        asprise_data = send_receipt_to_asprise(image_bytes, file.filename or "receipt.jpg")
         parsed = parse_asprise_response(asprise_data)
 
         # Call AI model to classify items
-        try:
-            ai_data = classify_receipt_items(parsed)
+        ai_data = classify_receipt_items(parsed)
+        
+        classified_results = ai_data.get("results", {})
+        
+        processed_items = []
+        
+        for item_name, item_data in classified_results.items():
+            if not item_data.get("is_food", False):
+                continue
+                
+            quantity = item_data.get("quantity", 1)
+            category = item_data.get("category", "Uncategorized")
+            storage = item_data.get("storage", "Pantry")
             
-            return {
-                "status": "success",
-                "asprise_parsed": parsed,
-                "ai_classified": ai_data
-            }
-        except Exception as e:
-            # If AI model is unavailable, return parsed data without classification
-            return {
-                "status": "partial_success",
-                "message": "Receipt parsed but AI classification failed",
-                "asprise_parsed": parsed,
-                "ai_error": str(e)
-            }
+            # Fetch image from OpenFoodFacts
+            item_image = get_product_image_from_openfoodfacts(item_name)
+            
+            # Check if item already exists for this user
+            existing_item = (
+                db.query(PantryItem)
+                .filter(PantryItem.user_id == user.id)
+                .filter(PantryItem.item_name == item_name)
+                .first()
+            )
+            
+            if existing_item:
+                # Update existing item - add to quantity
+                existing_item.quantity_value += quantity
+                existing_item.category = category
+                existing_item.storage = storage
+                if item_image:
+                    existing_item.item_image = item_image
+                existing_item.added_on = datetime.datetime.utcnow()
+                db.flush()
+                
+                processed_items.append({
+                    "id": existing_item.id,
+                    "name": existing_item.item_name,
+                    "qty": f"x{int(existing_item.quantity_value)}",
+                    "image": existing_item.item_image or "",
+                    "category": existing_item.category,
+                    "storage": existing_item.storage
+                })
+            else:
+                # Add new item
+                new_item = PantryItem(
+                    user_id=user.id,
+                    item_name=item_name,
+                    quantity_value=quantity,
+                    quantity_unit="pcs",
+                    category=category,
+                    storage=storage,
+                    item_image=item_image,
+                    added_on=datetime.datetime.utcnow()
+                )
+                db.add(new_item)
+                db.flush()
+                
+                processed_items.append({
+                    "id": new_item.id,
+                    "name": new_item.item_name,
+                    "qty": f"x{int(new_item.quantity_value)}",
+                    "image": new_item.item_image or "",
+                    "category": new_item.category,
+                    "storage": new_item.storage
+                })
+        
+        db.commit()
+        
+        # Group items by storage for frontend
+        grouped_items = {}
+        for item in processed_items:
+            storage = item["storage"]
+            if storage not in grouped_items:
+                grouped_items[storage] = []
+            grouped_items[storage].append({
+                "id": item["id"],
+                "name": item["name"],
+                "qty": item["qty"],
+                "image": item["image"]
+            })
+        
+        return {
+            "status": "success",
+        }
 
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
+        db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
     
 @router.post("/auth/google", tags=["Google OAuth"])
 async def verify_google_token(request: Request):
@@ -278,7 +359,47 @@ async def delete_user(user_id: int, user=Depends(require_google_token)):
         db.close()
         
 
-@router.post("/pantry_items", tags=["Pantry"])
+@router.get("/pantry_items/{user_id}", tags=["Pantry"])
+async def get_pantry_items(user_id: int, user=Depends(require_google_token)):
+    """
+    Get all pantry items for a specific user, grouped by storage location.
+    """
+    db = SessionLocal()
+    try:
+        db_user = db.query(User).filter(User.id == user_id).first()
+        if not db_user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        items = db.query(PantryItem).filter(PantryItem.user_id == user_id).all()
+        
+        # Group items by storage
+        grouped_items = {}
+        for item in items:
+            storage = item.storage or "Pantry"
+            if storage not in grouped_items:
+                grouped_items[storage] = []
+            
+            grouped_items[storage].append({
+                "id": item.id,
+                "name": item.item_name,
+                "qty": f"x{int(item.quantity_value)}",
+                "image": item.item_image or ""
+            })
+        
+        return {
+            "status": "success",
+            "grouped_items": grouped_items,
+            "total_items": len(items)
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+@router.post("/add_update_pantry_items", tags=["Pantry"])
 async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends(require_google_token)):
     """
     Add or update pantry items in the database for a specific user.
@@ -294,6 +415,7 @@ async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends
                 "quantity_unit": "L",
                 "category": "Dairy",
                 "storage": "Fridge"
+                "item_image": "http://example.com/milk.jpg"
             },
             ...
         ]
@@ -315,6 +437,7 @@ async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends
             quantity_unit = item.quantity_unit.strip() if item.quantity_unit else "pcs"
             category = item.category.strip() if item.category else "Uncategorized"
             storage = item.storage.strip() if item.storage else "Pantry"
+            item_image = item.item_image if item.item_image else None
 
             # Check if item already exists for this user
             existing_item = (
@@ -330,6 +453,7 @@ async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends
                 existing_item.quantity_unit = quantity_unit
                 existing_item.category = category
                 existing_item.storage = storage
+                existing_item.item_image = item_image
                 existing_item.added_on = datetime.datetime.utcnow()
                 processed_items.append(existing_item)
             else:
@@ -341,6 +465,7 @@ async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends
                     quantity_unit=quantity_unit,
                     category=category,
                     storage=storage,
+                    item_image=item_image,
                     added_on=datetime.datetime.utcnow()
                 )
                 db.add(new_item)

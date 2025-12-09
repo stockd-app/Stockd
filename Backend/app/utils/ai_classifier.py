@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-FOOD_CLASSIFIER_MODEL_URL = os.getenv("FOOD_CLASSIFIER_MODEL_URL", "http://localhost:9002x")
+FOOD_CLASSIFIER_MODEL_URL = os.getenv("FOOD_CLASSIFIER_MODEL_URL", "http://localhost:9002")
 
 
 def classify_receipt_items(parsed_data: dict) -> dict:
