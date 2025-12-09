@@ -26,7 +26,7 @@ def require_google_token(credentials: HTTPAuthorizationCredentials = Security(be
         
         db = SessionLocal()
         try:
-            db_user = db.query(User).filter(User.email == idinfo["email"]).first()
+            db_user = db.query(User).filter(User.email_hash == hash_email(idinfo["email"])).first()
             if not db_user:
                 print(f"User not found in database: {idinfo['email']}")
                 raise HTTPException(status_code=401, detail="User not found")
