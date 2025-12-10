@@ -138,6 +138,33 @@ def search_recipes(query: str, limit: int = 20):
 
     return matches[['Name']].to_dict(orient="records")
 
+def find_exact_match_recipes(pantry_items: list):
+    """
+    Return recipes where every ingredient in the recipe exists in the user's pantry.
+    The pantry may have extra ingredients - recipes do not need to use them all.
+    """
+    if not pantry_items:
+        return pd.DataFrame(columns=df.columns)
+
+    pantry_set = set([p.lower().strip() for p in pantry_items])
+    matches = []
+
+    for _, row in df.iterrows():
+        ingredients = row.get("RecipeIngredientParts")
+        if not isinstance(ingredients, list):
+            continue
+
+        recipe_set = set([i.lower().strip() for i in ingredients])
+
+        if recipe_set.issubset(pantry_set):
+            matches.append(row)
+
+    if not matches:
+        return pd.DataFrame(columns=df.columns)
+
+    return pd.DataFrame(matches)
+
+
 if __name__ == "__main__":
     # local tests
     test_user_ids = [1, 2, 3]
