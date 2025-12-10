@@ -29,6 +29,7 @@ class PantryItem(Base):
     storage = Column(String(255))
     quantity_value = Column(Float, default=0)
     quantity_unit = Column(String(100))
+    item_image = Column(String(255))
     added_on = Column(DateTime, default=datetime.utcnow)
 
     owner = relationship("User", back_populates="pantry_items")
@@ -40,6 +41,7 @@ class PantryItemInput(BaseModel):
     quantity_unit: Optional[str] = "pcs"
     category: Optional[str] = "Uncategorized"
     storage: Optional[str] = "Pantry"
+    item_image: Optional[str] = None
 
 class PantryItemsRequest(BaseModel):
     user_id: int

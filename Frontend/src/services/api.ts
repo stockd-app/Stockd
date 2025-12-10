@@ -3,15 +3,50 @@ import { API_ROUTES } from "../config/consts";
 
 /**
  * Upload a receipt image file to Backend for OCR processing.
- * @param file 
- * @returns 
+ * @param file
+ * @returns
  */
 export const uploadReceipt = async (file: File) => {
+  const idToken = localStorage.getItem("google_id_token");
+  
+  if (!idToken) {
+    throw new Error("Not authenticated. Please log in again.");
+  }
+
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await axios.post(API_ROUTES.UPLOAD_RECEIPT, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
+  try {
+    const response = await axios.post(API_ROUTES.UPLOAD_RECEIPT, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${idToken}`,
+      },
+    });
+
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      // Token expired or invalid
+      localStorage.clear();
+      throw new Error("Session expired. Please log in again.");
+    }
+    throw error;
+  }
+};
+
+/**
+ * Get pantry items for a user
+ * @param userId
+ * @returns
+ */
+export const getPantryItems = async (userId: number) => {
+  const idToken = localStorage.getItem("google_id_token");
+
+  const response = await axios.get(`${API_ROUTES.GET_PANTRY}/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${idToken}`,
+    },
   });
 
   return response.data;
@@ -66,7 +101,7 @@ export const handleLogout = async () => {
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${idToken}`,
+        Authorization: `Bearer ${idToken}`,
       },
       body: JSON.stringify({
         access_token: accessToken,
@@ -87,8 +122,8 @@ export const handleLogout = async () => {
 
 /**
  * Delete User Account
- * @param userId 
- * @returns 
+ * @param userId
+ * @returns
  */
 export const deleteUserAccount = async (userId: number) => {
   try {
@@ -97,7 +132,7 @@ export const deleteUserAccount = async (userId: number) => {
     const res = await fetch(`${API_ROUTES.DELETE_USER}/${userId}`, {
       method: "DELETE",
       headers: {
-        "Authorization": `Bearer ${idToken}`,
+        Authorization: `Bearer ${idToken}`,
         "Content-Type": "application/json",
       },
       credentials: "include",
