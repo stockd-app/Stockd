@@ -49,8 +49,31 @@ services:
     networks:
       - stockd-network
     restart: unless-stopped
+    
+  # Database - MySQL  
+  database:
+    build:
+      context: ./Database
+      dockerfile: Dockerfile
+    container_name: stockd-mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: stockd_db
+      MYSQL_USER: stockd_user
+      MYSQL_PASSWORD: stockd_pass
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./Database:/docker-entrypoint-initdb.d
+    networks:
+      - stockd-network
+    restart: unless-stopped
 
 networks:
   stockd-network:
     driver: bridge
     name: stockd-network
+
+volumes:
+  mysql_data:
