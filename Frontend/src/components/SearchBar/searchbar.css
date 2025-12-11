@@ -1,0 +1,69 @@
+@import "@/styles/variable.css";
+
+.searchbar__container {
+    /* width: 100%; */
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+}
+
+/* The white rounded search box */
+.searchbar__wrapper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 700px;
+
+    background: var(--color-white);
+    border-radius: 14px;
+
+    padding: 12px 16px;
+    gap: 12px;
+
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Search icon styling */
+.searchbar__icon {
+    color: var(--color-dark-grey);
+}
+
+/* Input text */
+.searchbar__input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 17px;
+    color: var(--color-dark-grey);
+    background: transparent;
+}
+
+.searchbar__input::placeholder {
+    color: var(--color-dark-grey);
+}
+
+/* Small screens (mobile) */
+@media (min-width: 600px) {
+    .searchbar__container {
+        padding: 16px 24px;
+    }
+
+    .searchbar__input {
+        padding: 16px 20px;
+        font-size: 16px;
+        max-width: 700px;
+    }
+}
+
+/* Medium screens (tablet) */
+@media (min-width: 601px) and (max-width: 1024px) {
+    .searchbar__container {
+        padding: 24px 32px;
+    }
+
+    .searchbar__input {
+        max-width: 800px;
+        padding: 18px 22px;
+    }
+}

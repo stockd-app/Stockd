@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
-import { getPantryItems } from "../../services/api";
+import PantryItemSection from "../../components/PantryItemSection/PantryItemSection"; import { getPantryItems } from "../../services/api";
 import "./pantrypage.css";
-import ItemSection from "../../components/ItemSection/ItemSection";
 
 /**
  * Pantry Page
@@ -89,7 +88,7 @@ const PantryPage: React.FC = () => {
                     <p>Your pantry is empty. Scan a receipt to add items!</p>
                 ) : (
                     pantryData.map((section) => (
-                        <ItemSection
+                        <PantryItemSection
                             key={section.section}
                             section={section.section}
                             items={section.items}

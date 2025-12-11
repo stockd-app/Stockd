@@ -17,7 +17,7 @@ def get_recipe_recommendations(user_id: int, pantry_items: list, top_n=10):
     resp = requests.post(
         f"{RECIPE_RECOMMENDER_MODEL_URL}/recommend",
         json=payload,
-        timeout=30
+        timeout=120
     )
 
     resp.raise_for_status()

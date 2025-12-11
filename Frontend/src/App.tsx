@@ -39,7 +39,15 @@ const App: React.FC = () => {
       {/* If not logged in, go back home */}
       <Route
         path="/dashboard"
-        element={user ? <Dashboard /> : <Navigate to="/" replace />}
+        element={
+          user ? (
+            <Dashboard
+              userId={JSON.parse(localStorage.getItem("user")!)?.id || null}
+            />
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
       />
       <Route
         path="/pantry"
