@@ -55,7 +55,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
             image: imageUrl,
             rating: recipe.AggregatedRating ?? 4.0,
             time: formatPrepTime(recipe.PrepTime),
-            status: "Available",
+            // status: "Available",
           };
         });
 
