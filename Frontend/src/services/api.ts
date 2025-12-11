@@ -8,7 +8,7 @@ import { API_ROUTES } from "../config/consts";
  */
 export const uploadReceipt = async (file: File) => {
   const idToken = localStorage.getItem("google_id_token");
-  
+
   if (!idToken) {
     throw new Error("Not authenticated. Please log in again.");
   }
@@ -43,14 +43,42 @@ export const uploadReceipt = async (file: File) => {
 export const getPantryItems = async (userId: number) => {
   const idToken = localStorage.getItem("google_id_token");
 
-  const response = await axios.get(`${API_ROUTES.GET_PANTRY}/${userId}`, {
-    headers: {
-      Authorization: `Bearer ${idToken}`,
-    },
-  });
-
-  return response.data;
+  try {
+    const response = await axios.get(`${API_ROUTES.GET_PANTRY}/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+    });
+    console.log("API getPantryItems response:", response);
+    return response.data;
+  } catch (error: any) {
+    throw error;
+  }
 };
+
+/**
+ * Add or Update a pantry item for a user
+ * @param userId 
+ * @param itemData 
+ * @returns 
+ */
+export const addOrUpdatePantryItem = async (userId: number, items: any) => {
+  const idToken = localStorage.getItem("google_id_token");
+
+  try {
+    const response = await axios.post(API_ROUTES.ADD_UPDATE_PANTRY_ITEM, {
+      user_id: userId,
+      items,
+    }, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error;
+  }
+}
 
 /**
  * Handles Google login using the authorization code

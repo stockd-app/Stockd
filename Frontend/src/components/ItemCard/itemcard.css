@@ -1,88 +1,61 @@
 @import "@/styles/variable.css";
 
-.pantry__card {
-    width: 140px;
-    /* background: var(--color-white);
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    padding: 12px; */
-    flex-shrink: 0;
+.itemcard {
+  width: 140px;
+  padding: 1em;
+  flex-shrink: 0;
+  border-radius: 2em;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
 }
 
-.pantry__image__Container {
-    width: 100%;
-    height: 150px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-    /* background-color: #f5f5f5; */
+.itemcard:hover {
+  transform: translateY(-12px);
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  box-shadow: 0 3px rgba(0, 0, 0, 0.5);
 }
 
-.pantry__image {
-    width: 100%;
-    height: 100%;
-    /* object-fit: cover;  */
-    object-fit: contain;
+.itemcard__container {
+  width: 100%;
+  height: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 1em;
+  overflow: hidden;
+  background-color: var(--color-primary);
+  box-shadow: -0.5em 0.5em var(--color-primary);
 }
 
-.pantry__info{
-    margin-top: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.itemcard:hover .itemcard__container {
+  background-color: var(--color-white);
+  box-shadow: 0 0;
 }
 
-.pantry__name {
-    font-size: 14px;
-    font-weight: 800;
+.itemcard__image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
-.pantry__qty {
-    color: #808080;
-    font-size: 14px;
+.itemcard__info {
+  margin: 1em 1em 0 1em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/*Small screens (mobile) */
-@media (min-width: 600px) {
-
-  .pantry__card {
-    width: 160px;
-    padding: 14px;
-  }
-
-  .pantry__image__Container {
-    height: 170px;
-  }
-
-  .pantry__name {
-    font-size: 15px;
-  }
-
-  .pantry__qty {
-    font-size: 15px;
-  }
+.itemcard__name {
+  font-size: 14px;
+  font-weight: 800;
 }
 
-/*Medium screens (tablet) */
-@media (min-width: 601px) and (max-width: 1024px) {
+.itemcard__qty {
+  color: var(--color-dark-grey);
+  font-size: 14px;
+}
 
-  .pantry__card {
-    width: 180px;
-    padding: 16px;
-  }
-
-  .pantry__image__Container {
-    height: 190px;
-  }
-
-  .pantry__name {
-    font-size: 16px;
-  }
-
-  .pantry__qty {
-    font-size: 16px;
-  }
+.itemcard:hover .itemcard__qty {
+  color: var(--color-white);
 }

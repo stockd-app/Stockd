@@ -1,0 +1,54 @@
+.pantryitemsection__container {
+  margin-top: 2em;
+}
+
+.pantryitemsecton__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 2em;
+}
+
+.pantryitemsection__items {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 0.8em 0;
+}
+
+@media (max-width: 600px) {
+  .pantryitemsection__items {
+    gap: 5px;
+  }
+
+  .pantryitemsection__items::-webkit-scrollbar {
+    height: 0.7em;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 1024px) {
+  .pantryitemsection__items {
+    gap: 15px;
+  }
+}
+
+/* Custom horizontal scrollbar */
+.pantryitemsection__items::-webkit-scrollbar {
+  height: 0.4em;
+}
+
+.pantryitemsection__items::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 2em;
+  cursor: pointer;
+}
+
+.pantryitemsection__items::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 2em;
+  cursor: pointer;
+}
+
+.pantryitemsection__items::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-dark, var(--color-primary));
+}

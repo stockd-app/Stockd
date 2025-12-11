@@ -1,24 +1,19 @@
 import React, { useState, useEffect } from "react";
-import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
 import { getPantryItems } from "../../services/api";
+import PantryItemSection, { type PantryItem } from "../../components/PantryItemSection/PantryItemSection";
+import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
+
 import "./pantrypage.css";
-import ItemSection from "../../components/ItemSection/ItemSection";
+
+interface PantrySection {
+    section: string;
+    items: PantryItem[];
+}
 
 /**
  * Pantry Page
  * Displays user's pantry items grouped by storage location (Fridge, Pantry, Freezer)
  */
-
-interface PantrySection {
-    section: string;
-    items: {
-        id: number;
-        name: string;
-        qty: string;
-        image: string;
-    }[];
-}
-
 const PantryPage: React.FC = () => {
     const [pantryData, setPantryData] = useState<PantrySection[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +28,7 @@ const PantryPage: React.FC = () => {
             setIsLoading(true);
             setError(null);
 
-            // Get user from localStorage
+            // Get user from localStorage TODO: avoid prop drilling in the future, use localStorage instead
             const userStr = localStorage.getItem("user");
             if (!userStr) {
                 setError("Please log in to view your pantry");
@@ -43,6 +38,7 @@ const PantryPage: React.FC = () => {
 
             const user = JSON.parse(userStr);
             const response = await getPantryItems(user.id);
+            console.log("Pantry items fetched:", response);
 
             // Transform grouped_items to pantryData format
             const grouped = response.grouped_items || {};
@@ -89,7 +85,7 @@ const PantryPage: React.FC = () => {
                     <p>Your pantry is empty. Scan a receipt to add items!</p>
                 ) : (
                     pantryData.map((section) => (
-                        <ItemSection
+                        <PantryItemSection
                             key={section.section}
                             section={section.section}
                             items={section.items}
