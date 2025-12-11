@@ -690,6 +690,7 @@ async def search_recipes_route(query: str, limit: int = 20):
 
 @router.get("/recommendations/exact/{user_id}")
 async def get_exact_match_recipes(user_id: int):
+    # fetch pantry items for the user
     pantry_items = get_user_pantry_exact_match(user_id)
 
     async with httpx.AsyncClient() as client:
@@ -704,6 +705,7 @@ async def get_exact_match_recipes(user_id: int):
     ai_json = ai_data.json()
     recipes = ai_json.get("recipes", [])
 
+    # Optional: fetch full recipe objects from DB if needed
     db = SessionLocal()
     id_list = [r["RecipeId"] for r in recipes]
     db_recipes = db.query(Recipe).filter(Recipe.id.in_(id_list)).all()

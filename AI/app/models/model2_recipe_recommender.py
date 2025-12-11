@@ -7,6 +7,8 @@ import faiss
 import hashlib
 from sklearn.metrics.pairwise import cosine_similarity
 
+from recipe_subset import canonicalize_recipe_ingredients, build_canonical_from_recipe_df, get_canonical_db
+
 # build path to data file since relative paths can be unreliable
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_PATH = os.path.join(BASE_DIR, "../data/recipes.parquet")
@@ -21,6 +23,15 @@ df = df.sample(5000) # limit to 5000 recipes for faster testing. full 500k datas
 df['ingredients_text'] = df['RecipeIngredientParts'].apply(
     lambda x: " ".join(x).lower() if isinstance(x, list) else str(x).lower()
 )
+
+# -----------------------------
+# Build canonical DB from your recipe dataset (once at startup)
+# -----------------------------
+print("Building/loading canonical ingredient database...")
+canonical_db = get_canonical_db()  # ensure singleton instance exists
+# Populate canonical DB from the recipes dataframe
+build_canonical_from_recipe_df(df, ing_col='RecipeIngredientParts', min_occurrences=1)
+print(f"Canonical ingredient DB has {len(canonical_db.names)} entries")
 
 # load cached model if exists and index if available
 if os.path.exists(MODEL_PATH) and os.path.exists(INDEX_PATH):
@@ -138,25 +149,53 @@ def search_recipes(query: str, limit: int = 20):
 
     return matches[['Name']].to_dict(orient="records")
 
-def find_exact_match_recipes(pantry_items: list):
+# List of minor/non-essential ingredients to ignore when matching
+MINOR_INGREDIENTS = {
+    "salt", "pepper", "water", "oil", "olive oil", "vegetable oil",
+    "butter", "sugar", "brown sugar", "ground pepper", "garlic powder",
+    "onion powder", "chili powder", "paprika", "herbs", "parsley", "cilantro",
+    "basil", "oregano", "thyme", "rosemary", "cumin", "coriander"
+}
+
+def find_semantic_subset_recipes(
+    pantry_items: list,
+    match_ratio_threshold: float = 1.0
+):
     """
-    Return recipes where every ingredient in the recipe exists in the user's pantry.
-    The pantry may have extra ingredients - recipes do not need to use them all.
+    Return recipes where most essential ingredients are present in the pantry.
+    Minor ingredients (spices, herbs, salt, etc.) are ignored.
     """
     if not pantry_items:
         return pd.DataFrame(columns=df.columns)
 
-    pantry_set = set([p.lower().strip() for p in pantry_items])
+    # Canonicalize pantry items
+    pantry_canonical = set(canonicalize_recipe_ingredients(pantry_items, auto_add=False))
+
     matches = []
 
     for _, row in df.iterrows():
         ingredients = row.get("RecipeIngredientParts")
-        if not isinstance(ingredients, list):
+        if ingredients is None or len(ingredients) == 0:
             continue
 
-        recipe_set = set([i.lower().strip() for i in ingredients])
+        if isinstance(ingredients, (np.ndarray, pd.Series)):
+            ingredients = ingredients.tolist()
+        elif isinstance(ingredients, str):
+            ingredients = [ingredients]
 
-        if recipe_set.issubset(pantry_set):
+        # Canonicalize recipe ingredients
+        recipe_canonical = canonicalize_recipe_ingredients(ingredients, auto_add=False)
+
+        # Filter out minor ingredients
+        recipe_essentials = [ing for ing in recipe_canonical if ing not in MINOR_INGREDIENTS]
+        if not recipe_essentials:
+            continue
+
+        # Calculate fraction of recipe essentials that are in pantry
+        matched_count = sum(1 for ing in recipe_essentials if ing in pantry_canonical)
+        match_ratio = matched_count / len(recipe_essentials)
+
+        if match_ratio >= match_ratio_threshold:
             matches.append(row)
 
     if not matches:
@@ -170,9 +209,29 @@ if __name__ == "__main__":
     test_user_ids = [1, 2, 3]
     target_user = 1
 
-    print("\nTesting collaborative filtering:")
-    print(recommend_from_similar_users(target_user, test_user_ids, top_n=5))
+    # print("\nTesting collaborative filtering:")
+    # print(recommend_from_similar_users(target_user, test_user_ids, top_n=5))
 
-    test_pantry = ["chicken", "rice", "broccoli"]
-    print("\nTesting content-based (pantry) recommendations:")
-    print(recommend_recipes(test_pantry, top_n=5))
+    test_pantry = [
+    "chicken", "rice", "broccoli", "carrot", "onion", "garlic",
+    "olive oil", "butter", "cream cheese", "feta cheese",
+    "phyllo pastry", "potatoes", "baking soda", "baking powder",
+    "milk", "eggs", "flour", "brown sugar", "soy sauce",
+    "sesame oil", "lemon juice", "lime juice", "canned corn",
+    "tomatoes", "red bell pepper", "black pepper", "salt",
+    "parmesan cheese", "coconut milk", "chili powder", "curry powder",
+    "ground cumin", "paprika", "vanilla extract", "honey",
+    "ginger", "spinach", "zucchini", "celery", "green beans"
+    ]
+    
+    test_pantry_exact = [
+    "coconut milk", "eggs", "palm sugar",
+    "garlic", "sweet potatoes", "sour cream"
+]
+    
+    # print("\nTesting content-based (pantry) recommendations:")
+    # print(recommend_recipes(test_pantry, top_n=5))
+
+    print("\nTesting subset recommendations:")
+    df_subset = find_semantic_subset_recipes(test_pantry_exact, match_ratio_threshold=1.0)
+    print(df_subset[['Name', 'RecipeIngredientParts']])

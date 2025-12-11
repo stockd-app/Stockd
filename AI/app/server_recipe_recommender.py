@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
 import uvicorn
-from models.model2_recipe_recommender import recommend_recipes, recommend_from_similar_users, search_recipes, find_exact_match_recipes
+from models.model2_recipe_recommender import recommend_recipes, recommend_from_similar_users, search_recipes, find_semantic_subset_recipes
 from datetime import datetime
 import pandas as pd
 import numpy as np
@@ -164,8 +164,11 @@ async def search_recipes_endpoint(req: SearchRequest):
 
 @app.post("/exact-match")
 def exact_match_endpoint(req: RecommendationRequest):
+    """
+    Return recipes where all recipe ingredients are semantically matched by the user's pantry.
+    """
     try:
-        df_results = find_exact_match_recipes(req.pantry_items)
+        df_results = find_semantic_subset_recipes(req.pantry_items, similarity_threshold=0.8)
 
         formatted = []
         for _, row in df_results.iterrows():
