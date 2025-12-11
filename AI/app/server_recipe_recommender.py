@@ -11,6 +11,7 @@ class RecommendationRequest(BaseModel):
     user_id: int
     pantry_items: List[str]
     all_user_ids: List[int] = []
+    user_likes: dict = {}
     top_n: int = 10
     mode: str = "content"
 
@@ -48,7 +49,7 @@ class ContentRecommendationResponse(BaseModel):
 class CollaborativeRecommendationResponse(BaseModel):
     status: str
     type: str
-    recommendations: List[str]
+    recommendations: List[RecipeObject]
 
 class SearchRequest(BaseModel):
     query: str
@@ -130,16 +131,33 @@ def recommend_ai(req: RecommendationRequest):
             if not req.all_user_ids:
                 raise HTTPException(400, "all_user_ids required for collaborative mode.")
 
+            # DEBUG: print incoming data
+            print("==== Collaborative Recommendation Debug ====")
+            print("Target user:", req.user_id)
+            print("All user IDs:", req.all_user_ids)
+            print("User likes dict:", req.user_likes)
+
             recs = recommend_from_similar_users(
                 target_user=req.user_id,
                 all_user_ids=req.all_user_ids,
+                user_likes=req.user_likes,
                 top_n=req.top_n
             )
+
+            print("Raw recommended results:", recs)
+
+            formatted = []
+            for row in recs:
+                row = sanitize_row_for_pydantic(row)
+                formatted.append(RecipeObject(**row))
+
+            # DEBUG: print the final formatted recommendations
+            print("Formatted recommendations:", formatted)
 
             return CollaborativeRecommendationResponse(
                 status="success",
                 type="collaborative",
-                recommendations=recs
+                recommendations=formatted
             )
 
         else:
