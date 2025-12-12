@@ -36,6 +36,11 @@ export const BOTTOM_NAV_ICON_SIZE = {
   LARGE: 26,
 }
 
+//Icon color for Creation modal buttons
+export const ICON_COLOR = {
+  ICON: "#4BC7A7",
+}
+
 /* Update for pantry add/edit/delete */
 export const NOTIFICATION_MESSAGES = {
   ADDED: "Food has been added",
