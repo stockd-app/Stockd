@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Refrigerator, ScanLine, Bookmark, User, Camera, PencilLine, ImagePlus, SquarePlus } from "lucide-react";
+import { Home, Refrigerator, Bookmark, User, Camera, PencilLine, ImagePlus, SquarePlus } from "lucide-react";
+import { BOTTOM_NAV_ICON_SIZE, } from "../../../config/consts";
 import CameraModal from "../../CameraModal/CameraModal";
-import { BOTTOM_NAV_ICON_SIZE, ICON_COLOR } from "../../../config/consts";
+
 
 import "./bottomnavbar.css";
+import "@/styles/variable.css";
 
 /**
  * Bottom Navigation Bar Component
@@ -121,9 +123,6 @@ const BottomNavBar: React.FC = () => {
         <p>Pantry</p>
       </div>
 
-      {/* <div className="bottomnav__item scan__button" onClick={() => setShowCamera(true)}>
-        <ScanLine size={BOTTOM_NAV_ICON_SIZE.LARGE} />
-      </div> */}
       <div className="bottomnav__item scan__button" onClick={handleScanClick}>
         <SquarePlus size={BOTTOM_NAV_ICON_SIZE.LARGE} />
       </div>
@@ -158,16 +157,16 @@ const BottomNavBar: React.FC = () => {
             </div>
 
             <button className="creation__button large" onClick={handleTakePhoto}>
-              <Camera size={BOTTOM_NAV_ICON_SIZE.NORMAL} color={ICON_COLOR.ICON} />
+              <Camera size={BOTTOM_NAV_ICON_SIZE.NORMAL} color={"var(--color-primary)"} />
               Take Photo
             </button>
             <div className="creation__row">
               <button className="creation__button" onClick={handleManualAdd}>
-                <PencilLine size={BOTTOM_NAV_ICON_SIZE.NORMAL} color={ICON_COLOR.ICON} />
+                <PencilLine size={BOTTOM_NAV_ICON_SIZE.NORMAL} color={"var(--color-primary)"} />
                 Manual Add
               </button>
               <button className="creation__button" onClick={handleSelectPhoto}>
-                <ImagePlus size={BOTTOM_NAV_ICON_SIZE.NORMAL} color={ICON_COLOR.ICON} />
+                <ImagePlus size={BOTTOM_NAV_ICON_SIZE.NORMAL} color={"var(--color-primary)"} />
                 Select Photo
               </button>
             </div>
