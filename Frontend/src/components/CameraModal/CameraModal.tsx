@@ -1,10 +1,10 @@
 import React, { useRef, useState, useEffect } from "react";
-import { uploadReceipt } from "../../services/api";
+
 import "./cameramodal.css";
 
 interface CameraModalProps {
   onClose: () => void;
-  onUploadSuccess?: (data: any) => void;
+  onPhotoCaptured: (file: File, url: string) => void;
 }
 
 /**
@@ -13,27 +13,18 @@ interface CameraModalProps {
  *  Displays a full-screen modal camera interface that allows the user to:
  * - Open the **rear (environment)** camera using `getUserMedia`.
  * - Capture a still image from the video stream.
- * - Preview the captured photo before confirming or retaking it.
- *
- * TODO : Expand on camera modal functionality based on Figma
  * @param param0
  * @returns
  */
 const CameraModal: React.FC<CameraModalProps> = ({
   onClose,
-  onUploadSuccess,
+  onPhotoCaptured,
 }) => {
   // Reference to the <video> element displaying the live camera feed
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Holds the captured image in Base64 format (used for preview)
-  const [photo, setPhoto] = useState<string | null>(null);
-
   // Stores the active MediaStream (so we can stop/restart the camera)
   const [stream, setStream] = useState<MediaStream | null>(null);
-
-  // Loading state for upload
-  const [isUploading, setIsUploading] = useState(false);
 
   /**
    * Initializes the camera.
@@ -42,166 +33,57 @@ const CameraModal: React.FC<CameraModalProps> = ({
    * If unavailable (e.g. desktop or older phone), it falls back to the default camera.
    */
   const startCamera = async () => {
-    try {
-      const s = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: "environment" },
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-        },
-      });
-      if (videoRef.current) {
-        videoRef.current.srcObject = s;
-      }
-      setStream(s);
-    } catch (err) {
-      console.warn("Rear camera not found, falling back:", err);
-      const fallback = await navigator.mediaDevices.getUserMedia({
-        video: true,
-      });
-      if (videoRef.current) {
-        videoRef.current.srcObject = fallback;
-      }
-      setStream(fallback);
-    }
+    const s = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" } },
+    });
+    if (videoRef.current) videoRef.current.srcObject = s;
+    setStream(s);
   };
 
-  /**
-   * Starts the camera when the modal mounts.
-   * Cleans up the camera stream when the modal is closed/unmounted.
-   */
   useEffect(() => {
     startCamera();
-    return () => {
-      stream?.getTracks().forEach((track) => track.stop());
-    };
+    return () => stream?.getTracks().forEach((t) => t.stop());
   }, []);
 
-  /**
-   * Captures the current frame from the live camera feed.
-   *
-   * Steps:
-   * 1. Draws the video frame onto a temporary <canvas>.
-   * 2. Converts the canvas image into a Base64 PNG.
-   * 3. Stops the video stream to release the camera.
-   * 4. Displays the captured photo in preview mode.
-   */
-  const capturePhoto = () => {
+  const capturePhoto = async () => {
     const video = videoRef.current;
     if (!video) return;
 
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
+
     const ctx = canvas.getContext("2d");
-    if (ctx) ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    if (!ctx) return;
+
+    ctx.drawImage(video, 0, 0);
 
     // Stop stream to release camera resource
     stream?.getTracks().forEach((track) => track.stop());
-    setPhoto(canvas.toDataURL("image/png"));
+
+    const blob = await (await fetch(canvas.toDataURL("image/jpeg"))).blob();
+    const file = new File([blob], "receipt.jpg", { type: "image/jpeg" });
+    const url = URL.createObjectURL(file);
+
+    onPhotoCaptured(file, url);
+    onClose();
   };
 
-  /**
-   * Retakes the photo.
-   *
-   * Clears the captured image and reinitializes the camera.
-   */
-  const retakePhoto = async () => {
-    setPhoto(null);
-    await startCamera(); // Restart camera feed
-  };
-
-  /**
-   * Confirms the captured photo and uploads it to the backend.
-   */
-  const usePhoto = async () => {
-    if (!photo) return;
-
-    setIsUploading(true);
-
-    try {
-      // Convert base64 to blob
-      const response = await fetch(photo);
-      const blob = await response.blob();
-
-      // Create a file from the blob
-      const file = new File([blob], "receipt.jpg", { type: "image/jpeg" });
-
-      // Upload to backend
-      const result = await uploadReceipt(file);
-
-      console.log("Upload successful:", result);
-
-      // Call success callback if provided
-      if (onUploadSuccess) {
-        onUploadSuccess(result);
-      }
-
-      onClose();
-    } catch (error) {
-      console.error("Upload failed:", error);
-      alert("Failed to upload receipt. Please try again.");
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  /**
-   * UI rendering logic:
-   *
-   * - If `photo` is null → show **live camera view** and capture controls.
-   * - If `photo` is set → show **captured image preview** with retake/use options.
-   */
   return (
     <div className="camera-modal">
-      {isUploading && (
-        <div className="uploading__overlay">
-          <div className="spinner"></div>
-          <p className="loading__text">AI is scanning your receipt…</p>
-        </div>
-      )}
-      {!photo ? (
-        <>
-          {/* ===== Live Camera View ===== */}
-          <div className="camera-frame">
-            <video ref={videoRef} autoPlay playsInline muted />
-            <div className="camera-outline"></div>
-          </div>
+      {/* ===== Live Camera View ===== */}
+      <div className="camera-frame">
+        <video ref={videoRef} autoPlay playsInline muted />
+        <div className="camera-outline" />
+      </div>
 
-          {/* Capture Controls (Shutter + Close) */}
-          <div className="camera-controls">
-            <button className="capture-btn" onClick={capturePhoto}></button>
-            <button className="close-btn" onClick={onClose}>
-              ✕
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
-          {/* ===== Photo Preview ===== */}
-          <div className="photo-preview">
-            <img src={photo} alt="Captured" className="captured-photo" />
-          </div>
-
-          {/* Preview Controls (Retake / Use Photo) */}
-          <div className="preview-controls">
-            <button
-              className="retake-btn"
-              onClick={retakePhoto}
-              disabled={isUploading}
-            >
-              Retake
-            </button>
-            <button
-              className="use-btn"
-              onClick={usePhoto}
-              disabled={isUploading}
-            >
-              {isUploading ? "Uploading..." : "Use Photo"}
-            </button>
-          </div>
-        </>
-      )}
+      {/* Capture Controls (Shutter + Close) */}
+      <div className="camera-controls">
+        <button className="capture-btn" onClick={capturePhoto} />
+        <button className="close-btn" onClick={onClose}>
+          ✕
+        </button>
+      </div>
     </div>
   );
 };

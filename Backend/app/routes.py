@@ -20,6 +20,7 @@ from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
 from app.database.models import LikedRecipe, PantryItemsRequest, Recipe, User, PantryItem
 from app.utils.ai_recommender import get_recipe_recommendations
+from typing import List
 
 load_dotenv()
 
@@ -32,7 +33,7 @@ router = APIRouter()
 AI_SERVER_URL_RECIPE_RECOMMENDER = os.getenv("RECIPE_RECOMMENDER_MODEL_URL")
 
 @router.post("/upload-receipt", tags=["OCR"])
-async def upload_receipt(file: UploadFile = File(...), user=Depends(require_google_token)):
+async def upload_receipt(files: List[UploadFile] = File(...), user=Depends(require_google_token)):
     """
     Upload an image of a receipt and:
     1. Send it to Asprise OCR API
@@ -43,80 +44,81 @@ async def upload_receipt(file: UploadFile = File(...), user=Depends(require_goog
     """
     db = SessionLocal()
     try:
-        image_bytes = await file.read()
-
-        # Send to Asprise API and parse the response
-        asprise_data = send_receipt_to_asprise(image_bytes, file.filename or "receipt.jpg")
-        parsed = parse_asprise_response(asprise_data)
-
-        # Call AI model to classify items
-        ai_data = classify_receipt_items(parsed)
-        
-        classified_results = ai_data.get("results", {})
-        
         processed_items = []
-        
-        for item_name, item_data in classified_results.items():
-            if not item_data.get("is_food", False):
-                continue
-                
-            quantity = item_data.get("quantity", 1)
-            category = item_data.get("category", "Uncategorized")
-            storage = item_data.get("storage", "Pantry")
+
+        for file in files:
+            image_bytes = await file.read()
+
+            # Send to Asprise API and parse the response
+            asprise_data = send_receipt_to_asprise(image_bytes, file.filename or "receipt.jpg")
+            parsed = parse_asprise_response(asprise_data)
+
+            # Call AI model to classify items
+            ai_data = classify_receipt_items(parsed)
+
+            classified_results = ai_data.get("results", {})
             
-            # Fetch image from OpenFoodFacts
-            item_image = get_product_image_from_openfoodfacts(item_name)
-            
-            # Check if item already exists for this user
-            existing_item = (
-                db.query(PantryItem)
-                .filter(PantryItem.user_id == user.id)
-                .filter(PantryItem.item_name == item_name)
-                .first()
-            )
-            
-            if existing_item:
-                # Update existing item - add to quantity
-                existing_item.quantity_value += quantity
-                existing_item.category = category
-                existing_item.storage = storage
-                if item_image:
-                    existing_item.item_image = item_image
-                existing_item.added_on = datetime.datetime.utcnow()
-                db.flush()
-                
-                processed_items.append({
-                    "id": existing_item.id,
-                    "name": existing_item.item_name,
-                    "qty": f"x{int(existing_item.quantity_value)}",
-                    "image": existing_item.item_image or "",
-                    "category": existing_item.category,
-                    "storage": existing_item.storage
-                })
-            else:
-                # Add new item
-                new_item = PantryItem(
-                    user_id=user.id,
-                    item_name=item_name,
-                    quantity_value=quantity,
-                    quantity_unit="pcs",
-                    category=category,
-                    storage=storage,
-                    item_image=item_image,
-                    added_on=datetime.datetime.utcnow()
+            for item_name, item_data in classified_results.items():
+                if not item_data.get("is_food", False):
+                    continue
+
+                quantity = item_data.get("quantity", 1)
+                category = item_data.get("category", "Uncategorized")
+                storage = item_data.get("storage", "Pantry")
+
+                # Fetch image from OpenFoodFacts
+                item_image = get_product_image_from_openfoodfacts(item_name)
+
+                # Check if item already exists for this user
+                existing_item = (
+                    db.query(PantryItem)
+                    .filter(PantryItem.user_id == user.id)
+                    .filter(PantryItem.item_name == item_name)
+                    .first()
                 )
-                db.add(new_item)
-                db.flush()
-                
-                processed_items.append({
-                    "id": new_item.id,
-                    "name": new_item.item_name,
-                    "qty": f"x{int(new_item.quantity_value)}",
-                    "image": new_item.item_image or "",
-                    "category": new_item.category,
-                    "storage": new_item.storage
-                })
-        
+
+                if existing_item:
+                    # Update existing item - add to quantity
+                    existing_item.quantity_value += quantity
+                    existing_item.category = category
+                    existing_item.storage = storage
+                    if item_image:
+                        existing_item.item_image = item_image
+                    existing_item.added_on = datetime.datetime.utcnow()
+                    db.flush()
+
+                    processed_items.append({
+                        "id": existing_item.id,
+                        "name": existing_item.item_name,
+                        "qty": f"x{int(existing_item.quantity_value)}",
+                        "image": existing_item.item_image or "",
+                        "category": existing_item.category,
+                        "storage": existing_item.storage,
+                    })
+                else:
+                    # Add new item
+                    new_item = PantryItem(
+                        user_id=user.id,
+                        item_name=item_name,
+                        quantity_value=quantity,
+                        quantity_unit="pcs",
+                        category=category,
+                        storage=storage,
+                        item_image=item_image,
+                        added_on=datetime.datetime.utcnow(),
+                    )
+                    db.add(new_item)
+                    db.flush()
+
+                    processed_items.append({
+                        "id": new_item.id,
+                        "name": new_item.item_name,
+                        "qty": f"x{int(new_item.quantity_value)}",
+                        "image": new_item.item_image or "",
+                        "category": new_item.category,
+                        "storage": new_item.storage,
+                    })
+
         db.commit()
         
         # Group items by storage for frontend
