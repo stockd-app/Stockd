@@ -36,6 +36,7 @@ class PantryItem(Base):
     recipe_ingredients = relationship("RecipeIngredient", back_populates="pantry_item")
     
 class PantryItemInput(BaseModel):
+    id: Optional[int] = None
     item_name: str
     quantity_value: Optional[float] = 0
     quantity_unit: Optional[str] = "pcs"
