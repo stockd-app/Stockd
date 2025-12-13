@@ -1,0 +1,13 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY Recipe_Recommender/recipe_recommender_requirements.txt .
+
+RUN pip install --no-cache-dir -r recipe_recommender_requirements.txt
+
+COPY Recipe_Recommender/ ./app/
+
+EXPOSE 9001
+
+CMD ["python", "recipe_recommender_server.py"]

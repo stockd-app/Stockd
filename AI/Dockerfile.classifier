@@ -1,0 +1,13 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY Food_Classifier/food_classifier_requirements.txt .
+
+RUN pip install --no-cache-dir -r food_classifier_requirements.txt
+
+COPY Food_Classifier/ ./app/
+
+EXPOSE 9002
+
+CMD ["python", "food_classifier_server.py"]

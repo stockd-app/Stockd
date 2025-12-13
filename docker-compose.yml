@@ -45,12 +45,26 @@ services:
     ports:
       - "9002:9002"
     volumes:
-      - ./AI/app:/app/app
+      - ./AI/Food_Classifier:/app/
     networks:
       - stockd-network
     restart: unless-stopped
-    
-  # Database - MySQL  
+
+  # AI Model 2 - Recipe Recommender
+  recipe-recommender:
+    build:
+      context: ./AI
+      dockerfile: Dockerfile.recipe
+    container_name: stockd-recipe-recommender
+    ports:
+      - "9001:9001"
+    volumes:
+      - ./AI/Recipe_Recommender:/app/
+    networks:
+      - stockd-network
+    restart: unless-stopped
+
+  # Database - MySQL
   database:
     build:
       context: ./Database
