@@ -36,11 +36,11 @@ services:
       - stockd-network
     restart: unless-stopped
 
-  # AI Model 1 - Item Classifier
+  # AI Model 1 - Food Classifier
   food-classifier:
     build:
       context: ./AI
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.classifier
     container_name: stockd-food-classifier
     ports:
       - "9002:9002"
@@ -54,7 +54,7 @@ services:
   recipe-recommender:
     build:
       context: ./AI
-      dockerfile: Dockerfile.recipe
+      dockerfile: Dockerfile.recommender
     container_name: stockd-recipe-recommender
     ports:
       - "9001:9001"

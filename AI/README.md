@@ -1,6 +1,59 @@
+# AI (Food Classifier and Recipe Recommender)
+
+In this project we are making use of two models:
+
+- **Food Classifier**: which takes list of items from asprice's output and add labels to those items such as food/non-food, storage, what kind of food it is. It uses facebook BART mnli for the functionality.
+- **Recipe Recommender**: which is a local recipe-recommendation AI service powered by a Food.com dataset
+
+# Food Classifier — Setup Guide
+
+## Follow the steps below to set up the environment and run the server.
+
+---
+
+## 📥 1. File Structure
+
+Your file structure should look like:
+AI/
+└─ Food_Classifier/
+├─ data_cleaning/
+├─ food_classifier_model.py
+├─ food_classifier_requirements.txt
+└─ food_classifier_server.py
+
+## 📦 2. Install Dependencies
+
+Navigate into the Food_Classifier directory:
+pip install -r food_classifier_requirements.txt
+
+## ⚙️ 3. Configure Environment Variables
+
+Inside the `Backend` directory, open your `.env` file (create one if needed) and add:
+Local Development:
+
+- FOOD_CLASSIFER_MODEL_URL=http://<your_ip>:9002
+
+Replace `<your_ip>` with your machine’s actual local IP address.
+
+Running in containers:
+
+- FOOD_CLASSIFER_MODEL_URL=http://localhost:9002
+
+---
+
+## 🚀 4. Run the Server
+
+Start the server:
+python food_classifier_server.py
+
+> ⏳ **Note:** The first launch performs an initial setup and may take some time.
+
+Now you can navigate to the Swagger docs to test the endpoints. You can find the Swagger doc by going to this URL:
+http://<your_ip>:9002/docs for food classifier
+
 # Recipe Recommender — Setup Guide
 
-This project provides a local recipe-recommendation AI service powered by a Food.com dataset. Follow the steps below to set up the environment and run the server.
+Follow the steps below to set up the environment and run the server.
 
 ---
 
@@ -12,42 +65,46 @@ This project provides a local recipe-recommendation AI service powered by a Food
 2. Extract the zip file named archive.
 3. Locate the file **`recipes.parquet`**.
 4. Create a `data` directory inside the project at:
-AI/app/data
+   AI/Recipe_Recommender/data
 
 5. Place **`recipes.parquet`** into this newly created `data` folder.
 
 Your file structure should look like:
 AI/
-└─ app/
+└─ Recipe_Recommender/
 ├─ data/
 │ └─ recipes.parquet
-└─ server_recipe_recommender.py
-
+├─ recipe_recommender_model.py
+├─ recipe_recommender_requirements.txt
+└─ recipe_recommender_server.py
 
 ## 📦 2. Install Dependencies
 
-From the project root, install the required Python packages
-pip install -r requirements.txt
+Navigate into the Recipe_Recommender directory:
+pip install -r recipe_recommender_requirements.txt
 
 ## ⚙️ 3. Configure Environment Variables
-Inside the `Backend` directory, open your `.env` file (create one if needed) and add:
-FOOD_CLASSIFER_MODEL_URL=http://192.168.x.x:9000
-RECIPE_RECOMMENDER_MODEL_URL=http://192.168.x.x:9001
 
-Replace `192.168.x.x` with your machine’s actual local IP address.
+Inside the `Backend` directory, open your `.env` file (create one if needed) and add:
+Local Development:
+
+- RECIPE_RECOMMENDER_MODEL_URL=http://<your_ip>:9001
+
+Replace `<your_ip>` with your machine’s actual local IP address.
+
+Running in containers:
+
+- RECIPE_RECOMMENDER_MODEL_URL=http://localhost:9001
 
 ---
 
 ## 🚀 4. Run the Recipe Recommender Server
 
-Navigate into the app directory:
-cd AI/app
 Start the server:
-python server_recipe_recommender.py
+python recipe_recommender_server.py
 
 > ⏳ **Note:** The first launch performs an initial setup and may take some time.
 
 Now you can navigate to the Swagger docs to test the endpoints. You can find the Swagger doc by going to this URL:
-http://<YOUR_IP>:9000/docs for item classifier
-OR
-http://<YOUR_IP>:9000/docs for recipe recommender
+
+http://<your_ip>:9001/docs for recipe recommender
