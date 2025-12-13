@@ -32,20 +32,35 @@ services:
       - ./Backend:/app
     depends_on:
       - food-classifier
+      - recipe-recommender
     networks:
       - stockd-network
     restart: unless-stopped
 
-  # AI Model 1 - Item Classifier
+  # AI Model 1 - Food Item Classifier
   food-classifier:
     build:
       context: ./AI
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.classifier
     container_name: stockd-food-classifier
     ports:
       - "9002:9002"
     volumes:
-      - ./AI/app:/app/app
+      - ./AI/Food_Classifier:/app/
+    networks:
+      - stockd-network
+    restart: unless-stopped
+
+  # AI Model 2 - Recipe Recommender
+  recipe-recommender:
+    build:
+      context: ./AI
+      dockerfile: Dockerfile.recipe
+    container_name: stockd-recipe-recommender
+    ports:
+      - "9001:9001"
+    volumes:
+      - ./AI/Recipe_Recommender:/app/
     networks:
       - stockd-network
     restart: unless-stopped

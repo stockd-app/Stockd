@@ -30,7 +30,7 @@ router = APIRouter()
 AI_SERVER_URL_RECIPE_RECOMMENDER = os.getenv("RECIPE_RECOMMENDER_MODEL_URL")
 
 @router.post("/upload-receipt", tags=["OCR"])
-async def upload_receipt(file: UploadFile = File(...), user=Depends(require_google_token)):
+async def upload_receipt(file: UploadFile = File(...)):
     """
     Upload an image of a receipt and send it to Asprise OCR API,
     then classify items using the AI model
