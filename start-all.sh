@@ -78,6 +78,13 @@ else
     echo -e "${RED}✗${NC} Food Classifier - Not running"
 fi
 
+if docker ps | grep -q stockd-recipe-recommender; then
+    echo -e "${GREEN}✓Recipe Recommender AI - Running on port 9001${NC}"
+else
+    echo -e "${RED}✗Recipe Recommender AI - Not running${NC}"
+fi
+
+
 if docker ps | grep -q stockd-mysql; then
     echo -e "${GREEN}✓${NC} Database (MySQL) - Running on port 3307"
 else
@@ -91,6 +98,7 @@ echo -e "${GREEN}Access your application:${NC}"
 echo -e "  Frontend:     ${BLUE}http://localhost${NC}"
 echo -e "  Backend:      ${BLUE}http://localhost:8000${NC}"
 echo -e "  Food Classifier:   ${BLUE}http://localhost:9002${NC}"
+echo -e "  Recipe Recommender: ${BLUE}http://localhost:9001${NC}"
 echo -e "  Database (MySQL): ${BLUE}localhost:3307${NC}"
 echo ""
 echo -e "${YELLOW}Useful commands:${NC}"
