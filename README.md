@@ -78,7 +78,7 @@ This will start:
 
 ## Health Checks
 
-Each service in `docker-compose.yml` has health check configurations that Docker monitors automatically.
+Each service in `docker-compose.yml` has health check configurations that Docker monitors automatically. Used kuma for status monitoring of each service. Will configure email alerts when deployed to AWS.
 
 ### 1. **Health Check Endpoints**
 

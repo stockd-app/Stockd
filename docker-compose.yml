@@ -68,7 +68,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 220s
+      start_period: 350s
 
   # AI Model 2 - Recipe Recommender
   recipe-recommender:
@@ -126,6 +126,18 @@ services:
       retries: 3
       start_period: 30s
 
+  # Uptime Kuma - Monitoring Dashboard
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: stockd-uptime-kuma
+    ports:
+      - "3001:3001"
+    volumes:
+      - uptime-kuma-data:/app/data
+    networks:
+      - stockd-network
+    restart: unless-stopped
+
 networks:
   stockd-network:
     driver: bridge
@@ -133,3 +145,4 @@ networks:
 
 volumes:
   mysql_data:
+  uptime-kuma-data:
