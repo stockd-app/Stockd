@@ -12,8 +12,18 @@ app = FastAPI(title="AI Classifier")
 
 model = FoodLabeler()
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Docker and monitoring"""
+    return {
+        "status": "healthy",
+        "service": "food-classifier",
+        "model_loaded": model is not None
+    }
+
 @app.post("/classify-items")
 async def classify_items(req: ReceiptRequest):
+    """Classify items from a receipt into food and non-food categories"""
     try:
         classified_items = {}
         

@@ -79,9 +79,9 @@ else
 fi
 
 if docker ps | grep -q stockd-recipe-recommender; then
-    echo -e "${GREEN}✓Recipe Recommender AI - Running on port 9001${NC}"
+    echo -e "${GREEN}✓${NC} Recipe Recommender AI - Running on port 9001${NC}"
 else
-    echo -e "${RED}✗Recipe Recommender AI - Not running${NC}"
+    echo -e "${RED}✗${NC} Recipe Recommender AI - Not running${NC}"
 fi
 
 
