@@ -383,7 +383,11 @@ async def get_pantry_items(user_id: int, user=Depends(require_google_token)):
                 "id": item.id,
                 "name": item.item_name,
                 "qty": f"x{int(item.quantity_value)}",
-                "image": item.item_image or ""
+                "unit": item.quantity_unit or "pcs",
+                "image": item.item_image or "",
+                "category": item.category or "Uncategorized",
+                "storage": item.storage or "Pantry",
+                "added_on": item.added_on,
             })
         
         return {
@@ -440,21 +444,23 @@ async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends
             item_image = item.item_image if item.item_image else None
 
             # Check if item already exists for this user
-            existing_item = (
-                db.query(PantryItem)
-                .filter(PantryItem.user_id == request_data.user_id)
-                .filter(PantryItem.item_name == item_name)
-                .first()
-            )
+            existing_item = None
+            if item.id is not None:
+                existing_item = (
+                    db.query(PantryItem)
+                    .filter(PantryItem.id == item.id)
+                    .filter(PantryItem.user_id == request_data.user_id)
+                    .first()
+                )
 
             if existing_item:
                 # Update existing item
+                existing_item.item_name = item_name
                 existing_item.quantity_value = quantity_value
                 existing_item.quantity_unit = quantity_unit
                 existing_item.category = category
                 existing_item.storage = storage
                 existing_item.item_image = item_image
-                existing_item.added_on = datetime.datetime.utcnow()
                 processed_items.append(existing_item)
             else:
                 # Add new item

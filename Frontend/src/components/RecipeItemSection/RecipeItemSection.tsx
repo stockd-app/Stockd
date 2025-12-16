@@ -1,5 +1,5 @@
 import React from "react";
-import ItemCard from "../ItemCard/ItemCard";
+import RecipeItemCard from "../RecipeItemCard/RecipeItemCard";
 import EmptyFridge from "../../assets/images/Emptyfridge.png";
 
 import "./recipeitemsection.css";
@@ -42,14 +42,13 @@ const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = 
             ) : (
                 <div className="recipeItemSection__items_scroll">
                     {items.map((item, index) => (
-                        <ItemCard
+                        <RecipeItemCard
                             key={index}
                             name={item.name}
                             image={item.image}
                             rating={item.rating}
                             time={item.time}
                             status={item.status}
-                            mode="dashboard"
                         />
                     ))}
                 </div>

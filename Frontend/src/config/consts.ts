@@ -8,6 +8,7 @@ export const API_ROUTES = {
   UPLOAD_RECEIPT: `${API_BASE_URL}/upload-receipt`,
   VERIFY_GOOGLE: `${API_BASE_URL}/auth/google`,
   GET_PANTRY: `${API_BASE_URL}/pantry_items`,
+  ADD_UPDATE_PANTRY_ITEM: `${API_BASE_URL}/add_update_pantry_items`,
   GET_PANTRY_RECOMMENDATIONS: `${API_BASE_URL}/recommendations/pantry`, // Caller will append `user_id`
   LOGOUT_GOOGLE: `${API_BASE_URL}/auth/google/logout`,
   DELETE_USER: `${API_BASE_URL}/delete_user`,
