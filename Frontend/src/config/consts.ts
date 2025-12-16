@@ -5,6 +5,7 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 // Backend route endpoints
 export const API_ROUTES = {
+  REFRESH_TOKEN: `${API_BASE_URL}/auth/refresh`,
   UPLOAD_RECEIPT: `${API_BASE_URL}/upload-receipt`,
   VERIFY_GOOGLE: `${API_BASE_URL}/auth/google`,
   GET_PANTRY: `${API_BASE_URL}/pantry_items`,

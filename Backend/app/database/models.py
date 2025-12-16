@@ -6,6 +6,9 @@ from app.database.database import Base
 from pydantic import BaseModel
 from typing import List, Optional
 
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
 class User(Base):
     __tablename__ = "Users"
     id = Column(Integer, primary_key=True, index=True)
