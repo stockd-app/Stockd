@@ -5,7 +5,7 @@ import { API_ROUTES } from "../config/consts";
  * Refresh the Google access token using the refresh token stored in localStorage
  * @returns Returns true if the refresh was successful
  */
-const refreshAccessToken = async () => {
+const refreshToken = async () => {
   const refreshToken = localStorage.getItem("google_refresh_token");
 
   if (!refreshToken) {
@@ -57,7 +57,7 @@ export const uploadReceipt = async (file: File) => {
     if (error.response?.status === 401) {
       // Token expired or invalid
       // Attempt to refresh the token
-      const refreshed = await refreshAccessToken();
+      const refreshed = await refreshToken();
       if (refreshed) {
         idToken = localStorage.getItem("google_id_token");
         const retryResponse = await axios.post(API_ROUTES.UPLOAD_RECEIPT, formData, {
@@ -99,7 +99,7 @@ export const getPantryItems = async (userId: number) => {
     if (error.response?.status === 401) {
       // Token expired or invalid
       // Attempt to refresh the token
-      const refreshed = await refreshAccessToken();
+      const refreshed = await refreshToken();
       if (refreshed) {
         idToken = localStorage.getItem("google_id_token");
         const retryResponse = await axios.get(`${API_ROUTES.GET_PANTRY}/${userId}`, {
@@ -144,7 +144,7 @@ export const addOrUpdatePantryItem = async (userId: number, items: any) => {
     if (error.response?.status === 401) {
       // Token expired or invalid
       // Attempt to refresh the token
-      const refreshed = await refreshAccessToken();
+      const refreshed = await refreshToken();
       if (refreshed) {
         idToken = localStorage.getItem("google_id_token");
         const retryResponse = await axios.post(API_ROUTES.ADD_UPDATE_PANTRY_ITEM, {
@@ -286,7 +286,7 @@ export const deleteUserAccount = async (userId: number) => {
     if (error.response?.status === 401) {
       // Token expired or invalid
       // Attempt to refresh the token
-      const refreshed = await refreshAccessToken();
+      const refreshed = await refreshToken();
       if (refreshed) {
         let idToken = localStorage.getItem("google_id_token");
         const retryResponse = await fetch(`${API_ROUTES.DELETE_USER}/${userId}`, {
