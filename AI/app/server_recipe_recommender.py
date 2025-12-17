@@ -90,7 +90,6 @@ def sanitize_row_for_pydantic(row_dict):
         if value is None:
             row_dict[f] = []
         else:
-            # replace any None inside list
             row_dict[f] = [v if v is not None else "" for v in value]
 
     for f in string_fields:
@@ -98,7 +97,6 @@ def sanitize_row_for_pydantic(row_dict):
         if value is None:
             row_dict[f] = ""
 
-    # similarity is optional float
     sim = row_dict.get("similarity")
     if sim is None or (isinstance(sim, float) and np.isnan(sim)):
         row_dict["similarity"] = 0.0
@@ -131,12 +129,6 @@ def recommend_ai(req: RecommendationRequest):
             if not req.all_user_ids:
                 raise HTTPException(400, "all_user_ids required for collaborative mode.")
 
-            # DEBUG: print incoming data
-            print("==== Collaborative Recommendation Debug ====")
-            print("Target user:", req.user_id)
-            print("All user IDs:", req.all_user_ids)
-            print("User likes dict:", req.user_likes)
-
             recs = recommend_from_similar_users(
                 target_user=req.user_id,
                 all_user_ids=req.all_user_ids,
@@ -150,9 +142,6 @@ def recommend_ai(req: RecommendationRequest):
             for row in recs:
                 row = sanitize_row_for_pydantic(row)
                 formatted.append(RecipeObject(**row))
-
-            # DEBUG: print the final formatted recommendations
-            print("Formatted recommendations:", formatted)
 
             return CollaborativeRecommendationResponse(
                 status="success",

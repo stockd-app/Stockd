@@ -76,21 +76,6 @@ def recommend_recipes(pantry_items, top_n=10, user_id=None):
 
     return results
 
-# This will later be replaced with the user's liked recipes fetched from the database. Eevery user has the same liked recipes until real data is used.
-# FAKE_LIKED_RECIPES = [
-#     "Garlic Chicken Stir Fry",
-#     "Teriyaki Chicken",
-#     "Chicken Fried Rice",
-#     "Chocolate Chip Cookies",
-#     "Spaghetti Bolognese",
-# ]
-
-# FAKE_USER_LIKES = {
-#     1: [101, 203, 550],
-#     2: [101, 999, 432],
-#     3: [550, 777],
-# }
-
 def build_interaction_matrix(all_user_ids, user_likes):
     """
     Create (1) interaction list, (2) user-item matrix, (3) similarity matrix.
@@ -140,10 +125,9 @@ def recommend_from_similar_users(
     """
     Recommend recipes based on similar users.
     """
-    # Normalize keys to ints
     user_likes = {int(k): v for k, v in user_likes.items()}
 
-    # Build matrices
+    # build matrices
     df_interactions, user_item_matrix, sim_df = build_interaction_matrix(
         all_user_ids, user_likes
     )
@@ -155,7 +139,7 @@ def recommend_from_similar_users(
     if target_user not in sim_df.index:
         raise ValueError(f"Target user {target_user} has no interaction data.")
 
-    # Sort similar users
+    # sort similar users
     similar_users = sim_df[target_user].sort_values(ascending=False).drop(target_user)
     print("Similar users sorted by similarity:\n", similar_users)
 
@@ -172,7 +156,7 @@ def recommend_from_similar_users(
 
     recommended_ids = list(recommended)[:top_n]
 
-    # Look up recipe objects in parquet df
+    # look up recipe objects in parquet df
     recommended_ids = [int(rid) for rid in recommended_ids]
     results = df[df["RecipeId"].isin(recommended_ids)].copy()
 
