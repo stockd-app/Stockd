@@ -9,7 +9,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from recipe_subset import canonicalize_recipe_ingredients, build_canonical_from_recipe_df, get_canonical_db
 
-# build path to data file since relative paths can be unreliable
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_PATH = os.path.join(BASE_DIR, "../data/recipes.parquet")
 MODEL_PATH = os.path.normpath(os.path.join(BASE_DIR, "recipe_assets.pkl"))
@@ -24,14 +23,11 @@ df['ingredients_text'] = df['RecipeIngredientParts'].apply(
     lambda x: " ".join(x).lower() if isinstance(x, list) else str(x).lower()
 )
 
-# -----------------------------
-# Build canonical DB from your recipe dataset (once at startup)
-# -----------------------------
+# build canonical DB from recipe dataset (once at startup)
 print("Building/loading canonical ingredient database...")
-canonical_db = get_canonical_db()  # ensure singleton instance exists
-# Populate canonical DB from the recipes dataframe
+canonical_db = get_canonical_db()
+# populate canonical DB from the recipes dataframe
 build_canonical_from_recipe_df(df, ing_col='RecipeIngredientParts', min_occurrences=1)
-print(f"Canonical ingredient DB has {len(canonical_db.names)} entries")
 
 # load cached model if exists and index if available
 if os.path.exists(MODEL_PATH) and os.path.exists(INDEX_PATH):
@@ -81,7 +77,6 @@ def recommend_recipes(pantry_items, top_n=10, user_id=None):
 
     return results
 
-# This will later be replaced with the user's liked recipes fetched from the database. Eevery user has the same liked recipes until real data is used.
 FAKE_LIKED_RECIPES = [
     "Garlic Chicken Stir Fry",
     "Teriyaki Chicken",
@@ -149,7 +144,7 @@ def search_recipes(query: str, limit: int = 20):
 
     return matches[['Name']].to_dict(orient="records")
 
-# List of minor/non-essential ingredients to ignore when matching
+# list of minor/non-essential ingredients to ignore when matching
 MINOR_INGREDIENTS = {
     "salt", "pepper", "water", "oil", "olive oil", "vegetable oil",
     "butter", "sugar", "brown sugar", "ground pepper", "garlic powder",
@@ -168,7 +163,7 @@ def find_semantic_subset_recipes(
     if not pantry_items:
         return pd.DataFrame(columns=df.columns)
 
-    # Canonicalize pantry items
+    # canonicalize pantry items
     pantry_canonical = set(canonicalize_recipe_ingredients(pantry_items, auto_add=False))
 
     matches = []
@@ -183,15 +178,15 @@ def find_semantic_subset_recipes(
         elif isinstance(ingredients, str):
             ingredients = [ingredients]
 
-        # Canonicalize recipe ingredients
+        # canonicalize recipe ingredients
         recipe_canonical = canonicalize_recipe_ingredients(ingredients, auto_add=False)
 
-        # Filter out minor ingredients
+        # filter out minor ingredients
         recipe_essentials = [ing for ing in recipe_canonical if ing not in MINOR_INGREDIENTS]
         if not recipe_essentials:
             continue
 
-        # Calculate fraction of recipe essentials that are in pantry
+        # calculate fraction of recipe essentials that are in pantry
         matched_count = sum(1 for ing in recipe_essentials if ing in pantry_canonical)
         match_ratio = matched_count / len(recipe_essentials)
 
@@ -211,18 +206,6 @@ if __name__ == "__main__":
 
     # print("\nTesting collaborative filtering:")
     # print(recommend_from_similar_users(target_user, test_user_ids, top_n=5))
-
-    test_pantry = [
-    "chicken", "rice", "broccoli", "carrot", "onion", "garlic",
-    "olive oil", "butter", "cream cheese", "feta cheese",
-    "phyllo pastry", "potatoes", "baking soda", "baking powder",
-    "milk", "eggs", "flour", "brown sugar", "soy sauce",
-    "sesame oil", "lemon juice", "lime juice", "canned corn",
-    "tomatoes", "red bell pepper", "black pepper", "salt",
-    "parmesan cheese", "coconut milk", "chili powder", "curry powder",
-    "ground cumin", "paprika", "vanilla extract", "honey",
-    "ginger", "spinach", "zucchini", "celery", "green beans"
-    ]
     
     test_pantry_exact = [
     "coconut milk", "eggs", "palm sugar",
