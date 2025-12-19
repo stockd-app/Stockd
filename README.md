@@ -76,6 +76,49 @@ This will start:
 ./stop-all.sh
 ```
 
+## Health Checks
+
+Each service in `docker-compose.yml` has health check configurations that Docker monitors automatically. Used kuma for status monitoring of each service. Will configure email alerts when deployed to AWS.
+
+### 1. **Health Check Endpoints**
+
+- **Backend**: `http://localhost:8000/health`
+- **Food Classifier**: `http://localhost:9002/health`
+- **Recipe Recommender**: `http://localhost:9001/health`
+- **Frontend**: `http://localhost:80/` (Nginx default)
+- **Database**: MySQL ping command
+
+### 2. Basic Monitoring
+
+#### Check Container Health Status
+
+```bash
+docker compose ps
+```
+
+Shows health status: `healthy`, `unhealthy`, or `starting`
+
+#### View Detailed Health Check Logs
+
+```bash
+docker inspect stockd-backend | grep -A 10 Health
+```
+
+#### Monitor All Services
+
+```bash
+watch -n 5 'docker compose ps'
+```
+
+Refreshes every 5 seconds to show real-time status
+
+### 3. What Happens When a Service Fails?
+
+1. **Docker detects failure** after 3 failed health checks (90 seconds)
+2. **Container marked as unhealthy** (visible in `docker compose ps`)
+3. **Container automatically restarts** (due to `restart: unless-stopped`)
+4. **Dependent services wait** for healthy status before starting
+
 ## Development Setup
 
 If you want to run services individually without Docker for development:

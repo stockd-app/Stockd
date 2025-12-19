@@ -56,6 +56,14 @@ class SearchRequest(BaseModel):
 
 app = FastAPI(title="Recipe Recommender")
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Docker and monitoring"""
+    return {
+        "status": "healthy",
+        "service": "recipe-recommender"
+    }
+
 def sanitize_row_for_pydantic(row_dict):
     """
     Ensure all values in row_dict conform to RecipeObject types

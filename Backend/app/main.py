@@ -53,6 +53,14 @@ else:
         allow_headers=["*"],
     )
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Docker and monitoring"""
+    return {
+        "status": "healthy",
+        "service": "backend",
+    }
+
 # Include all routes FIRST (before catch-all)
 app.include_router(router)
 

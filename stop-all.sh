@@ -20,5 +20,5 @@ docker-compose down
 echo ""
 echo -e "${GREEN}✓${NC} All services stopped"
 echo ""
-echo "To start again, run: ${BLUE}./start-all.sh${NC}"
+echo -e "To start again, run: ${BLUE}./start-all.sh${NC}"
 echo ""
