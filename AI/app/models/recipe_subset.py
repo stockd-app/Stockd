@@ -28,9 +28,6 @@ import faiss
 from nltk.stem import WordNetLemmatizer
 import pandas as pd
 
-# -----------------------------
-# Configuration / Paths
-# -----------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CANONICAL_DB_DIR = os.path.join(BASE_DIR, "canonical_db")
 if not os.path.exists(CANONICAL_DB_DIR):
@@ -41,13 +38,11 @@ CANONICAL_EMB = os.path.join(CANONICAL_DB_DIR, "canonical_emb.npy")
 CANONICAL_NAMES = os.path.join(CANONICAL_DB_DIR, "canonical_names.json")
 FAISS_INDEX_PATH = os.path.join(CANONICAL_DB_DIR, "canonical.faiss")
 
-# Tweakable thresholds
 EMBED_SIMILARITY_THRESHOLD = 0.62  # embedding cosine similarity threshold to match existing canonical
 AUTO_ADD_THRESHOLD = 0.50          # if below this, create new canonical entry when auto_add=True
 
-# -----------------------------
-# Model & NLP setup
-# -----------------------------
+
+# model & NLP setup
 lemmatizer = WordNetLemmatizer()
 MODEL_NAME = 'all-MiniLM-L6-v2'
 _model_lock = threading.Lock()
@@ -61,9 +56,7 @@ def get_model():
             _model = SentenceTransformer(MODEL_NAME)
         return _model
 
-# -----------------------------
-# Text cleaning helpers
-# -----------------------------
+# text cleaning helpers
 DESCRIPTORS = {
     "fresh", "large", "small", "organic", "raw", "boneless",
     "skinless", "dried", "freshly", "chopped", "minced",
@@ -95,7 +88,7 @@ def clean_text(text: str) -> str:
     if not text:
         return ""
     text = text.lower()
-    # remove parentheticals and content inside
+    # remove parenthesis
     text = re.sub(r"\([^\)]*\)", " ", text)
     # remove digits, fractions, punctuation except hyphen
     text = re.sub(r"[^a-zA-Z\- ]+", " ", text)
@@ -104,7 +97,6 @@ def clean_text(text: str) -> str:
 
 
 def normalize_tokens(text: str) -> str:
-    # Basic cleaning
     text = clean_text(text)
 
     for k, v in IRREGULAR_MAP.items():
@@ -135,9 +127,7 @@ def normalize_tokens(text: str) -> str:
     # otherwise keep first two tokens for safety
     return " ".join(tokens[:2])
 
-# -----------------------------
-# Canonical vocabulary management
-# -----------------------------
+# canonical vocabulary management
 class CanonicalDB:
     """Stores canonical ingredient names and their embeddings; provides FAISS ANN lookup."""
     def __init__(self, emb_dim: int = None):
@@ -176,9 +166,7 @@ class CanonicalDB:
         if self.embs is None:
             return
         self.dim = self.embs.shape[1]
-        # FAISS IndexFlatIP for cosine if embeddings are normalized
         self.index = faiss.IndexFlatIP(self.dim)
-        # Embeddings should be float32
         self.index.add(self.embs.astype('float32'))
 
     def refresh_index(self):
@@ -186,7 +174,6 @@ class CanonicalDB:
         self._save()
 
     def reembed_all_names(self):
-        # useful if you change embedding model
         if not self.names:
             return
         self.embs = self.model.encode(self.names, normalize_embeddings=True, batch_size=256)
@@ -219,15 +206,11 @@ class CanonicalDB:
         else:
             self.embs = np.vstack([self.embs, emb])
         self.names.append(name)
-        # rebuild index incrementally: easiest is to recreate
+
         self._build_index()
         if save:
             self._save()
         return len(self.names) - 1
-
-# -----------------------------
-# Public pipeline functions
-# -----------------------------
 
 # single shared canonical db instance
 _canonical_db = None
@@ -304,14 +287,10 @@ def batch_build_canonical(initial_ingredients: List[str], min_occurrences: int =
         candidates = db.find_closest(r, top_k=3)
         if candidates and candidates[0][1] >= EMBED_SIMILARITY_THRESHOLD:
             continue
-        # else add as new canonical (to grow vocab quickly). In production you might flag for human review
+        # else add as new canonical (to grow vocab quickly)
         db.add_canonical(r, save=False)
     db.refresh_index()
     return db
-
-# -----------------------------
-# Example integration utilities
-# -----------------------------
 
 def canonicalize_recipe_ingredients(recipe_ing_list: List[str], auto_add: bool = False) -> List[str]:
     """Canonicalize a recipe's ingredient list (returns list of canonical ingredient names)."""
@@ -338,19 +317,13 @@ def build_canonical_from_recipe_df(df, ing_col='RecipeIngredientParts', min_occu
             all_ing.extend([p.strip() for p in str(parts).split(',') if p.strip()])
     return batch_build_canonical(all_ing, min_occurrences=min_occurrences)
 
-
-# -----------------------------
-# Save/Load utilities (if you want to inspect or export canonical names)
-# -----------------------------
-
 def export_canonical_list(path: str):
     db = get_canonical_db()
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(db.names, f, ensure_ascii=False, indent=2)
 
-# -----------------------------
-# If run as script, quick demo
-# -----------------------------
+
+# manual testing
 if __name__ == '__main__':
     # quick demo: build from small dataset example
     sample = [
@@ -367,6 +340,3 @@ if __name__ == '__main__':
     tests = ["freshly chopped garlic cloves", "rice vinegar", "boneless skinless chicken breast halves", "gingerroot"]
     for t in tests:
         print(t, '->', canonicalize_ingredient(t, auto_add=True))
-
-
-# End of module
