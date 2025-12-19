@@ -688,34 +688,32 @@ async def search_recipes_route(query: str, limit: int = 20):
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error contacting recipe AI service: {str(e)}")
 
-@router.get("/recommendations/exact/{user_id}")
-async def get_exact_match_recipes(user_id: int):
-    # fetch pantry items for the user
-    pantry_items = get_user_pantry_exact_match(user_id)
+# @router.get("/recommendations/exact/{user_id}")
+# async def get_exact_match_recipes(user_id: int):
+#     pantry_items = get_user_pantry_exact_match(user_id)
 
-    async with httpx.AsyncClient() as client:
-        ai_data = await client.post(
-            f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/exact-match",
-            json={
-                "user_id": user_id,
-                "pantry_items": pantry_items
-            }
-        )
+#     async with httpx.AsyncClient() as client:
+#         ai_data = await client.post(
+#             f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/exact-match",
+#             json={
+#                 "user_id": user_id,
+#                 "pantry_items": pantry_items
+#             }
+#         )
 
-    ai_json = ai_data.json()
-    recipes = ai_json.get("recipes", [])
+#     ai_json = ai_data.json()
+#     recipes = ai_json.get("recipes", [])
 
-    # Optional: fetch full recipe objects from DB if needed
-    db = SessionLocal()
-    id_list = [r["RecipeId"] for r in recipes]
-    db_recipes = db.query(Recipe).filter(Recipe.id.in_(id_list)).all()
-    db.close()
+#     db = SessionLocal()
+#     id_list = [r["RecipeId"] for r in recipes]
+#     db_recipes = db.query(Recipe).filter(Recipe.id.in_(id_list)).all()
+#     db.close()
 
-    merged = []
-    for r in recipes:
-        merged.append({**r})
+#     merged = []
+#     for r in recipes:
+#         merged.append({**r})
 
-    return {
-        "status": "success",
-        "exact_matches": merged
-    }
+#     return {
+#         "status": "success",
+#         "exact_matches": merged
+#     }
