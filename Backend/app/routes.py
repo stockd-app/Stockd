@@ -9,6 +9,7 @@ from google.auth.transport import requests as google_requests
 from google.auth.exceptions import InvalidValue
 from pymysql import IntegrityError
 from sqlalchemy.exc import SQLAlchemyError
+from app.dependencies.limiter import limiter
 from app.utils.crypto import hash_email
 import httpx
 from fastapi import APIRouter, HTTPException
@@ -18,7 +19,7 @@ from app.utils.ai_classifier import classify_receipt_items
 from app.utils.openfoodfacts import get_product_image_from_openfoodfacts
 from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
-from app.database.models import LikedRecipe, PantryItemsRequest, Recipe, User, PantryItem
+from app.database.models import LikedRecipe, PantryItemsRequest, Recipe, RefreshTokenRequest, User, PantryItem
 from app.utils.ai_recommender import get_recipe_recommendations
 
 load_dotenv()
@@ -32,7 +33,8 @@ router = APIRouter()
 AI_SERVER_URL_RECIPE_RECOMMENDER = os.getenv("RECIPE_RECOMMENDER_MODEL_URL")
 
 @router.post("/upload-receipt", tags=["OCR"])
-async def upload_receipt(file: UploadFile = File(...), user=Depends(require_google_token)):
+@limiter.limit("5/minute")
+async def upload_receipt(request: Request, file: UploadFile = File(...), user=Depends(require_google_token)):
     """
     Upload an image of a receipt and:
     1. Send it to Asprise OCR API
@@ -48,6 +50,13 @@ async def upload_receipt(file: UploadFile = File(...), user=Depends(require_goog
         # Send to Asprise API and parse the response
         asprise_data = send_receipt_to_asprise(image_bytes, file.filename or "receipt.jpg")
         parsed = parse_asprise_response(asprise_data)
+        if not parsed["items"]:
+            return {
+                "status": "success",
+                "message": "No items detected on receipt",
+                "grouped_items": {},
+                "total_items": 0
+            }
 
         # Call AI model to classify items
         ai_data = classify_receipt_items(parsed)
@@ -144,8 +153,34 @@ async def upload_receipt(file: UploadFile = File(...), user=Depends(require_goog
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
+
+@router.post("/auth/refresh")
+async def refresh_google_token(request: RefreshTokenRequest):
+    """
+    Refresh Google OAuth token using a provided refresh token
+    """
+    try:
+        token_url = GOOGLE_CLIENT_URI
+        refresh_token = request.refresh_token
+        payload = {
+            "client_id": GOOGLE_CLIENT_ID,
+            "client_secret": GOOGLE_CLIENT_SECRET,
+            "refresh_token": refresh_token,
+            "grant_type": "refresh_token",
+        }
+
+        response = httpx.post(url=token_url, data=payload)
+        new_token_data = response.json()
+
+        if "access_token" in new_token_data:
+            return new_token_data
+        else:
+            raise HTTPException(status_code=400, detail="Token refresh failed")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error refreshing token: {str(e)}")
     
 @router.post("/auth/google", tags=["Google OAuth"])
+@limiter.limit("10/minute")
 async def verify_google_token(request: Request):
     """
     - Exchanges temporary auth code for Google ID token
@@ -269,6 +304,7 @@ async def verify_google_token(request: Request):
             },
             "id_token": token_data.get("id_token"), 
             "access_token": token_data.get("access_token"),
+            "refresh_token": token_data.get("refresh_token"),
             }
 
     # Top-level exception handling for safe & clear responses
@@ -280,6 +316,7 @@ async def verify_google_token(request: Request):
         db.close()
 
 @router.post("/auth/google/logout", tags=["Google OAuth"])
+@limiter.limit("10/minute")
 async def google_logout(request: Request, user=Depends(require_google_token)):
     """
     Logs out a Google-authenticated user.
@@ -326,9 +363,9 @@ async def google_logout(request: Request, user=Depends(require_google_token)):
     # 3. Successfully logged out
     return {"status": "success", "message": "Google user logged out successfully"}
 
-
 @router.delete("/delete_user/{user_id}", tags=["Users"])
-async def delete_user(user_id: int, user=Depends(require_google_token)):
+@limiter.limit("10/minute")
+async def delete_user(request: Request, user_id: int, user=Depends(require_google_token)):
     """
     Delete a user by ID
     Deletes user from Users table and PantryItems table
@@ -383,7 +420,11 @@ async def get_pantry_items(user_id: int, user=Depends(require_google_token)):
                 "id": item.id,
                 "name": item.item_name,
                 "qty": f"x{int(item.quantity_value)}",
-                "image": item.item_image or ""
+                "unit": item.quantity_unit or "pcs",
+                "image": item.item_image or "",
+                "category": item.category or "Uncategorized",
+                "storage": item.storage or "Pantry",
+                "added_on": item.added_on,
             })
         
         return {
@@ -400,7 +441,8 @@ async def get_pantry_items(user_id: int, user=Depends(require_google_token)):
         db.close()
 
 @router.post("/add_update_pantry_items", tags=["Pantry"])
-async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends(require_google_token)):
+@limiter.limit("10/minute")
+async def add_update_pantry_items(request: Request, request_data: PantryItemsRequest, user=Depends(require_google_token)):
     """
     Add or update pantry items in the database for a specific user.
 
@@ -440,21 +482,23 @@ async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends
             item_image = item.item_image if item.item_image else None
 
             # Check if item already exists for this user
-            existing_item = (
-                db.query(PantryItem)
-                .filter(PantryItem.user_id == request_data.user_id)
-                .filter(PantryItem.item_name == item_name)
-                .first()
-            )
+            existing_item = None
+            if item.id is not None:
+                existing_item = (
+                    db.query(PantryItem)
+                    .filter(PantryItem.id == item.id)
+                    .filter(PantryItem.user_id == request_data.user_id)
+                    .first()
+                )
 
             if existing_item:
                 # Update existing item
+                existing_item.item_name = item_name
                 existing_item.quantity_value = quantity_value
                 existing_item.quantity_unit = quantity_unit
                 existing_item.category = category
                 existing_item.storage = storage
                 existing_item.item_image = item_image
-                existing_item.added_on = datetime.datetime.utcnow()
                 processed_items.append(existing_item)
             else:
                 # Add new item
@@ -498,7 +542,8 @@ async def add_update_pantry_items(request_data: PantryItemsRequest, user=Depends
         db.close()
         
 @router.post("/recipes/{recipe_id}/like", tags=["Recipes"])
-async def toggle_like_recipe(recipe_id: int, user=Depends(require_google_token)):
+@limiter.limit("10/minute")
+async def toggle_like_recipe(request: Request, recipe_id: int, user=Depends(require_google_token)):
     """
     Like or unlike a recipe for the authenticated user.
     - If the user has not liked the recipe, it will be added
@@ -542,9 +587,10 @@ async def toggle_like_recipe(recipe_id: int, user=Depends(require_google_token))
 
     finally:
         db.close()
-        
+       
 @router.get("/users/current/liked-recipes", tags=["Recipes"])
-async def get_liked_recipes(user=Depends(require_google_token)):
+@limiter.limit("10/minute") 
+async def get_liked_recipes(request: Request, user=Depends(require_google_token)):
     """
     Returns a list of recipes liked by the currently authenticated user.
     """
@@ -575,7 +621,6 @@ async def get_liked_recipes(user=Depends(require_google_token)):
 
     finally:
         db.close()
-
 
 @router.get("/recommendations/pantry/{user_id}")
 async def get_pantry_recommendations(user_id: int, top_n: int = 10):
@@ -665,7 +710,8 @@ async def get_collaborative_recommendations(user_id: int, top_n: int = 5):
     return resp.json()
 
 @router.get("/recipes/search", tags=["Recipes"])
-async def search_recipes_route(query: str, limit: int = 20):
+@limiter.limit("10/minute")
+async def search_recipes_route(request: Request, query: str, limit: int = 20):
     """
     Search for recipes by name substring.
     Example:

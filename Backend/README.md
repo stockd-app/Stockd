@@ -119,3 +119,9 @@ ports:
 Code is mounted as volume, so changes should reflect automatically. If not:
 ```bash
 docker-compose restart backend
+```
+
+### Rate Limiting
+- `upload_recipe`: 5 requests per minute
+- Other routes: 10 requests per minute
+- No rate limiting on `pantry-items` and `recipe recommendation` routes, as they are frequently called by the UI and limiting them would affect user experience.

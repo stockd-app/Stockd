@@ -2,16 +2,44 @@ import axios from "axios";
 import { API_ROUTES } from "../config/consts";
 
 /**
+ * Refresh the Google access token using the refresh token stored in localStorage
+ * @returns Returns true if the refresh was successful
+ */
+const refreshToken = async () => {
+  const refreshToken = localStorage.getItem("google_refresh_token");
+
+  if (!refreshToken) {
+    localStorage.clear();
+    window.location.href = "/";
+    throw new Error("No refresh token found. Please log in again.");
+  }
+
+  try {
+    const response = await axios.post(API_ROUTES.REFRESH_TOKEN, { refresh_token: refreshToken });
+
+    if (response.data?.access_token) {
+      localStorage.setItem("google_id_token", response.data.id_token);
+      localStorage.setItem("google_access_token", response.data.access_token);
+      return true;
+    } else {
+      console.error("Token refresh failed. No access token returned.");
+      return false;
+    }
+  } catch (error) {
+    localStorage.clear();
+    window.location.href = "/";
+    console.error("Token refresh failed:", error);
+    return false;
+  }
+};
+
+/**
  * Upload a receipt image file to Backend for OCR processing.
  * @param file
  * @returns
  */
 export const uploadReceipt = async (file: File) => {
-  const idToken = localStorage.getItem("google_id_token");
-  
-  if (!idToken) {
-    throw new Error("Not authenticated. Please log in again.");
-  }
+  let idToken = localStorage.getItem("google_id_token");
 
   const formData = new FormData();
   formData.append("file", file);
@@ -28,10 +56,26 @@ export const uploadReceipt = async (file: File) => {
   } catch (error: any) {
     if (error.response?.status === 401) {
       // Token expired or invalid
-      localStorage.clear();
-      throw new Error("Session expired. Please log in again.");
+      // Attempt to refresh the token
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        idToken = localStorage.getItem("google_id_token");
+        const retryResponse = await axios.post(API_ROUTES.UPLOAD_RECEIPT, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+        return retryResponse.data;
+      } else {
+        // If refresh fails, log the user out
+        localStorage.clear();
+        window.location.href = "/";
+        throw new Error("Session expired. Please log in again.");
+      }
+    } else {
+      throw error;
     }
-    throw error;
   }
 };
 
@@ -41,15 +85,87 @@ export const uploadReceipt = async (file: File) => {
  * @returns
  */
 export const getPantryItems = async (userId: number) => {
-  const idToken = localStorage.getItem("google_id_token");
+  let idToken = localStorage.getItem("google_id_token");
 
-  const response = await axios.get(`${API_ROUTES.GET_PANTRY}/${userId}`, {
-    headers: {
-      Authorization: `Bearer ${idToken}`,
-    },
-  });
+  try {
+    const response = await axios.get(`${API_ROUTES.GET_PANTRY}/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+    });
+    console.log("API getPantryItems response:", response);
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      // Token expired or invalid
+      // Attempt to refresh the token
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        idToken = localStorage.getItem("google_id_token");
+        const retryResponse = await axios.get(`${API_ROUTES.GET_PANTRY}/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+        return retryResponse.data;
+      } else {
+        // If refresh fails, log the user out
+        localStorage.clear();
+        window.location.href = "/";
+        throw new Error("Session expired. Please log in again.");
+      }
+    } else {
+      throw error;
+    }
+  }
+};
 
-  return response.data;
+
+/**
+ * Add or Update a pantry item for a user
+ * @param userId 
+ * @param itemData 
+ * @returns 
+ */
+export const addOrUpdatePantryItem = async (userId: number, items: any) => {
+  let idToken = localStorage.getItem("google_id_token");
+
+  try {
+    const response = await axios.post(API_ROUTES.ADD_UPDATE_PANTRY_ITEM, {
+      user_id: userId,
+      items,
+    }, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      // Token expired or invalid
+      // Attempt to refresh the token
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        idToken = localStorage.getItem("google_id_token");
+        const retryResponse = await axios.post(API_ROUTES.ADD_UPDATE_PANTRY_ITEM, {
+          user_id: userId,
+          items,
+        }, {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+        return retryResponse.data;
+      } else {
+        // If refresh fails, log the user out
+        localStorage.clear();
+        window.location.href = "/";
+        throw new Error("Session expired. Please log in again.");
+      }
+    } else {
+      throw error;
+    }
+  }
 };
 
 /**
@@ -70,6 +186,7 @@ export const loginWithGoogle = async (authCode: string) => {
     // Save Google Tokens (Crucial for Logout)
     localStorage.setItem("google_id_token", res.data.id_token);
     localStorage.setItem("google_access_token", res.data.access_token);
+    localStorage.setItem("google_refresh_token", res.data.refresh_token);
 
     return { success: true, data: res.data };
   } catch (err: any) {
@@ -108,13 +225,8 @@ export const getPantryRecommendations = async (userId: number, topN: number = 10
  */
 export const handleLogout = async () => {
   try {
-    const idToken = localStorage.getItem("google_id_token");
+    let idToken = localStorage.getItem("google_id_token");
     const accessToken = localStorage.getItem("google_access_token");
-
-    if (!idToken || !accessToken) {
-      console.error("Missing Google tokens in localStorage");
-      return;
-    }
 
     const res = await fetch(API_ROUTES.LOGOUT_GOOGLE, {
       method: "POST",
@@ -133,12 +245,17 @@ export const handleLogout = async () => {
       window.location.href = "/";
     } else {
       const error = await res.json();
+    localStorage.clear();
+    window.location.href = "/";
       console.error("Logout failed:", error);
     }
-  } catch (error) {
-    console.error("Logout error:", error);
+  } catch (error: any) {
+    console.error("Logout failed:", error);
+    localStorage.clear();
+    window.location.href = "/";
+    throw new Error("Session expired. Please log in again.");
   }
-};
+}
 
 /**
  * Delete User Account
@@ -165,8 +282,34 @@ export const deleteUserAccount = async (userId: number) => {
     }
 
     return true;
-  } catch (err) {
-    console.error("Delete user error:", err);
-    return false;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      // Token expired or invalid
+      // Attempt to refresh the token
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        let idToken = localStorage.getItem("google_id_token");
+        const retryResponse = await fetch(`${API_ROUTES.DELETE_USER}/${userId}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+
+        if (!retryResponse.ok) {
+          const retryErr = await retryResponse.json();
+          console.error("Retry delete failed:", retryErr);
+          return false;
+        }
+        return true;
+      } else {
+        // If refresh fails, log the user out
+        localStorage.clear();
+        window.location.href = "/";
+        throw new Error("Session expired. Please log in again.");
+      }
+    }
   }
 };

@@ -6,6 +6,9 @@ from app.database.database import Base
 from pydantic import BaseModel
 from typing import List, Optional
 
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
 class User(Base):
     __tablename__ = "Users"
     id = Column(Integer, primary_key=True, index=True)
@@ -36,6 +39,7 @@ class PantryItem(Base):
     recipe_ingredients = relationship("RecipeIngredient", back_populates="pantry_item")
     
 class PantryItemInput(BaseModel):
+    id: Optional[int] = None
     item_name: str
     quantity_value: Optional[float] = 0
     quantity_unit: Optional[str] = "pcs"
