@@ -162,29 +162,29 @@ async def search_recipes_endpoint(req: SearchRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/exact-match")
-def exact_match_endpoint(req: RecommendationRequest):
-    """
-    Return recipes where all recipe ingredients are semantically matched by the user's pantry.
-    """
-    try:
-        df_results = find_semantic_subset_recipes(req.pantry_items, similarity_threshold=0.8)
+# @app.post("/exact-match")
+# def exact_match_endpoint(req: RecommendationRequest):
+#     """
+#     Return recipes where all recipe ingredients are semantically matched by the user's pantry.
+#     """
+#     try:
+#         df_results = find_semantic_subset_recipes(req.pantry_items, similarity_threshold=0.8)
 
-        formatted = []
-        for _, row in df_results.iterrows():
-            row_dict = row.to_dict()
-            row_dict = sanitize_row_for_pydantic(row_dict)
-            formatted.append(RecipeObject(**row_dict))
+#         formatted = []
+#         for _, row in df_results.iterrows():
+#             row_dict = row.to_dict()
+#             row_dict = sanitize_row_for_pydantic(row_dict)
+#             formatted.append(RecipeObject(**row_dict))
 
-        return {
-            "status": "success",
-            "type": "by-ingredients",
-            "count": len(formatted),
-            "recipes": formatted
-        }
+#         return {
+#             "status": "success",
+#             "type": "by-ingredients",
+#             "count": len(formatted),
+#             "recipes": formatted
+#         }
 
-    except Exception as e:
-        raise HTTPException(500, str(e))
+#     except Exception as e:
+#         raise HTTPException(500, str(e))
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=9001)
