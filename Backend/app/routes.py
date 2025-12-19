@@ -18,7 +18,7 @@ from app.utils.ai_classifier import classify_receipt_items
 from app.utils.openfoodfacts import get_product_image_from_openfoodfacts
 from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
-from app.database.models import LikedRecipe, PantryItemsRequest, Recipe, User, PantryItem
+from app.database.models import LikedRecipe, PantryItemsRequest, Recipe, RefreshTokenRequest, User, PantryItem
 from app.utils.ai_recommender import get_recipe_recommendations
 
 load_dotenv()
@@ -144,6 +144,31 @@ async def upload_receipt(file: UploadFile = File(...), user=Depends(require_goog
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
+
+@router.post("/auth/refresh")
+async def refresh_google_token(request: RefreshTokenRequest):
+    """
+    Refresh Google OAuth token using a provided refresh token
+    """
+    try:
+        token_url = GOOGLE_CLIENT_URI
+        refresh_token = request.refresh_token
+        payload = {
+            "client_id": GOOGLE_CLIENT_ID,
+            "client_secret": GOOGLE_CLIENT_SECRET,
+            "refresh_token": refresh_token,
+            "grant_type": "refresh_token",
+        }
+
+        response = httpx.post(url=token_url, data=payload)
+        new_token_data = response.json()
+
+        if "access_token" in new_token_data:
+            return new_token_data
+        else:
+            raise HTTPException(status_code=400, detail="Token refresh failed")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error refreshing token: {str(e)}")
     
 @router.post("/auth/google", tags=["Google OAuth"])
 async def verify_google_token(request: Request):
@@ -269,6 +294,7 @@ async def verify_google_token(request: Request):
             },
             "id_token": token_data.get("id_token"), 
             "access_token": token_data.get("access_token"),
+            "refresh_token": token_data.get("refresh_token"),
             }
 
     # Top-level exception handling for safe & clear responses
