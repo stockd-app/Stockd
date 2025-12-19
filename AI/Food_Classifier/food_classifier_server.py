@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import List, Dict
 import uvicorn
 from food_classifier_model import FoodLabeler
+from sanitizer import sanitize_text, sanitize_quantity, sanitize_url
 
 class ReceiptRequest(BaseModel):
     store: str
@@ -28,6 +29,8 @@ async def classify_items(req: ReceiptRequest):
         classified_items = {}
         
         for item_name, quantity in req.items.items():
+            item_name = sanitize_text(item_name)
+            quantity = sanitize_quantity(quantity)
             classification = model.classify(item_name)
             
             classified_items[item_name] = {

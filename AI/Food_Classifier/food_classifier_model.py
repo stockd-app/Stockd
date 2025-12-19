@@ -1,7 +1,8 @@
 import pandas as pd
 from transformers import pipeline
 from sklearn.metrics import accuracy_score, classification_report
-import torch 
+import torch
+from app.utils.sanitizer import sanitize_text
 
 class FoodLabeler:
     def __init__(self):
@@ -19,6 +20,8 @@ class FoodLabeler:
         ]
 
     def classify(self, item):
+        item = sanitize_text(item)
+        
         # 1. food vs non-food
         food_res = self.clf(item, self.food_labels, hypothesis_template="This is a {}.")
         food_label = food_res['labels'][0]
