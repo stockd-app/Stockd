@@ -26,6 +26,19 @@ def sanitize_url(url: str) -> str:
         return url
     return ""
 
+def sanitize_google_url(url: str) -> str:
+    """
+    Lightly sanitize Google URLs:
+    - Must start with http:// or https://
+    - Return empty string if missing
+    """
+    if not url:
+        return ""
+    url = url.strip()
+    if url.startswith("http://") or url.startswith("https://"):
+        return url
+    return ""
+
 if __name__ == "__main__":
     print("=== Testing sanitize_text ===")
     test_texts = [

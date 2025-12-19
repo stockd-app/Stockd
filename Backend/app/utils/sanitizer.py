@@ -25,3 +25,49 @@ def sanitize_url(url: str) -> str:
     if re.match(r"^https?://", url):
         return url
     return ""
+
+def sanitize_google_url(url: str) -> str:
+    """
+    Lightly sanitize Google URLs:
+    - Must start with http:// or https://
+    - Return empty string if missing
+    """
+    if not url:
+        return ""
+    url = url.strip()
+    if url.startswith("http://") or url.startswith("https://"):
+        return url
+    return ""
+
+if __name__ == "__main__":
+    print("=== Testing sanitize_text ===")
+    test_texts = [
+        "  Hello World!  ",
+        "<script>alert('xss')</script>",
+        "This is a very long text " * 10,
+        None,
+        ""
+    ]
+    for t in test_texts:
+        sanitized = sanitize_text(t)
+        print(f"Original: {repr(t)} -> Sanitized: {repr(sanitized)}")
+
+    print("\n=== Testing sanitize_quantity ===")
+    test_quantities = ["10", "-5", 3.5, None, "abc"]
+    for q in test_quantities:
+        sanitized = sanitize_quantity(q)
+        print(f"Original: {repr(q)} -> Sanitized: {sanitized}")
+
+    print("\n=== Testing sanitize_url ===")
+    test_urls = [
+        "https://example.com",
+        "http://example.com/path",
+        "ftp://example.com",
+        "javascript:alert('xss')",
+        "   https://spaced.com  ",
+        "",
+        None
+    ]
+    for u in test_urls:
+        sanitized = sanitize_url(u)
+        print(f"Original: {repr(u)} -> Sanitized: {repr(sanitized)}")

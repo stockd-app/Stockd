@@ -21,7 +21,7 @@ from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
 from app.database.models import LikedRecipe, PantryItemsRequest, Recipe, RefreshTokenRequest, User, PantryItem
 from app.utils.ai_recommender import get_recipe_recommendations
-from app.utils.sanitizer import sanitize_text, sanitize_quantity, sanitize_url
+from app.utils.sanitizer import sanitize_text, sanitize_quantity, sanitize_url, sanitize_google_url
 
 load_dotenv()
 
@@ -271,7 +271,7 @@ async def verify_google_token(request: Request):
         }
 
         user_info["name"] = sanitize_text(user_info.get("name", ""))
-        user_info["picture"] = sanitize_url(user_info.get("picture", ""))
+        user_info["picture"] = sanitize_google_url(user_info.get("picture", ""))
 
         if not user_info["email"]:
             raise HTTPException(status_code=400, detail={"error_code": "EMAIL_NOT_FOUND", "message": "Google account email missing from ID token"})
