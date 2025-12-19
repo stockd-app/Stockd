@@ -270,10 +270,12 @@ async def verify_google_token(request: Request):
             "client_id": idinfo.get("sub")
         }
 
+        user_info["name"] = sanitize_text(user_info.get("name", ""))
+        user_info["picture"] = sanitize_url(user_info.get("picture", ""))
+
         if not user_info["email"]:
             raise HTTPException(status_code=400, detail={"error_code": "EMAIL_NOT_FOUND", "message": "Google account email missing from ID token"})
 
-        
         # 4. Save or update user in DB
         try:
             existing_user = db.query(User).filter(User.email_hash == hash_email(user_info["email"])).first()
