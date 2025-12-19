@@ -4,18 +4,16 @@ Scalable Ingredient Normalization & Canonicalization Pipeline
 - Hybrid pipeline: lightweight cleaning + lemmatization + embedding-based canonicalization
 - Stores a dynamic canonical vocabulary (names + embeddings) on disk
 - Uses SentenceTransformer for embeddings and FAISS for nearest-neighbor lookup
-- Exposes functions you can call from your recipe processing pipeline
+- Exposes functions that can be caled from recipe processing pipeline
 
 Notes:
 - Requires: sentence-transformers, faiss, nltk (wordnet), joblib, pandas
-- Optional: spacy for more advanced POS-lemmatization (commented)
 
 Usage overview:
 1. Initialize pipeline (loads or creates canonical DB)
 2. Batch process recipe ingredients to build initial canonical set
-3. For new/online ingredients: call canonicalize_ingredient(); if unknown, optionally auto-add
+3. For new ingredients: call canonicalize_ingredient(); if unknown, optionally auto-add
 4. Use canonicalized ingredient names in downstream matching and embedding index for recipes
-
 """
 
 import os
