@@ -8,6 +8,7 @@ import RecipeItemSection from "../../components/RecipeItemSection/RecipeItemSect
 import ExploreSection from "../../components/Dashboard/ExploreSection";
 import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
 import image_placeholder from "../../assets/images/error_handling/image_placeholder.png"
+import DOMPurify from "dompurify";
 
 import "./dashboard.css";
 
@@ -50,10 +51,10 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
           const imageUrl = hasImages ? recipe.Images[0] : image_placeholder;
 
           return {
-            id: recipe.RecipeId ?? index + 1,
-            name: recipe.Name,
+            id: Number(recipe.RecipeId) || index + 1,
+            name: DOMPurify.sanitize(recipe.Name || "Unnamed Recipe"),
             image: imageUrl,
-            rating: recipe.AggregatedRating ?? 4.0,
+            rating: Number(recipe.AggregatedRating) || 4.0,
             time: formatPrepTime(recipe.PrepTime),
             // status: "Available",
           };
