@@ -2,7 +2,7 @@ import pandas as pd
 from transformers import pipeline
 from sklearn.metrics import accuracy_score, classification_report
 import torch
-from app.utils.sanitizer import sanitize_text
+from Backend.app.utils.sanitizer import sanitize_text
 
 class FoodLabeler:
     def __init__(self):

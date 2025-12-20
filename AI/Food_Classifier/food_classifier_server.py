@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import List, Dict
 import uvicorn
 from food_classifier_model import FoodLabeler
-from sanitizer import sanitize_text, sanitize_quantity, sanitize_url
+from Backend.app.utils.sanitizer import sanitize_text, sanitize_quantity
 
 class ReceiptRequest(BaseModel):
     store: str
