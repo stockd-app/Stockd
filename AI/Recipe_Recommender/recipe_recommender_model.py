@@ -9,7 +9,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 # build path to data file since relative paths can be unreliable
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH = os.path.join(BASE_DIR, "data/recipes.parquet")
+DATA_PATH = os.path.normpath(os.path.join(BASE_DIR, "../app/data/recipes.parquet"))
 MODEL_PATH = os.path.normpath(os.path.join(BASE_DIR, "recipe_assets.pkl"))
 INDEX_PATH = os.path.normpath(os.path.join(BASE_DIR, "recipe_index.faiss"))
 
@@ -21,7 +21,7 @@ df["RecipeId"] = df["RecipeId"].astype(int)
 
 df = df.sample(5000, random_state=42) # limit to 5000 recipes for faster testing. full 500k dataset will probably take 1-2 hours to compute. only need to compute once before prod
 
-print("Sample RecipeIds in df:", df["RecipeId"].tolist()[:10])
+# print("Sample RecipeIds in df:", df["RecipeId"].tolist()[:10])
 
 # join each list in recipeingredientparts into a single string
 df['ingredients_text'] = df['RecipeIngredientParts'].apply(
@@ -179,9 +179,27 @@ def search_recipes(query: str, limit: int = 20):
 
     return matches[['Name']].to_dict(orient="records")
 
+def get_recipe_by_id(recipe_id: int):
+    """
+    Return a single recipe object by RecipeId.
+    """
+    recipe_id = int(recipe_id)
+
+    match = df[df["RecipeId"] == recipe_id]
+
+    if match.empty:
+        return None
+
+    return match.iloc[0].to_dict()
+
 if __name__ == "__main__":
     # # local tests
     test_user_ids = [1, 2, 3]
+
+    # print("Testing recipe by ID:")
+    # recipe = get_recipe_by_id(373686)
+    # print(recipe)
+
     # target_user = 1
 
     # print("\nTesting collaborative filtering:")

@@ -734,3 +734,29 @@ async def search_recipes_route(request: Request, query: str, limit: int = 20):
 
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error contacting recipe AI service: {str(e)}")
+        
+@router.get("/recipes/{recipe_id}", tags=["Recipes"])
+async def get_recipe_by_id_route(recipe_id: int):
+    """
+    Fetch a single recipe by RecipeId via the AI service.
+    """
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.post(
+                f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recipe-by-id",
+                json={"recipe_id": recipe_id}
+            )
+            resp.raise_for_status()
+            return resp.json()
+
+        except httpx.HTTPStatusError:
+            raise HTTPException(
+                status_code=resp.status_code,
+                detail=resp.text
+            )
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error contacting recipe AI service: {str(e)}"
+            )

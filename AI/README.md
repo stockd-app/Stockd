@@ -101,6 +101,8 @@ Running in containers:
 ## 🚀 4. Run the Recipe Recommender Server
 
 Start the server:
+cd into AI/Recipe_Recommender
+Then run the following command
 python recipe_recommender_server.py
 
 > ⏳ **Note:** The first launch performs an initial setup and may take some time.

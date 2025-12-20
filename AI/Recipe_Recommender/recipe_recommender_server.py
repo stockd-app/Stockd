@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
 import uvicorn
-from recipe_recommender_model import recommend_recipes, recommend_from_similar_users, search_recipes
+from recipe_recommender_model import recommend_recipes, recommend_from_similar_users, search_recipes, get_recipe_by_id
 from datetime import datetime
 import pandas as pd
 import numpy as np
@@ -54,6 +54,9 @@ class CollaborativeRecommendationResponse(BaseModel):
 class SearchRequest(BaseModel):
     query: str
     limit: int = 20
+
+class RecipeByIdRequest(BaseModel):
+    recipe_id: int
 
 app = FastAPI(title="Recipe Recommender")
 
@@ -174,6 +177,19 @@ async def search_recipes_endpoint(req: SearchRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/recipe-by-id")
+def recipe_by_id(req: RecipeByIdRequest):
+    recipe = get_recipe_by_id(req.recipe_id)
+
+    if recipe is None:
+        raise HTTPException(404, "Recipe not found")
+
+    recipe = sanitize_row_for_pydantic(recipe)
+    return {
+        "status": "success",
+        "recipe": RecipeObject(**recipe)
+    }
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=9001)
