@@ -110,3 +110,25 @@ python recipe_recommender_server.py
 Now you can navigate to the Swagger docs to test the endpoints. You can find the Swagger doc by going to this URL:
 
 http://<your_ip>:9001/docs for recipe recommender
+
+## 🔐 Input Sanitization
+
+All user input and external data is sanitized on the backend before being stored, processed, or sent to AI services.
+
+What is sanitized:
+Text fields (item names, categories, search queries, user names)
+   Trimmed, HTML-escaped, length-limited
+   Unsafe characters removed
+
+Numeric values (quantities)
+   Converted to numbers
+   Negative values are not allowed (clamped to 0)
+
+URLs (profile images, product images)
+   Only valid http:// and https:// URLs are accepted
+
+Why:
+Prevents invalid or malicious data
+Ensures consistent pantry and AI behavior
+Protects against XSS and injection issues
+The frontend relies on React’s built-in escaping and does not render raw HTML. All critical sanitization is enforced server-side.
