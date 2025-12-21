@@ -169,6 +169,16 @@ export const addOrUpdatePantryItem = async (userId: number, items: any) => {
 };
 
 /**
+ * Get single recipe detail by recipeId
+ */
+export const getRecipeById = async (recipeId: number | string) => {
+  const response = await axios.get(
+    API_ROUTES.GET_RECIPE_BY_ID(recipeId)
+  );
+  return response.data;
+};
+
+/**
  * Handles Google login using the authorization code
  * @params authCode
  * @returns
@@ -245,8 +255,8 @@ export const handleLogout = async () => {
       window.location.href = "/";
     } else {
       const error = await res.json();
-    localStorage.clear();
-    window.location.href = "/";
+      localStorage.clear();
+      window.location.href = "/";
       console.error("Logout failed:", error);
     }
   } catch (error: any) {

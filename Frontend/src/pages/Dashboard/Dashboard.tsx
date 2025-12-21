@@ -94,6 +94,9 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
       <FoodCategorySection />
       <RecipeItemSection title="Recommended Based on Your Pantry"
         items={recommendedItems}
+        onItemClick={(recipeId: number) => {
+          navigate(`/recipes/${recipeId}`);
+        }}
       />
 
       <RecipeItemSection title="AI - Recommended Recipes For You"
