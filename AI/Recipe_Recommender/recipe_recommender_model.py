@@ -9,7 +9,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 # build path to data file since relative paths can be unreliable
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH = os.path.normpath(os.path.join(BASE_DIR, "../app/data/recipes.parquet"))
+DATA_PATH = os.path.join(BASE_DIR, "data/recipes.parquet")
 MODEL_PATH = os.path.normpath(os.path.join(BASE_DIR, "recipe_assets.pkl"))
 INDEX_PATH = os.path.normpath(os.path.join(BASE_DIR, "recipe_index.faiss"))
 
