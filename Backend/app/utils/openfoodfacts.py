@@ -1,5 +1,6 @@
 import requests
 from typing import Optional
+from app.utils.sanitizer import sanitize_url
 
 def get_product_image_from_openfoodfacts(product_name: str) -> Optional[str]:
     """
@@ -28,7 +29,7 @@ def get_product_image_from_openfoodfacts(product_name: str) -> Optional[str]:
                 product.get("image_small_url")
             )
             
-            return image_url
+            return sanitize_url(image_url) if image_url else None
         
         return None
         
