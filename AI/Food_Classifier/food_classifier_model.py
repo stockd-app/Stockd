@@ -2,10 +2,7 @@ import pandas as pd
 from transformers import pipeline
 from sklearn.metrics import accuracy_score, classification_report
 import torch
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-from Backend.app.utils.sanitizer import sanitize_text
+from sanitizer import sanitize_text
 
 class FoodLabeler:
     def __init__(self):
