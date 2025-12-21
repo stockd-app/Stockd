@@ -3,6 +3,9 @@ from pydantic import BaseModel
 from typing import List, Dict
 import uvicorn
 from food_classifier_model import FoodLabeler
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from Backend.app.utils.sanitizer import sanitize_text, sanitize_quantity
 
 class ReceiptRequest(BaseModel):
