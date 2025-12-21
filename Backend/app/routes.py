@@ -21,6 +21,7 @@ from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
 from app.database.models import LikedRecipe, PantryItemsRequest, Recipe, RefreshTokenRequest, User, PantryItem
 from app.utils.ai_recommender import get_recipe_recommendations
+from app.utils.sanitizer import sanitize_text, sanitize_quantity, sanitize_url, sanitize_google_url
 
 load_dotenv()
 
@@ -65,16 +66,18 @@ async def upload_receipt(request: Request, file: UploadFile = File(...), user=De
         
         processed_items = []
         
-        for item_name, item_data in classified_results.items():
+        for raw_item_name, item_data in classified_results.items():
             if not item_data.get("is_food", False):
                 continue
                 
-            quantity = item_data.get("quantity", 1)
-            category = item_data.get("category", "Uncategorized")
-            storage = item_data.get("storage", "Pantry")
-            
-            # Fetch image from OpenFoodFacts
-            item_image = get_product_image_from_openfoodfacts(item_name)
+            # Sanitize inputs
+            item_name = sanitize_text(raw_item_name)
+            quantity = sanitize_quantity(item_data.get("quantity", 1))
+            category = sanitize_text(item_data.get("category", "Uncategorized"))
+            storage = sanitize_text(item_data.get("storage", "Pantry"))
+            # Fetch image from OpenFoodFacts and sanitize URL
+            raw_image = get_product_image_from_openfoodfacts(raw_item_name)
+            item_image = sanitize_url(raw_image)
             
             # Check if item already exists for this user
             existing_item = (
@@ -267,10 +270,12 @@ async def verify_google_token(request: Request):
             "client_id": idinfo.get("sub")
         }
 
+        user_info["name"] = sanitize_text(user_info.get("name", ""))
+        user_info["picture"] = sanitize_google_url(user_info.get("picture", ""))
+
         if not user_info["email"]:
             raise HTTPException(status_code=400, detail={"error_code": "EMAIL_NOT_FOUND", "message": "Google account email missing from ID token"})
 
-        
         # 4. Save or update user in DB
         try:
             existing_user = db.query(User).filter(User.email_hash == hash_email(user_info["email"])).first()
@@ -474,12 +479,12 @@ async def add_update_pantry_items(request: Request, request_data: PantryItemsReq
         processed_items = []
         for item in request_data.items:
             # Replace blanks or None with default values
-            item_name = item.item_name.strip() if item.item_name else "Unnamed Item"
-            quantity_value = item.quantity_value if item.quantity_value not in [None, ""] else 0
-            quantity_unit = item.quantity_unit.strip() if item.quantity_unit else "pcs"
-            category = item.category.strip() if item.category else "Uncategorized"
-            storage = item.storage.strip() if item.storage else "Pantry"
-            item_image = item.item_image if item.item_image else None
+            item_name = sanitize_text(item.item_name) if item.item_name else "Unnamed Item"
+            quantity_value = sanitize_quantity(item.quantity_value)
+            quantity_unit = sanitize_text(item.quantity_unit) if item.quantity_unit else "pcs"
+            category = sanitize_text(item.category) if item.category else "Uncategorized"
+            storage = sanitize_text(item.storage) if item.storage else "Pantry"
+            item_image = sanitize_url(item.item_image)
 
             # Check if item already exists for this user
             existing_item = None
@@ -674,28 +679,38 @@ def get_all_user_ids():
     finally:
         db.close()
 
+def get_user_liked_recipes(user_id: int):
+    db = SessionLocal()
+    try:
+        rows = db.query(LikedRecipe.recipe_id).filter(
+            LikedRecipe.user_id == user_id
+        ).all()
+        return [r[0] for r in rows]
+    finally:
+        db.close()
+
 @router.get("/recommendations/collaborative/{user_id}")
 async def get_collaborative_recommendations(user_id: int, top_n: int = 5):
     pantry_items = get_user_pantry(user_id)
     all_user_ids = get_all_user_ids()
 
-    if not all_user_ids:
-        raise HTTPException(status_code=400, detail="No users found for collaborative filtering.")
+    user_likes = {
+        uid: get_user_liked_recipes(uid)
+        for uid in all_user_ids
+    }
 
     payload = {
         "user_id": user_id,
         "pantry_items": pantry_items,
-        "all_user_ids": [1, 2, 3], # replace this with all_user_ids later
+        "all_user_ids": all_user_ids,
+        "user_likes": user_likes,
         "top_n": top_n,
         "mode": "collaborative"
     }
 
     async with httpx.AsyncClient() as client:
-        try:
-            resp = await client.post(f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend", json=payload)
-            resp.raise_for_status()
-        except httpx.HTTPError as e:
-            raise HTTPException(status_code=500, detail=f"AI server request failed: {str(e)}")
+        resp = await client.post(f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend", json=payload)
+        resp.raise_for_status()
 
     return resp.json()
 
@@ -709,12 +724,14 @@ async def search_recipes_route(request: Request, query: str, limit: int = 20):
     """
     if not query or query.strip() == "":
         raise HTTPException(status_code=400, detail="Query string cannot be empty.")
+    
+    safe_query = sanitize_text(query)
 
     async with httpx.AsyncClient() as client:
         try:
             ai_response = await client.post(
                 f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/search-recipes",
-                json={"query": query, "limit": limit}
+                json={"query": safe_query, "limit": limit}
             )
             ai_response.raise_for_status()
             return ai_response.json()
@@ -724,3 +741,29 @@ async def search_recipes_route(request: Request, query: str, limit: int = 20):
 
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error contacting recipe AI service: {str(e)}")
+        
+@router.get("/recipes/{recipe_id}", tags=["Recipes"])
+async def get_recipe_by_id_route(recipe_id: int):
+    """
+    Fetch a single recipe by RecipeId via the AI service.
+    """
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.post(
+                f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recipe-by-id",
+                json={"recipe_id": recipe_id}
+            )
+            resp.raise_for_status()
+            return resp.json()
+
+        except httpx.HTTPStatusError:
+            raise HTTPException(
+                status_code=resp.status_code,
+                detail=resp.text
+            )
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error contacting recipe AI service: {str(e)}"
+            )
