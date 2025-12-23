@@ -169,13 +169,43 @@ export const addOrUpdatePantryItem = async (userId: number, items: any) => {
 };
 
 /**
- * Get single recipe detail by recipeId
+ * Get single recipe by recipe ID
+ * @param recipeId
+ * @returns
  */
-export const getRecipeById = async (recipeId: number | string) => {
-  const response = await axios.get(
-    API_ROUTES.GET_RECIPE_BY_ID(recipeId)
-  );
-  return response.data;
+export const getRecipeById = async (recipeId: number) => {
+  let idToken = localStorage.getItem("google_id_token");
+
+  try {
+    const res = await axios.get(`${API_ROUTES.GET_RECIPE_BY_ID}/${recipeId}`, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+    });
+
+    return res.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        idToken = localStorage.getItem("google_id_token");
+        const retryRes = await axios.get(
+          `${API_ROUTES.GET_RECIPE_BY_ID}/${recipeId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
+        return retryRes.data;
+      } else {
+        localStorage.clear();
+        window.location.href = "/";
+        throw new Error("Session expired. Please log in again.");
+      }
+    }
+    throw error;
+  }
 };
 
 /**

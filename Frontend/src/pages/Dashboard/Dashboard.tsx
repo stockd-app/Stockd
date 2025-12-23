@@ -96,6 +96,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
       <RecipeItemSection title="Recommended Based on Your Pantry"
         items={recommendedItems}
         onItemClick={(recipeId: number) => {
+          console.log("Clicked recipe item:", recipeId);
           navigate(`/recipes/${recipeId}`);
         }}
       />
