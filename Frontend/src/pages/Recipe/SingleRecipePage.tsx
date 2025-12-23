@@ -14,6 +14,10 @@ const SingleRecipePage: React.FC = () => {
 
     const [recipe, setRecipe] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const difficulty =
+        recipe?.Keywords?.find((kw: string) =>
+            ["easy", "medium", "hard"].includes(kw.toLowerCase())
+        ) ?? "—";
 
     useEffect(() => {
         if (!id) return;
@@ -43,56 +47,82 @@ const SingleRecipePage: React.FC = () => {
 
     const imageUrl = recipe.Images?.[0] || image_placeholder;
 
+
     return (
-        <div className="recipe-page">
-            <button className="back-btn" onClick={() => navigate(-1)}>← Back</button>
-            {/* <div className="pid__header">
-                <button className="pid__back" onClick={onClose}>←</button>
-            </div> */}
-
-            <img className="recipe-hero" src={imageUrl} alt={recipe.Name} />
-
-            <div className="recipe-content">
-                <h1 className="recipe-title">{recipe.Name}</h1>
-
-                <div className="recipe-meta">
-                    {/* <span><Clock size={16} /> {recipe.TotalTime?.replace("PT", "")}</span> */}
-                    <span><Clock size={16} /> {formatPrepTime(recipe.TotalTime)}</span>
-                    <span><Star size={16} color="#FFD700" fill="#FFD700" /> {recipe.AggregatedRating}</span>
-                    {/* <span>🍽 {recipe.RecipeCategory}</span> */}
+        <div className="recipe__page">
+            <div className="recipe__container">
+                <div className="recipe__hero">
+                    <button className="recipe__back recipe__back--overlay" onClick={() => navigate(-1)} aria-label="Back" > ← </button>
+                    <img className="recipe__hero-img" src={imageUrl} alt={recipe.Name} />
                 </div>
 
-                <p className="recipe-description">{recipe.Description}</p>
+                <div className="recipe__content">
+                    <h1 className="recipe__title">{recipe.Name}</h1>
+                    <span>
+                        <Star size={16} color="#FFD700" fill="#FFD700" /> {recipe.AggregatedRating}
+                    </span>
 
-                <section className="recipe-section">
-                    <h2>Ingredients</h2>
-                    <ul>
-                        {recipe.RecipeIngredientParts?.map((part: string, i: number) => (
-                            <li key={i}>
-                                <img
-                                    src={getIngredientIcon(part)}
-                                    alt={part}
-                                    className="ingredient-icon"
-                                    loading="lazy"
-                                />
-                                <span className="qty">{recipe.RecipeIngredientQuantities?.[i]}</span>
-                                <span>{part}</span>
-                            </li>
-                        ))}
-                    </ul>
-                </section>
+                    {/* <div className="recipe__meta">
+                        <span>
+                            <Clock size={16} /> {formatPrepTime(recipe.TotalTime)}
+                        </span>
+                        <span>
+                            <Star size={16} color="#FFD700" fill="#FFD700" /> {recipe.AggregatedRating}
+                        </span>
+                    </div> */}
+                    <div className="recipe__meta__cards">
+                        <div className="recipe__meta__card">
+                            <div className="recipe__meta__value">
+                                <Clock size={16} />
+                                {formatPrepTime(recipe.TotalTime)}
+                            </div>
+                            <div className="recipe__meta__label">Cook time</div>
+                        </div>
+                        <div className="recipe__meta__card recipe__meta__card__secondary">
+                            {/* <div className="recipe__meta__value">
+                                <Clock size={16} />
+                                {formatPrepTime(recipe.TotalTime)}
+                            </div> */}
+                            <div className="recipe__meta__value">{difficulty}</div>
+                            <div className="recipe__meta__label">Difficulty</div>
+                        </div>
+                    </div>
 
-                <section className="recipe-section">
-                    <h2>Instructions</h2>
-                    <ol>
-                        {recipe.Instructions?.map((step: string, i: number) => (
-                            <li key={i}>{step}</li>
-                        ))}
-                    </ol>
-                </section>
+
+
+                    <p className="recipe__description">{recipe.Description}</p>
+
+                    <section className="recipe__section">
+                        <h2 className="recipe__section__title">Ingredients</h2>
+                        <ul className="recipe__ingredients">
+                            {recipe.RecipeIngredientParts?.map((part: string, i: number) => (
+                                <li key={i} className="recipe__ingredient">
+                                    <img
+                                        src={getIngredientIcon(part)}
+                                        alt={part}
+                                        className="recipe__ingredient__icon"
+                                        loading="lazy"
+                                    />
+                                    <span className="recipe__ingredient__qty">
+                                        {recipe.RecipeIngredientQuantities?.[i]}
+                                    </span>
+                                    <span className="recipe__ingredient__name">{part}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+
+                    <section className="recipe__section">
+                        <h2 className="recipe__section-title">Instructions</h2>
+                        {/* <ol className="recipe__instructions">
+                            {recipe.Instructions?.map((step: string, i: number) => (
+                                <li key={i}>{step}</li>
+                            ))}
+                        </ol> */}
+                    </section>
+                </div>
             </div>
         </div>
-
     );
 };
 
