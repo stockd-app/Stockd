@@ -14,10 +14,7 @@ const SingleRecipePage: React.FC = () => {
 
     const [recipe, setRecipe] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const difficulty =
-        recipe?.Keywords?.find((kw: string) =>
-            ["easy", "medium", "hard"].includes(kw.toLowerCase())
-        ) ?? "—";
+    const difficulty = recipe?.Keywords?.find((kw: string) => ["easy", "medium", "hard"].includes(kw.toLowerCase())) ?? "—";
 
     useEffect(() => {
         if (!id) return;
@@ -52,7 +49,7 @@ const SingleRecipePage: React.FC = () => {
         <div className="recipe__page">
             <div className="recipe__container">
                 <div className="recipe__hero">
-                    <button className="recipe__back recipe__back--overlay" onClick={() => navigate(-1)} aria-label="Back" > ← </button>
+                    <button className="recipe__back recipe__back__overlay" onClick={() => navigate(-1)} aria-label="Back" > ← </button>
                     <img className="recipe__hero-img" src={imageUrl} alt={recipe.Name} />
                 </div>
 
@@ -61,15 +58,6 @@ const SingleRecipePage: React.FC = () => {
                     <span>
                         <Star size={16} color="#FFD700" fill="#FFD700" /> {recipe.AggregatedRating}
                     </span>
-
-                    {/* <div className="recipe__meta">
-                        <span>
-                            <Clock size={16} /> {formatPrepTime(recipe.TotalTime)}
-                        </span>
-                        <span>
-                            <Star size={16} color="#FFD700" fill="#FFD700" /> {recipe.AggregatedRating}
-                        </span>
-                    </div> */}
                     <div className="recipe__meta__cards">
                         <div className="recipe__meta__card">
                             <div className="recipe__meta__value">
@@ -87,9 +75,6 @@ const SingleRecipePage: React.FC = () => {
                             <div className="recipe__meta__label">Difficulty</div>
                         </div>
                     </div>
-
-
-
                     <p className="recipe__description">{recipe.Description}</p>
 
                     <section className="recipe__section">
@@ -113,7 +98,7 @@ const SingleRecipePage: React.FC = () => {
                     </section>
 
                     <section className="recipe__section">
-                        <h2 className="recipe__section-title">Instructions</h2>
+                        <h2 className="recipe__section__title">Instructions</h2>
                         {/* <ol className="recipe__instructions">
                             {recipe.Instructions?.map((step: string, i: number) => (
                                 <li key={i}>{step}</li>

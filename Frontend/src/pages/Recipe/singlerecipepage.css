@@ -18,11 +18,10 @@
 .recipe__hero-img {
   width: 100%;
   height: clamp(260px, 42vw, 420px); 
-  /* object-fit: contain;                */
   display: block;
 }
 
-.recipe__back--overlay {
+.recipe__back__overlay {
   position: absolute;
   top: 14px;
   left: 14px;
@@ -44,7 +43,7 @@
 }
 
 .recipe__content {
-  width: 55%;
+  width: 50%;
   padding: 22px 6px 0; 
   margin: auto;
 }
@@ -167,7 +166,6 @@
   color: #111827;
 }
 
-/* ===== Responsive tweaks ===== */
 @media (max-width: 600px) {
   .recipe__container {
     width: calc(100% - 28px);
