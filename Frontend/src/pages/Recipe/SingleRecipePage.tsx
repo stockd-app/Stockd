@@ -5,6 +5,9 @@ import { getIngredientIcon } from "../../utils/ingredientIconMap";
 import { Clock, Star } from "lucide-react";
 import image_placeholder from "../../assets/images/error_handling/image_placeholder.png";
 import { formatPrepTime } from "../../utils/utils";
+import { parseQuantity, resolveIngredientDisplay } from "../../utils/ingredientUnit";
+import LikeButton from "../../components/LikeButton/LikeButton";
+
 
 import "./singlerecipepage.css";
 
@@ -27,8 +30,16 @@ const SingleRecipePage: React.FC = () => {
                 setLoading(true);
                 const data = await getRecipeById(recipeId);
                 console.log("Recipe detail:", data);
+                console.log("Recipe detail ID:", data.recipe.RecipeId);
                 // setRecipe(data);
+                // const normalizedRecipe = {
+                //     ...data.recipe,
+                //     id: data.recipe.recipe_id, 
+                // };
+                // console.log("Recipe id:", data.recipe.recipe_id);
+                // console.log("Normalized recipe id:", normalizedRecipe.id);
                 setRecipe(data.recipe);
+                // setRecipe(normalizedRecipe);
             } catch (err) {
                 console.error("Failed to fetch recipe", err);
             } finally {
@@ -44,7 +55,6 @@ const SingleRecipePage: React.FC = () => {
 
     const imageUrl = recipe.Images?.[0] || image_placeholder;
 
-
     return (
         <div className="recipe__page">
             <div className="recipe__container">
@@ -52,6 +62,11 @@ const SingleRecipePage: React.FC = () => {
                     <button className="recipe__back recipe__back__overlay" onClick={() => navigate(-1)} aria-label="Back" > ← </button>
                     <img className="recipe__hero-img" src={imageUrl} alt={recipe.Name} />
                 </div>
+                <LikeButton
+                    recipeId={recipe.RecipeId}
+                    // initialLiked={recipe.isLiked} 
+                    initialLiked={recipe.isLiked ?? false}
+                />
 
                 <div className="recipe__content">
                     <h1 className="recipe__title">{recipe.Name}</h1>
@@ -80,7 +95,7 @@ const SingleRecipePage: React.FC = () => {
                     <section className="recipe__section">
                         <h2 className="recipe__section__title">Ingredients</h2>
                         <ul className="recipe__ingredients">
-                            {recipe.RecipeIngredientParts?.map((part: string, i: number) => (
+                            {/* {recipe.RecipeIngredientParts?.map((part: string, i: number) => (
                                 <li key={i} className="recipe__ingredient">
                                     <img
                                         src={getIngredientIcon(part)}
@@ -89,11 +104,30 @@ const SingleRecipePage: React.FC = () => {
                                         loading="lazy"
                                     />
                                     <span className="recipe__ingredient__qty">
-                                        {recipe.RecipeIngredientQuantities?.[i]}
+                                        {recipe.RecipeIngredientQuantities?.[i]}{IngredientUnit(part)}
                                     </span>
                                     <span className="recipe__ingredient__name">{part}</span>
                                 </li>
-                            ))}
+                            ))} */}
+                            {recipe.RecipeIngredientParts?.map((part: string, i: number) => {
+                                const rawQty = recipe.RecipeIngredientQuantities?.[i];
+                                const qtyParsed = parseQuantity(rawQty);
+                                const { qty, unit } = resolveIngredientDisplay(part, qtyParsed);
+
+                                return (
+                                    <li key={i} className="recipe__ingredient">
+                                        <img
+                                            src={getIngredientIcon(part)}
+                                            alt={part}
+                                            className="recipe__ingredient__icon"
+                                        />
+                                        <span className="recipe__ingredient__qty">
+                                            {qty} {unit}
+                                        </span>
+                                        <span className="recipe__ingredient__name">{part}</span>
+                                    </li>
+                                );
+                            })}
                         </ul>
                     </section>
 
