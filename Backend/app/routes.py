@@ -19,7 +19,7 @@ from app.utils.ai_classifier import classify_receipt_items
 from app.utils.openfoodfacts import get_product_image_from_openfoodfacts
 from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
-from app.database.models import LikedRecipe, PantryItemsRequest, Recipe, RefreshTokenRequest, User, PantryItem
+from app.database.models import LikedRecipe, PantryItemsDeleteRequest, PantryItemsRequest, Recipe, RefreshTokenRequest, User, PantryItem
 from app.utils.ai_recommender import get_recipe_recommendations
 from app.utils.sanitizer import sanitize_text, sanitize_quantity, sanitize_url, sanitize_google_url
 
@@ -542,6 +542,51 @@ async def add_update_pantry_items(request: Request, request_data: PantryItemsReq
         db.rollback()
         print("Unexpected error traceback:", traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+    
+    finally:
+        db.close()
+        
+@router.delete("/pantry_items/delete", tags=["Pantry"])
+@limiter.limit("10/minute")
+async def delete_pantry_items(request: Request, request_data: PantryItemsDeleteRequest, user=Depends(require_google_token)):
+    """
+    Delete multiple pantry items by their IDs.
+    Example JSON body:
+    {
+        "pantry_item_ids": [1, 2, 3]
+    }
+    """
+    db = SessionLocal()
+    try:
+        if not request_data.pantry_item_ids:
+            raise HTTPException(status_code=400, detail="No pantry item IDs provided")
+
+        items_to_delete = (
+            db.query(PantryItem)
+            .filter(PantryItem.user_id == user.id)
+            .filter(PantryItem.id.in_(request_data.pantry_item_ids))
+            .all()
+        )
+
+        if not items_to_delete:
+            raise HTTPException(status_code=404, detail="Pantry items not found")
+
+        deleted_ids = [item.id for item in items_to_delete]
+
+        for item in items_to_delete:
+            db.delete(item)
+        
+        db.commit()
+
+        return {
+            "status": "success",
+            "deleted_ids": deleted_ids,
+            "message": f"Deleted {len(deleted_ids)} pantry items successfully"
+        }
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to delete pantry items: {str(e)}")
     
     finally:
         db.close()
