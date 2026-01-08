@@ -4,7 +4,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 import os
+from app.dependencies.limiter import limiter
 from app.routes import router
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from fastapi.responses import JSONResponse
+from fastapi import Request
 
 load_dotenv()
 
@@ -15,6 +20,16 @@ app = FastAPI(
     version="1.0.0",
     description="A simple backend powered by FastAPI with Swagger UI"
 )
+
+app.state.limiter = limiter
+app.add_middleware(SlowAPIMiddleware)
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Please wait 5 minutes, request limit reached."},
+    )
 
 # CORS setup (everything under same ngrok domain now)
 app.add_middleware(
@@ -52,6 +67,14 @@ else:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Docker and monitoring"""
+    return {
+        "status": "healthy",
+        "service": "backend",
+    }
 
 # Include all routes FIRST (before catch-all)
 app.include_router(router)

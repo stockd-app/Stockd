@@ -5,6 +5,7 @@ import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavB
 import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
 import { deleteUserAccount, handleLogout } from "../../services/api";
 import { CONFIRM_DELETE_TEXT, CONFIRM_LOGOUT_TEXT } from "../../config/consts";
+import DOMPurify from "dompurify";
 
 import "./profile.css";
 
@@ -36,8 +37,8 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
                     <img src={picture} alt="Profile" className="profile__avatar" />
                 </div>
 
-                <h2 className="profile__name">{name}</h2>
-                <p className="profile__email">{email}</p>
+                <h2 className="profile__name">{DOMPurify.sanitize(name)}</h2>
+                <p className="profile__email">{DOMPurify.sanitize(email)}</p>
             </div>
 
             {/* Options */}

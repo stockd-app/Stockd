@@ -13,7 +13,7 @@ def parse_asprise_response(asprise_response: dict) -> dict:
     receipt = receipts[0]
     store_name = receipt.get("merchant_name", "Unknown")
 
-    items = receipt.get("items", [])
+    items = receipt.get("items") or []
     item_counts = {}
 
     for item in items:
