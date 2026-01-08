@@ -95,20 +95,6 @@ const SingleRecipePage: React.FC = () => {
                     <section className="recipe__section">
                         <h2 className="recipe__section__title">Ingredients</h2>
                         <ul className="recipe__ingredients">
-                            {/* {recipe.RecipeIngredientParts?.map((part: string, i: number) => (
-                                <li key={i} className="recipe__ingredient">
-                                    <img
-                                        src={getIngredientIcon(part)}
-                                        alt={part}
-                                        className="recipe__ingredient__icon"
-                                        loading="lazy"
-                                    />
-                                    <span className="recipe__ingredient__qty">
-                                        {recipe.RecipeIngredientQuantities?.[i]}{IngredientUnit(part)}
-                                    </span>
-                                    <span className="recipe__ingredient__name">{part}</span>
-                                </li>
-                            ))} */}
                             {recipe.RecipeIngredientParts?.map((part: string, i: number) => {
                                 const rawQty = recipe.RecipeIngredientQuantities?.[i];
                                 const qtyParsed = parseQuantity(rawQty);
