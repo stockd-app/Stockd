@@ -9,3 +9,4 @@ pymysql
 cryptography
 httpx
 slowapi
+inflect
