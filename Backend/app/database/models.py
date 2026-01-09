@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Enum, DateTime, ForeignKey, Text, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Float, Enum, DateTime, ForeignKey, Text, UniqueConstraint, JSON
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.utils.encrypted_type import EncryptedString
@@ -17,11 +17,15 @@ class User(Base):
     email_hash = Column(String(64), nullable=False, unique=True)
     picture = Column(String(255))
     client_id = Column(EncryptedString)
+    allergens = Column(JSON, nullable=True)
     role = Column(Enum("admin", "user", "guest"), default="guest")
     created_at = Column(DateTime, default=datetime.utcnow)
 
     pantry_items = relationship("PantryItem", back_populates="owner", passive_deletes=True )
     liked_recipes = relationship("LikedRecipe", back_populates="user", passive_deletes=True)
+    
+class UserAllergensRequest(BaseModel):
+    allergens: List[str]
 
 class PantryItem(Base):
     __tablename__ = "PantryItems"
