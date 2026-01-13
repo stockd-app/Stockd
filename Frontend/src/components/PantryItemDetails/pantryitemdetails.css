@@ -1,0 +1,115 @@
+@import "@/styles/variable.css";
+
+
+.pid__overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--color-white);
+    display: flex;
+    justify-content: center;
+    z-index: 999;
+}
+
+
+.pid__modal {
+    width: 100%;
+    max-width: 430px;
+    background: var(--color-white);
+    padding: 2em;
+}
+
+
+.pid__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+.pid__back {
+    background: none;
+    border: none;
+    font-size: 20px;
+}
+
+
+.pid__body {
+    margin-top: 20px;
+}
+
+
+.pid__row {
+    max-height: 2em;
+    padding: 1.3em 0;
+    border-bottom: 1px solid var(--color-dark-grey);
+    display: flex;
+    justify-content: space-between;
+    align-self: center;
+}
+
+
+.pid__label {
+    font-weight: 600;
+    color: var(--color-dark-grey);
+}
+
+
+.pid__input {
+    font-size: 14px;
+    border: none;
+    outline: none;
+    text-align: right;
+    background: none;
+}
+
+
+.pid__input.select {
+    appearance: none;
+}
+
+
+.pid__qtybox {
+    display: flex;
+    align-items: center;
+    gap: 2em;
+}
+
+.pid__qty_input {
+    width: 4em;
+    text-align: center;
+    font-size: 1rem;
+    border: 1px solid var(--color-dark-grey);
+    border-radius: 6px;
+    padding: 0.25em;
+}
+
+
+
+.pid__qtybox button {
+    width: 1em;
+    height: 1em;
+    border-radius: 50%;
+    border: none;
+    font-size: 18px;
+    background: var(--color-secondary);
+    cursor: pointer;
+}
+
+
+.pid__footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+}
+
+
+.pid__save {
+    background: var(--color-primary);
+    color: var(--color-white);
+    padding: 10px 30px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    font-weight: 600;
+
+}

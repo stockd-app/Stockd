@@ -16,7 +16,6 @@ A smart pantry management application that helps you track food items, reduce wa
 - **AI-Powered Classification**: Automatically categorize food items
 - **Recipe Recommendations**: Get recipe suggestions based on available ingredients
 
-
 ## Quick Start (Docker)
 
 This is the **easiest way** to run the entire application with all services.
@@ -69,12 +68,56 @@ This will start:
 - Frontend on `http://localhost` (port 80)
 - Backend on `http://localhost:8000`
 - AI Food Classifier on `http://localhost:9002`
+- AI Recipe Recommender on `http://localhost:9001`
 
 ### 5. Stop All Services
 
 ```bash
 ./stop-all.sh
 ```
+
+## Health Checks
+
+Each service in `docker-compose.yml` has health check configurations that Docker monitors automatically. Used kuma for status monitoring of each service. Will configure email alerts when deployed to AWS.
+
+### 1. **Health Check Endpoints**
+
+- **Backend**: `http://localhost:8000/health`
+- **Food Classifier**: `http://localhost:9002/health`
+- **Recipe Recommender**: `http://localhost:9001/health`
+- **Frontend**: `http://localhost:80/` (Nginx default)
+- **Database**: MySQL ping command
+
+### 2. Basic Monitoring
+
+#### Check Container Health Status
+
+```bash
+docker compose ps
+```
+
+Shows health status: `healthy`, `unhealthy`, or `starting`
+
+#### View Detailed Health Check Logs
+
+```bash
+docker inspect stockd-backend | grep -A 10 Health
+```
+
+#### Monitor All Services
+
+```bash
+watch -n 5 'docker compose ps'
+```
+
+Refreshes every 5 seconds to show real-time status
+
+### 3. What Happens When a Service Fails?
+
+1. **Docker detects failure** after 3 failed health checks (90 seconds)
+2. **Container marked as unhealthy** (visible in `docker compose ps`)
+3. **Container automatically restarts** (due to `restart: unless-stopped`)
+4. **Dependent services wait** for healthy status before starting
 
 ## Development Setup
 
@@ -120,10 +163,47 @@ npm run dev
 
 Frontend will be available at `http://localhost:5173`
 
+### Food Classifier (Without Docker)
+
+```bash
+cd AI/Food_Classifier
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r food_classifier_requirements.txt
+
+# Run the server
+python food_classifier_server.py
+```
+
+Food Classifier will be available at `http://localhost:9002`
+
+### Recipe Recommender (Without Docker)
+
+```bash
+cd AI/Recipe_Recommender
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r recipe_recommender_requirements.txt
+
+# Run the server
+python recipe_recommender_requirements_server.py
+```
+
+Food Classifier will be available at `http://localhost:9001`
+
 For detailed instructions, see:
 
 - [Frontend README](./Frontend/README.md)
 - [Backend README](./Backend/README.md)
+- [AI README](./AI/README.md)
 
 ## Mobile Testing
 
@@ -151,11 +231,15 @@ docker-compose logs -f
 docker-compose logs -f frontend
 docker-compose logs -f backend
 docker-compose logs -f food-classifier
+docker-compose logs -f recipe-recommender
+docker-compose logs -f database
 
 # Restart a specific service
 docker-compose restart frontend
 docker-compose restart backend
 docker-compose restart food-classifier
+docker-compose restart recipe-recommender
+docker-compose restart food-database
 
 # View running containers
 docker-compose ps

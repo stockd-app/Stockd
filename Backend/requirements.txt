@@ -8,3 +8,5 @@ sqlalchemy
 pymysql
 cryptography
 httpx
+slowapi
+inflect

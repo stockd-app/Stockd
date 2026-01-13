@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
-import { getPantryItems } from "../../services/api";
+import PantryItemSection, { type PantryItem } from "../../components/PantryItemSection/PantryItemSection"; import { getPantryItems } from "../../services/api";
 import "./pantrypage.css";
-import ItemSection from "../../components/ItemSection/ItemSection";
 
 /**
  * Pantry Page
@@ -11,15 +10,11 @@ import ItemSection from "../../components/ItemSection/ItemSection";
 
 interface PantrySection {
     section: string;
-    items: {
-        id: number;
-        name: string;
-        qty: string;
-        image: string;
-    }[];
+    items: PantryItem[];
 }
 
 const PantryPage: React.FC = () => {
+    const SECTION_ORDER = ["Pantry", "Fridge", "Freezer"];
     const [pantryData, setPantryData] = useState<PantrySection[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -46,10 +41,27 @@ const PantryPage: React.FC = () => {
 
             // Transform grouped_items to pantryData format
             const grouped = response.grouped_items || {};
-            const sections: PantrySection[] = Object.keys(grouped).map((storage) => ({
-                section: storage,
-                items: grouped[storage]
-            }));
+            const sections: PantrySection[] = Object.keys(grouped)
+                .sort((a, b) => {
+                    const indexA = SECTION_ORDER.indexOf(a);
+                    const indexB = SECTION_ORDER.indexOf(b);
+
+                    // both known -> follow fixed order
+                    if (indexA !== -1 && indexB !== -1) {
+                        return indexA - indexB;
+                    }
+
+                    // known sections always come first
+                    if (indexA !== -1) return -1;
+                    if (indexB !== -1) return 1;
+
+                    // fallback alphabetical
+                    return a.localeCompare(b);
+                })
+                .map((storage) => ({
+                    section: storage,
+                    items: grouped[storage]
+                }));
 
             setPantryData(sections);
         } catch (err: any) {
@@ -89,10 +101,11 @@ const PantryPage: React.FC = () => {
                     <p>Your pantry is empty. Scan a receipt to add items!</p>
                 ) : (
                     pantryData.map((section) => (
-                        <ItemSection
+                        <PantryItemSection
                             key={section.section}
                             section={section.section}
                             items={section.items}
+                            onRefresh={fetchPantryData}
                         />
                     ))
                 )}

@@ -5,9 +5,12 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 // Backend route endpoints
 export const API_ROUTES = {
+  REFRESH_TOKEN: `${API_BASE_URL}/auth/refresh`,
   UPLOAD_RECEIPT: `${API_BASE_URL}/upload-receipt`,
   VERIFY_GOOGLE: `${API_BASE_URL}/auth/google`,
   GET_PANTRY: `${API_BASE_URL}/pantry_items`,
+  ADD_UPDATE_PANTRY_ITEM: `${API_BASE_URL}/add_update_pantry_items`,
+  GET_PANTRY_RECOMMENDATIONS: `${API_BASE_URL}/recommendations/pantry`, // Caller will append `user_id`
   LOGOUT_GOOGLE: `${API_BASE_URL}/auth/google/logout`,
   DELETE_USER: `${API_BASE_URL}/delete_user`,
 };
@@ -20,7 +23,7 @@ export const GOOGLE_CONSTS = {
   GOOGLE_ICON_SIZE: 18,
 }
 
-export const SEARCH = "Search";
+export const SEARCH = "Search any recipes";
 export const LANDING_PAGE = {
   STOCKD: "Stockd",
   WELCOME_TEXT: "Let's join our community to cook better food!",
@@ -35,16 +38,7 @@ export const BOTTOM_NAV_ICON_SIZE = {
   LARGE: 26,
 }
 
-export const DASHBOARD = {
-  TABS: ["Discover", "Recommend", "Saved"] as const,
-  DISCOVER: "Discover",
-  RECOMMEND: "Recommend",
-  SAVED: "Saved",
-  SAVED_PLACEHOLDER: "No saved items yet.",
-  RECOMMEND_PLACEHOLDER: "Recommended items will appear here.",
-  DISCOVER_PLACEHOLDER: "No items to display.",
-}
-
+/* Update for pantry add/edit/delete */
 export const NOTIFICATION_MESSAGES = {
   ADDED: "Food has been added",
   UPDATED: "Food has been updated",

@@ -96,3 +96,68 @@
     transform: scaleX(1.4);
     opacity: 1;
 }
+
+
+.creation__modal__container {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 2000;
+}
+
+.creation__modal {
+  background: white;
+  width: 100%;
+  padding: 22px;
+  border-radius: 20px 20px 0 0;
+  animation: slideUp .25s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.creation__modal__header {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.close__btn {
+  position: absolute;
+  right: 0;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.creation__button {
+  width: 48%;
+  padding: 14px;
+  background: #f4f4f4;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column; 
+  align-items: center;    
+  justify-content: center;
+  gap: 6px;      
+}
+
+.creation__button.large {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.creation__row {
+  display: flex;
+  justify-content: space-between;
+}

@@ -154,6 +154,12 @@ const CameraModal: React.FC<CameraModalProps> = ({
    */
   return (
     <div className="camera-modal">
+      {isUploading && (
+        <div className="uploading__overlay">
+          <div className="spinner"></div>
+          <p className="loading__text">AI is scanning your receipt…</p>
+        </div>
+      )}
       {!photo ? (
         <>
           {/* ===== Live Camera View ===== */}

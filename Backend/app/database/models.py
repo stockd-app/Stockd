@@ -6,6 +6,9 @@ from app.database.database import Base
 from pydantic import BaseModel
 from typing import List, Optional
 
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
 class User(Base):
     __tablename__ = "Users"
     id = Column(Integer, primary_key=True, index=True)
@@ -25,6 +28,7 @@ class PantryItem(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("Users.id", ondelete="CASCADE"))
     item_name = Column(String(255), nullable=False)
+    normalized_name = Column(String(255))
     category = Column(String(255))
     storage = Column(String(255))
     quantity_value = Column(Float, default=0)
@@ -36,6 +40,7 @@ class PantryItem(Base):
     recipe_ingredients = relationship("RecipeIngredient", back_populates="pantry_item")
     
 class PantryItemInput(BaseModel):
+    id: Optional[int] = None
     item_name: str
     quantity_value: Optional[float] = 0
     quantity_unit: Optional[str] = "pcs"
@@ -81,4 +86,10 @@ class LikedRecipe(Base):
     )
     user = relationship("User", back_populates="liked_recipes", passive_deletes=True)
 
-
+class FoodImageCache(Base):
+    __tablename__ = "foodimagecache"
+    id = Column(Integer, primary_key=True)
+    normalized_name = Column(String, unique=True, index=True)
+    image_url = Column(String)
+    source = Column(String, default="openfoodfacts")
+    updated_at = Column(DateTime, default=datetime.utcnow)
