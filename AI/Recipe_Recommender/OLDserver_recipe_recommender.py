@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
 import uvicorn
-from model2_recipe_recommender import recommend_recipes, recommend_from_similar_users, search_recipes, find_semantic_subset_recipes
+from AI.Recipe_Recommender.OLDmodel2_recipe_recommender import recommend_recipes, recommend_from_similar_users, search_recipes, find_semantic_subset_recipes
 from datetime import datetime
 import pandas as pd
 import numpy as np

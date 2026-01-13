@@ -61,7 +61,11 @@ DESCRIPTORS = {
     "fresh", "large", "small", "organic", "raw", "boneless",
     "skinless", "dried", "freshly", "chopped", "minced",
     "sliced", "free-range", "medium", "whole", "coarse", "packed",
-    "ground", "shredded", "grated", "peeled", "seeded"
+    "ground", "shredded", "grated", "peeled", "seeded", "frozen", "grey", "of",
+    "rack", "pieces", "leaves", "roast", "flake", "splenda", "prepared", "baking", "liquid", "broiler-fryer",
+    "salted", "unsalted", "toasted", "lightly", "ripe", "baby", "thinly", "cut", "cubed",
+    "boned", "halves", "cooked", "uncooked", "skin", "cans", "can", "bunch", "stalk", "stalks",
+    "squeeze", "jar"
 }
 
 MULTI_KEEP = {
@@ -76,13 +80,19 @@ MULTI_KEEP = {
     "dark rum", "cream sherry", "apple cider", "cornstarch"
 }
 
-GENERIC_ENDINGS = {"juice", "oil", "vinegar", "sugar", "powder", "sauce", "milk"}
+GENERIC_PROTEINS = {
+    "chicken", "beef", "pork", "lamb", "turkey", "duck", "fish", "salmon",
+    "tuna", "shrimp", "prawns", "egg", "eggs", "tofu", "tempeh"
+}
+
+GENERIC_ENDINGS = {"juice", "oil", "vinegar", "sugar", "powder", "sauce", "milk", "sauce", "rice", "beans", "potatoes", "potato", "flour"}
 
 IRREGULAR_MAP = {
     "gingerroot": "ginger",
     "chilies": "chili",
 }
 
+BRANDS = {"tesco", "aldi", "lidl", "dunnes stores", "supervalu"}
 
 def clean_text(text: str) -> str:
     if not text:
@@ -105,7 +115,7 @@ def normalize_tokens(text: str) -> str:
 
     tokens = text.split()
     # remove descriptors
-    tokens = [t for t in tokens if t not in DESCRIPTORS]
+    tokens = [t for t in tokens if t not in DESCRIPTORS and t not in BRANDS]
     if not tokens:
         return ""
     # lemmatize tokens
@@ -118,9 +128,11 @@ def normalize_tokens(text: str) -> str:
     for mw in MULTI_KEEP:
         if mw in candidate:
             return mw
-    # keep two-word combos when last token is generic
-    if len(tokens) >= 2 and tokens[-1] in GENERIC_ENDINGS:
-        return f"{tokens[-2]} {tokens[-1]}"
+    
+    for token in reversed(tokens):
+        if token in GENERIC_PROTEINS or token in GENERIC_ENDINGS:
+            return token
+    
     # if single token left
     if len(tokens) == 1:
         return tokens[0]
@@ -237,6 +249,10 @@ def canonicalize_ingredient(raw: str, auto_add: bool = True) -> Tuple[str, float
     if not norm:
         return "", 0.0, None
     db = get_canonical_db()
+
+    # Debug print
+    # print(f"Raw: '{raw}' -> Normalized: '{norm}'")
+
     # short-circuit exact match
     if norm in db.names:
         idx = db.names.index(norm)

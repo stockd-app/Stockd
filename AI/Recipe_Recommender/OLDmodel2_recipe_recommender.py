@@ -16,7 +16,11 @@ INDEX_PATH = os.path.normpath(os.path.join(BASE_DIR, "recipe_index.faiss"))
 
 df = pd.read_parquet(DATA_PATH)
 df = df.copy()
-df = df.sample(5000) # limit to 5000 recipes for faster testing. full 500k dataset will probably take 1-2 hours to compute. only need to compute once before prod
+
+# convert RecipeId to int to match IDs from likedrecipes
+df["RecipeId"] = df["RecipeId"].astype(int)
+
+df = df.head(5000)
 
 # join each list in recipeingredientparts into a single string
 df['ingredients_text'] = df['RecipeIngredientParts'].apply(
