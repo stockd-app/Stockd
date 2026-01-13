@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
 import uvicorn
-from AI.Recipe_Recommender.model2_recipe_recommender import recommend_recipes, recommend_from_similar_users, search_recipes, find_semantic_subset_recipes
+from model2_recipe_recommender import recommend_recipes, recommend_from_similar_users, search_recipes, find_semantic_subset_recipes
 from datetime import datetime
 import pandas as pd
 import numpy as np
@@ -162,29 +162,31 @@ async def search_recipes_endpoint(req: SearchRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# @app.post("/exact-match")
-# def exact_match_endpoint(req: RecommendationRequest):
-#     """
-#     Return recipes where all recipe ingredients are semantically matched by the user's pantry.
-#     """
-#     try:
-#         df_results = find_semantic_subset_recipes(req.pantry_items, similarity_threshold=0.8)
+@app.post("/recommend/subset", response_model=ContentRecommendationResponse)
+def subset_recommendation(req: RecommendationRequest):
+    """
+    Recommend recipes where essential ingredients are a subset of the user's pantry.
+    """
+    try:
+        df_results = find_semantic_subset_recipes(
+            req.pantry_items,
+            match_ratio_threshold=1.0
+        )
 
-#         formatted = []
-#         for _, row in df_results.iterrows():
-#             row_dict = row.to_dict()
-#             row_dict = sanitize_row_for_pydantic(row_dict)
-#             formatted.append(RecipeObject(**row_dict))
+        formatted = []
+        for _, row in df_results.iterrows():
+            row_dict = row.to_dict()
+            row_dict = sanitize_row_for_pydantic(row_dict)
+            formatted.append(RecipeObject(**row_dict))
 
-#         return {
-#             "status": "success",
-#             "type": "by-ingredients",
-#             "count": len(formatted),
-#             "recipes": formatted
-#         }
+        return ContentRecommendationResponse(
+            status="success",
+            type="subset",
+            recommendations=formatted
+        )
 
-#     except Exception as e:
-#         raise HTTPException(500, str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=9001)

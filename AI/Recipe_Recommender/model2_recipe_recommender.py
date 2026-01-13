@@ -10,7 +10,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from recipe_subset import canonicalize_recipe_ingredients, build_canonical_from_recipe_df, get_canonical_db
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH = os.path.join(BASE_DIR, "../data/recipes.parquet")
+DATA_PATH = os.path.join(BASE_DIR, "data/recipes.parquet")
 MODEL_PATH = os.path.normpath(os.path.join(BASE_DIR, "recipe_assets.pkl"))
 INDEX_PATH = os.path.normpath(os.path.join(BASE_DIR, "recipe_index.faiss"))
 
@@ -144,6 +144,7 @@ def search_recipes(query: str, limit: int = 20):
 
     return matches[['Name']].to_dict(orient="records")
 
+# =========================== Searching Recipes By Subset, only what you have in your pantry  =====================================
 # list of minor/non-essential ingredients to ignore when matching
 MINOR_INGREDIENTS = {
     "salt", "pepper", "water", "oil", "olive oil", "vegetable oil",
