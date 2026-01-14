@@ -36,7 +36,6 @@ from app.database.models import (
     RefreshTokenRequest,
     User,
     PantryItem,
-    UserAllergensRequest,
 )
 from app.utils.ai_recommender import get_recipe_recommendations
 from app.utils.sanitizer import sanitize_text, sanitize_quantity, sanitize_url, sanitize_google_url
@@ -967,58 +966,3 @@ async def get_recipe_by_id_route(recipe_id: int):
                 status_code=500,
                 detail=f"Error contacting recipe AI service: {str(e)}"
             )
-
-@router.post("/user/post-allergens", tags=["Users"])
-@limiter.limit("10/minute")
-async def update_user_allergens(
-    request: Request, 
-    data: UserAllergensRequest,
-    user=Depends(require_google_token),
-):
-    """
-    Add or update user's allergens in the database
-    Expects JSON like:
-    {
-        "allergens": ["peanuts", "gluten", "dairy"]
-    }
-    """
-    db = SessionLocal()
-    try:
-        db_user = db.query(User).filter(User.id == user.id).first()
-        if not db_user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        db_user.allergens = data.allergens
-        db.commit()
-
-        return {
-            "status": "success",
-            "allergens": db_user.allergens,
-        }
-
-    except HTTPException:
-        db.rollback()
-        raise
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        db.close()
-
-@router.get("/user/get-allergens", tags=["Users"])
-async def get_user_allergens(request: Request, user=Depends(require_google_token)):
-    """
-    Fetch user's allergens from the database
-    """
-    db = SessionLocal()
-    try:
-        db_user = db.query(User).filter(User.id == user.id).first()
-        if not db_user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        return {
-            "status": "success",
-            "allergens": db_user.allergens or [],
-        }
-    finally:
-        db.close()
