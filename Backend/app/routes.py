@@ -64,10 +64,11 @@ async def upload_receipt(
     """
     Upload an image of a receipt and:
     1. Send it to Asprise OCR API
-    2. Classify items using the AI model
-    3. Store items in the database
-    4. Return the processed items to frontend
-    5. Start background task to fetch images from OpenFoodFacts
+    2. Fetch existing items from DB classifications
+    3. Classify missing items using the AI model, if no missing items, skip this step
+    4. Store items in the database
+    5. Return the processed items to frontend
+    6. Start background task to fetch images from OpenFoodFacts
     """
     db = SessionLocal()
     try:
