@@ -84,8 +84,7 @@ def sanitize_row_for_pydantic(row_dict):
     ]
     string_fields = [
         "Name", "AuthorName", "CookTime", "PrepTime",
-        "TotalTime", "Description", "RecipeCategory",
-        "RecipeServings", "RecipeYield", "RecipeInstructions"
+        "TotalTime", "Description", "RecipeCategory"
     ]
 
     for f in numeric_fields:

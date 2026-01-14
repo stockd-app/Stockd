@@ -181,7 +181,7 @@ def recommend_recipes(pantry_items, top_n=10, user_id=None):
 def build_interaction_matrix(all_user_ids, user_likes):
     """
     Create (1) interaction list, (2) user-item matrix, (3) similarity matrix.
-    user_likes: dict { user_id: [re cipe_ids, ...] }
+    user_likes: dict { user_id: [recipe_ids, ...] }
     """
     interactions = []
 
