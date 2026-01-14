@@ -4,9 +4,12 @@ import { Home, Refrigerator, Bookmark, User, Camera, PencilLine, ImagePlus, Squa
 import { BOTTOM_NAV_ICON_SIZE, } from "../../../config/consts";
 import CameraModal from "../../CameraModal/CameraModal";
 
-
 import "./bottomnavbar.css";
 import "@/styles/variable.css";
+
+interface BottomNavBarProps {
+  onManualAdd?: () => void;
+}
 
 /**
  * Bottom Navigation Bar Component
@@ -14,7 +17,7 @@ import "@/styles/variable.css";
  * TODO : Ensure navigation state persists across pages
  * @returns 
  */
-const BottomNavBar: React.FC = () => {
+const BottomNavBar: React.FC<BottomNavBarProps> = ({ onManualAdd }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -37,7 +40,7 @@ const BottomNavBar: React.FC = () => {
 
   const handleManualAdd = () => {
     setShowCreationOptions(false);
-    navigate("/additem"); //TODO：Implement the manual add page and route in App.tsx
+    onManualAdd?.();
   };
 
   const handleSelectPhoto = () => {

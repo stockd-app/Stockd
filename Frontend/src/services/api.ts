@@ -168,6 +168,50 @@ export const addOrUpdatePantryItem = async (userId: number, items: any) => {
   }
 };
 
+
+
+/**
+ * Delete pantry items by their IDs
+ * @param itemIds 
+ * @returns 
+ */
+export const deletePantryItems = async (itemIds: number[]) => {
+  let idToken = localStorage.getItem("google_id_token");
+
+  try {
+    const res = await axios.delete(API_ROUTES.DELETE_PANTRY_ITEMS, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+      data: {
+        pantry_item_ids: itemIds,
+      },
+    });
+
+    return res.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        idToken = localStorage.getItem("google_id_token");
+        const retry = await axios.delete(API_ROUTES.DELETE_PANTRY_ITEMS, {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+          data: {
+            pantry_item_ids: itemIds,
+          },
+        });
+        return retry.data;
+      }
+      throw error;
+    }
+    throw error;
+  }
+};
+
+
+
 /**
  * Handles Google login using the authorization code
  * @params authCode
@@ -245,8 +289,8 @@ export const handleLogout = async () => {
       window.location.href = "/";
     } else {
       const error = await res.json();
-    localStorage.clear();
-    window.location.href = "/";
+      localStorage.clear();
+      window.location.href = "/";
       console.error("Logout failed:", error);
     }
   } catch (error: any) {

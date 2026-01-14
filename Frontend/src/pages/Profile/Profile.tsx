@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Accessibility, ShieldCheck, MessageSquare, LogOut, UserX } from "lucide-react";
-import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
 import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
 import { deleteUserAccount, handleLogout } from "../../services/api";
 import { CONFIRM_DELETE_TEXT, CONFIRM_LOGOUT_TEXT } from "../../config/consts";
@@ -68,8 +67,6 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
                     <span>Delete Account</span>
                 </div>
             </div>
-
-            <BottomNavBar />
 
             {/* Logout Modal */}
             {showLogoutModal && (
