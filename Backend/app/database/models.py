@@ -51,6 +51,9 @@ class PantryItemInput(BaseModel):
 class PantryItemsRequest(BaseModel):
     user_id: int
     items: List[PantryItemInput]
+    
+class PantryItemsDeleteRequest(BaseModel):
+    pantry_item_ids: List[int]
 
 class Recipe(Base):
     __tablename__ = "Recipes"
