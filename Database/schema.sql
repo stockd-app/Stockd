@@ -10,6 +10,7 @@ CREATE TABLE Users (
     email_hash CHAR(64) NOT NULL,          
     picture VARCHAR(255),
     client_id VARBINARY(512),
+    allergens JSON,
     role ENUM('admin', 'user', 'guest') DEFAULT 'guest',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
