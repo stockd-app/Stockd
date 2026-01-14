@@ -30,6 +30,7 @@ from app.utils.openfoodfacts import get_product_image_from_openfoodfacts
 from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
 from app.database.models import (
+    ItemClassification,
     LikedRecipe, PantryItemsDeleteRequest,
     PantryItemsRequest,
     Recipe,
@@ -63,10 +64,11 @@ async def upload_receipt(
     """
     Upload an image of a receipt and:
     1. Send it to Asprise OCR API
-    2. Classify items using the AI model
-    3. Store items in the database
-    4. Return the processed items to frontend
-    5. Start background task to fetch images from OpenFoodFacts
+    2. Fetch existing items from DB classifications
+    3. Classify missing items using the AI model, if no missing items, skip this step
+    4. Store items in the database
+    5. Return the processed items to frontend
+    6. Start background task to fetch images from OpenFoodFacts
     """
     db = SessionLocal()
     try:
@@ -87,92 +89,128 @@ async def upload_receipt(
                 "grouped_items": {},
                 "total_items": 0,
             }
-
-        print("Sending items to AI classifier: ", time.strftime("%Y-%m-%d %H:%M:%S"))
-        # Call AI model to classify items
-        ai_data = classify_receipt_items(parsed)
-
-        classified_results = ai_data.get("results", {})
-        print("Received classified results: ", time.strftime("%Y-%m-%d %H:%M:%S"))
-        processed_items = []
-        
-        for raw_item_name, item_data in classified_results.items():
-            if not item_data.get("is_food", False):
-                continue
-            # Sanitize inputs
-            item_name = sanitize_text(raw_item_name)
-            quantity = sanitize_quantity(item_data.get("quantity", 1))
-            category = sanitize_text(item_data.get("category", "Uncategorized"))
-            storage = sanitize_text(item_data.get("storage", "Pantry"))
-            normalized = normalize_food_name(item_name)
             
+        print("Fetching existing items classifications from DB: ", time.strftime("%Y-%m-%d %H:%M:%S"))
+        normalized_items = {
+            normalize_food_name(name): name
+            for name in parsed["items"].keys()
+        }
+        
+        cached = (
+            db.query(ItemClassification)
+            .filter(ItemClassification.normalized_name.in_(normalized_items.keys()))
+            .all()
+        )
+
+        cached_map = {}
+        for c in cached:
+            cached_map[c.normalized_name] = c
+        
+        missing_items = {}
+        for norm, raw in normalized_items.items():
+            if norm not in cached_map:
+                missing_items[norm] = raw
+
+        ai_results = {}
+        if missing_items:
+            print("Sending missing items to AI classifier: ", time.strftime("%Y-%m-%d %H:%M:%S"))
+            ai_items_payload = {name: parsed["items"][name] for name in missing_items.values()}
+            print("AI items payload: ", ai_items_payload)
+            ai_payload = {
+                "store": parsed.get("store", "Unknown"),
+                "items": ai_items_payload
+            }
+            ai_data = classify_receipt_items(ai_payload)
+            ai_results = ai_data.get("results", {})
+        
+        print("Received classified results: ", time.strftime("%Y-%m-%d %H:%M:%S"))
+        
+        for raw_name, item_data in ai_results.items():
+            normalized = normalize_food_name(raw_name)
+
+            if isinstance(item_data, dict):
+                is_food = item_data.get("is_food") == "food"
+                category = item_data.get("category", "Uncategorized")
+                storage = item_data.get("storage", "Pantry")
+                quantity = item_data.get("quantity", 1)
+            else:
+                # (1 = food, 0 = not food)
+                is_food = bool(item_data)
+                category = "Uncategorized"
+                storage = "Pantry"
+                quantity = 1
+
+            # Sanitize inputs
+            item_name = sanitize_text(raw_name)
+            quantity = sanitize_quantity(quantity)
+            category = sanitize_text(category)
+            storage = sanitize_text(storage)
+
+            existing = (
+                db.query(ItemClassification)
+                .filter(ItemClassification.normalized_name == normalized)
+                .first()
+            )
+
+            if existing:
+                cached_map[normalized] = existing
+            else:
+                classification = ItemClassification(
+                    normalized_name=normalized,
+                    is_food=is_food,
+                    category=category,
+                    storage=storage
+                )
+                db.add(classification)
+                db.flush()
+                cached_map[normalized] = classification
+
+        # Use cached_map to populate user's pantry items
+        processed_items = []
+        for norm_name, raw_name in normalized_items.items():
+            classification = cached_map.get(norm_name)
+
+            if not classification or not classification.is_food:
+                continue
+
             # Check if item already exists for this user
             existing_item = (
                 db.query(PantryItem)
                 .filter(PantryItem.user_id == user.id)
-                .filter(PantryItem.normalized_name == normalized)
+                .filter(PantryItem.normalized_name == norm_name)
                 .first()
             )
-
             if existing_item:
-                # Update existing item - add to quantity
-                existing_item.quantity_value += quantity
-                existing_item.category = category
-                existing_item.storage = storage
-                existing_item.added_on = datetime.datetime.utcnow()
-                db.flush()
+                processed_items.append(existing_item)
+                continue
 
-                processed_items.append(
-                    {
-                        "id": existing_item.id,
-                        "name": existing_item.item_name,
-                        "qty": f"x{int(existing_item.quantity_value)}",
-                        "image": existing_item.item_image or "",
-                        "category": existing_item.category,
-                        "storage": existing_item.storage,
-                    }
-                )
-            else:
-                # Add new item
-                new_item = PantryItem(
-                    user_id=user.id,
-                    item_name=item_name,
-                    normalized_name=normalized,
-                    quantity_value=quantity,
-                    quantity_unit="pcs",
-                    category=category,
-                    storage=storage,
-                    item_image=None,
-                    added_on=datetime.datetime.utcnow(),
-                )
-                db.add(new_item)
-                db.flush()
-
-                processed_items.append(
-                    {
-                        "id": new_item.id,
-                        "name": new_item.item_name,
-                        "qty": f"x{int(new_item.quantity_value)}",
-                        "image": new_item.item_image or "",
-                        "category": new_item.category,
-                        "storage": new_item.storage,
-                    }
-                )
+            # Create new PantryItem
+            new_item = PantryItem(
+                user_id=user.id,
+                item_name=sanitize_text(raw_name),
+                normalized_name=norm_name,
+                category=classification.category or "non-food",
+                storage=classification.storage or "non-food",
+                quantity_value=parsed["items"].get(raw_name, 1),
+                quantity_unit="",
+            )
+            db.add(new_item)
+            db.flush()
+            processed_items.append(new_item)
+                
         print("Processed all items: ", time.strftime("%Y-%m-%d %H:%M:%S"))
         db.commit()
 
         # Group items by storage for frontend
         grouped_items = {}
         for item in processed_items:
-            storage = item["storage"]
-            if storage not in grouped_items:
-                grouped_items[storage] = []
-            grouped_items[storage].append(
+            storage = item.storage or "Pantry"
+            grouped_items.setdefault(storage, []).append(
                 {
-                    "id": item["id"],
-                    "name": item["name"],
-                    "qty": item["qty"],
-                    "image": item["image"],
+                    "id": item.id,
+                    "name": item.item_name,
+                    "qty": item.quantity_value,
+                    "image": item.item_image,
                 }
             )
 
