@@ -2,15 +2,18 @@ import React, { useState } from "react";
 import "./AllergensModal.css";
 
 const COMMON_ALLERGENS = [
-  "peanuts",
-  "tree Nuts",
+  "celery",
+  "crustacean",
+  "egg",
+  "fish, sea food",
+  "gluten",
+  "lupine",
   "milk",
-  "eggs",
-  "soy",
-  "wheat (gluten)",
-  "fish",
-  "shellfish",
+  "mustard",
+  "peanut",
   "sesame",
+  "soy",
+  "tree-nut"
 ];
 
 interface Props {

@@ -13,8 +13,8 @@ export const API_ROUTES = {
   GET_PANTRY_RECOMMENDATIONS: `${API_BASE_URL}/recommendations/pantry`, // Caller will append `user_id`
   LOGOUT_GOOGLE: `${API_BASE_URL}/auth/google/logout`,
   DELETE_USER: `${API_BASE_URL}/delete_user`,
-  GET_USER_ALLERGENS: `${API_BASE_URL}/get-allergens`,
-  POST_USER_ALLERGENS: `${API_BASE_URL}/post-allergens`,
+  GET_USER_ALLERGENS: `${API_BASE_URL}/user/get-allergens`,
+  POST_USER_ALLERGENS: `${API_BASE_URL}/user/post-allergens`,
 };
 
 // Google OAuth related constants
