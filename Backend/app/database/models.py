@@ -77,6 +77,7 @@ class PantryItemsDeleteRequest(BaseModel):
 class Recipe(Base):
     __tablename__ = "Recipes"
     id = Column(Integer, primary_key=True, index=True)
+    dataset_recipe_id = Column(Integer, nullable=False, unique=True)
     recipe_name = Column(String(255), nullable=False)
     recipe_image = Column(String(255))
     steps = Column(Text)

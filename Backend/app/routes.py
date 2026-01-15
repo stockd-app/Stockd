@@ -774,6 +774,34 @@ async def delete_pantry_items(request: Request, request_data: PantryItemsDeleteR
         db.close()
 
 
+async def fetch_recipe_from_ai(recipe_id: int) -> dict:
+    """
+    Fetch a full recipe object from the AI service by recipe ID.
+    """
+    print(recipe_id)
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.post(
+                f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recipe-by-id",
+                json={"recipe_id": recipe_id}
+            )
+            print(resp)
+            resp.raise_for_status()
+            return resp.json()
+
+        except httpx.HTTPStatusError:
+            raise HTTPException(
+                status_code=resp.status_code,
+                detail=resp.text
+            )
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error contacting recipe AI service: {str(e)}"
+            )
+
+
 @router.post("/recipes/{recipe_id}/like", tags=["Recipes"])
 @limiter.limit("10/minute")
 async def toggle_like_recipe(
@@ -781,20 +809,39 @@ async def toggle_like_recipe(
 ):
     """
     Like or unlike a recipe for the authenticated user.
+    The recipe_id parameter is the dataset's RecipeId.
     - If the user has not liked the recipe, it will be added
     - If the user has already liked the recipe, it will be removed
     """
     db = SessionLocal()
 
     try:
-        recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+        # Check if recipe exists in database by dataset_recipe_id
+        recipe = db.query(Recipe).filter(Recipe.dataset_recipe_id == recipe_id).first()
+        
+        # If recipe doesn't exist in database, fetch from AI and create it
         if not recipe:
-            raise HTTPException(status_code=404, detail="Recipe not found")
+            try:
+                recipe_data = await fetch_recipe_from_ai(recipe_id)
+                recipe_obj = recipe_data.get("recipe", {})
+                
+                recipe = Recipe(
+                    dataset_recipe_id=recipe_id,
+                    recipe_name=recipe_obj.get("Name", "Unknown Recipe"),
+                    recipe_image=recipe_obj.get("Images", [None])[0] if recipe_obj.get("Images") else None,
+                    steps=recipe_obj.get("Description", ""),
+                    prep_time=int(recipe_obj.get("PrepTime", "0").replace("PT", "").replace("M", "")) if recipe_obj.get("PrepTime") else None,
+                    cook_time=int(recipe_obj.get("CookTime", "0").replace("PT", "").replace("M", "")) if recipe_obj.get("CookTime") else None,
+                )
+                db.add(recipe)
+                db.flush()
+            except HTTPException:
+                raise HTTPException(status_code=404, detail="Recipe not found in dataset")
 
         existing_like = (
             db.query(LikedRecipe)
             .filter(LikedRecipe.user_id == user.id)
-            .filter(LikedRecipe.recipe_id == recipe_id)
+            .filter(LikedRecipe.recipe_id == recipe.id)
             .first()
         )
 
@@ -805,7 +852,7 @@ async def toggle_like_recipe(
         else:
             new_like = LikedRecipe(
                 user_id=user.id,
-                recipe_id=recipe_id,
+                recipe_id=recipe.id,
                 liked_at=datetime.datetime.utcnow(),
             )
             db.add(new_like)
@@ -828,7 +875,7 @@ async def toggle_like_recipe(
 @limiter.limit("10/minute")
 async def get_liked_recipes(request: Request, user=Depends(require_google_token)):
     """
-    Returns a list of recipes liked by the currently authenticated user.
+    Returns a list of full recipe objects liked by the currently authenticated user.
     """
     db = SessionLocal()
     try:
@@ -841,15 +888,12 @@ async def get_liked_recipes(request: Request, user=Depends(require_google_token)
 
         result = []
         for recipe in liked_recipes:
-            result.append(
-                {
-                    "id": recipe.id,
-                    "recipe_name": recipe.recipe_name,
-                    "recipe_image": recipe.recipe_image,
-                    "prep_time": recipe.prep_time,
-                    "cook_time": recipe.cook_time,
-                }
-            )
+            try:
+                # Fetch full recipe object
+                recipe_data = await fetch_recipe_from_ai(recipe.dataset_recipe_id)
+                result.append(recipe_data)
+            except HTTPException:
+                continue
 
         return {"liked_recipes": result}
 
@@ -882,12 +926,12 @@ async def get_pantry_recommendations(user_id: int, top_n: int = 10):
 
     db = SessionLocal()
     id_list = [r["RecipeId"] for r in recipes]
-    db_recipes = db.query(Recipe).filter(Recipe.id.in_(id_list)).all()
+    db_recipes = db.query(Recipe).filter(Recipe.dataset_recipe_id.in_(id_list)).all()
     db.close()
 
     merged = []
     for r in recipes:
-        db_record = next((x for x in db_recipes if x.id == r["RecipeId"]), None)
+        db_record = next((x for x in db_recipes if x.dataset_recipe_id == r["RecipeId"]), None)
         merged.append(
             {
                 **r,
@@ -917,9 +961,12 @@ def get_all_user_ids():
 def get_user_liked_recipes(user_id: int):
     db = SessionLocal()
     try:
-        rows = db.query(LikedRecipe.recipe_id).filter(
-            LikedRecipe.user_id == user_id
-        ).all()
+        rows = (
+            db.query(Recipe.dataset_recipe_id)
+            .join(LikedRecipe, LikedRecipe.recipe_id == Recipe.id)
+            .filter(LikedRecipe.user_id == user_id)
+            .all()
+        )
         return [r[0] for r in rows]
     finally:
         db.close()
@@ -985,26 +1032,7 @@ async def get_recipe_by_id_route(recipe_id: int):
     """
     Fetch a single recipe by RecipeId via the AI service.
     """
-    async with httpx.AsyncClient() as client:
-        try:
-            resp = await client.post(
-                f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recipe-by-id",
-                json={"recipe_id": recipe_id}
-            )
-            resp.raise_for_status()
-            return resp.json()
-
-        except httpx.HTTPStatusError:
-            raise HTTPException(
-                status_code=resp.status_code,
-                detail=resp.text
-            )
-
-        except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Error contacting recipe AI service: {str(e)}"
-            )
+    return await fetch_recipe_from_ai(recipe_id)
 
 @router.post("/user/post-allergens", tags=["Users"])
 @limiter.limit("10/minute")
