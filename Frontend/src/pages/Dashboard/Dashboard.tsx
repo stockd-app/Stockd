@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getPantryRecommendations } from "../../services/api";
+import { getPantryRecommendations, getUserAllergens, updateUserAllergens } from "../../services/api";
 import { formatPrepTime } from "../../utils/utils";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import FoodCategorySection from "../../components/FoodCategoryCard/FoodCategorySection";
@@ -8,6 +8,7 @@ import RecipeItemSection from "../../components/RecipeItemSection/RecipeItemSect
 import ExploreSection from "../../components/Dashboard/ExploreSection";
 import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
 import image_placeholder from "../../assets/images/error_handling/image_placeholder.png"
+import AllergensModal from "../../components/AllergensModal/AllergensModal";
 import DOMPurify from "dompurify";
 
 import "./dashboard.css";
@@ -27,16 +28,34 @@ interface DashboardProps {
  */
 const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
   const [recommendedItems, setRecommendedItems] = useState<any[]>([]);
+  const [showAllergensModal, setShowAllergensModal] = useState(false);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("Dashboard useEffect mounted"); 1
+    console.log("Dashboard useEffect mounted");
     if (!userId) {
       navigate("/");
       return;
     }
 
+    const checkAllergens = async () => {
+      const alreadySet = localStorage.getItem("allergens_set");
+      if (alreadySet) return;
+
+      try {
+        const res = await getUserAllergens();
+        if (!res.allergens || res.allergens.length === 0) {
+          setShowAllergensModal(true);
+        } else {
+          localStorage.setItem("allergens_set", "true");
+        }
+      } catch (err) {
+        console.error("Failed to fetch allergens", err);
+      }
+    };
+
+    checkAllergens();
 
     const fetchRecommendations = async () => {
       try {
@@ -69,6 +88,16 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     fetchRecommendations();
   }, [userId]);
 
+  const handleAllergensConfirm = async (selected: string[]) => {
+    try {
+      await updateUserAllergens(selected);
+      localStorage.setItem("allergens_set", "true");
+      setShowAllergensModal(false);
+    } catch (err) {
+      console.error("Failed to save allergens", err);
+    }
+  };
+
   const aiRecommended = [
     {
       id: 3,
@@ -90,9 +119,15 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
 
 
   return (
+    <>
+      {showAllergensModal && (
+        <AllergensModal onConfirm={handleAllergensConfirm} />
+      )}
+      
     <div className="dashboard__container">
       <SearchBar />
       <FoodCategorySection />
+      
       <RecipeItemSection title="Recommended Based on Your Pantry"
         items={recommendedItems}
       />
@@ -103,6 +138,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
       <ExploreSection />
       <BottomNavBar />
     </div>
+    </>
   );
 };
 
