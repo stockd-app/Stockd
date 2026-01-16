@@ -53,6 +53,7 @@ CREATE TABLE item_classifications (
 -- RECIPES
 CREATE TABLE Recipes (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    dataset_recipe_id INT NOT NULL UNIQUE,
     recipe_name VARCHAR(255) NOT NULL,
     recipe_image VARCHAR(255),
     steps TEXT,
