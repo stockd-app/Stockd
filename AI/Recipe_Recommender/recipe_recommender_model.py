@@ -6,6 +6,78 @@ from sentence_transformers import SentenceTransformer
 import faiss
 import hashlib
 from sklearn.metrics.pairwise import cosine_similarity
+from typing import List, Set
+import csv
+from collections import defaultdict
+from dotenv import load_dotenv
+import re
+
+def prepare_ingredients_for_allergens(parts):
+    """
+    Convert RecipeIngredientParts to a clean list of strings
+    for allergen detection, without modifying ingredients_text.
+    """
+    if isinstance(parts, list):
+        return parts
+    elif isinstance(parts, (np.ndarray, pd.Series)):
+        return parts.tolist()
+    elif isinstance(parts, str):
+        # Convert string like "['milk' 'butter']" -> ['milk', 'butter']
+        return re.findall(r"[a-zA-Z0-9]+(?: [a-zA-Z0-9]+)*", parts)
+    else:
+        return []
+
+# load allergen map once
+def load_allergen_map(csv_path):
+    """
+    Load allergen data from a CSV file and return a mapping of allergens to ingredients.
+    Example output:
+    {
+        "peanut": {"peanut", "peanut butter", "peanut oil"},
+        "dairy": {"milk", "cheese", "butter"},
+        ...
+    }
+    """
+    allergen_map = defaultdict(set)
+
+    with open(csv_path, newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            ingredient = row["ingredient"].strip().lower()
+            allergen = row["allergy"].strip().lower()
+            if not ingredient or not allergen:
+                continue
+            allergen_map[allergen].add(ingredient)
+
+    return dict(allergen_map)
+
+def detect_allergens(ingredient_parts: List[str], ingredient_to_allergen: dict[str, str]) -> List[str]:
+    """
+    Detect allergens for a recipe using substring matching.
+    Checks both the main allergen name and all its variants.
+    Handles plurals and basic punctuation.
+    """
+    detected: Set[str] = set()
+
+    for part in ingredient_parts:
+        part_clean = re.sub(r"[^\w\s]", "", part.lower().strip())
+
+        # exact match
+        if part_clean in ingredient_to_allergen:
+            detected.add(ingredient_to_allergen[part_clean])
+
+        # substring match
+        for key, allergen in ingredient_to_allergen.items():
+            if key in part_clean:
+                detected.add(allergen)
+
+        # simple plural handling
+        if part_clean.endswith("s"):
+            singular = part_clean[:-1]
+            if singular in ingredient_to_allergen:
+                detected.add(ingredient_to_allergen[singular])
+
+    return sorted(detected)
 
 # build path to data file since relative paths can be unreliable
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -13,13 +85,43 @@ DATA_PATH = os.path.join(BASE_DIR, "data/recipes.parquet")
 MODEL_PATH = os.path.normpath(os.path.join(BASE_DIR, "recipe_assets.pkl"))
 INDEX_PATH = os.path.normpath(os.path.join(BASE_DIR, "recipe_index.faiss"))
 
+dotenv_path = os.path.join(BASE_DIR, ".env")
+load_dotenv(dotenv_path)
+ALLERGENS_CSV_PATH = os.getenv("ALLERGENS_CSV_PATH")
+if not ALLERGENS_CSV_PATH:
+    raise RuntimeError("ALLERGENS_CSV_PATH env variable not set")
+
+# If path is relative, resolve it from project root
+if not os.path.isabs(ALLERGENS_CSV_PATH):
+    PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+    ALLERGENS_CSV_PATH = os.path.join(PROJECT_ROOT, ALLERGENS_CSV_PATH)
+
+if not os.path.exists(ALLERGENS_CSV_PATH):
+    raise FileNotFoundError(f"Allergen CSV not found: {ALLERGENS_CSV_PATH}")
+
 df = pd.read_parquet(DATA_PATH)
 df = df.copy()
+
+# create a clean list of ingredients specifically for allergen detection
+df['ingredients_list'] = df['RecipeIngredientParts'].apply(prepare_ingredients_for_allergens)
+
+allergen_map = load_allergen_map(ALLERGENS_CSV_PATH)
+
+ingredient_to_allergen = {}
+for allergen, variants in allergen_map.items():
+    for variant in variants:
+        ingredient_to_allergen[variant.lower()] = allergen
+    # Also map the main allergen itself
+    ingredient_to_allergen[allergen.lower()] = allergen
+
+df['Allergens'] = df['ingredients_list'].apply(
+    lambda parts: detect_allergens(parts, ingredient_to_allergen)
+)
 
 # convert RecipeId to int to match IDs from likedrecipes
 df["RecipeId"] = df["RecipeId"].astype(int)
 
-df = df.sample(5000, random_state=42) # limit to 5000 recipes for faster testing. full 500k dataset will probably take 1-2 hours to compute. only need to compute once before prod
+df = df.head(5000) # limit to 5000 recipes for faster testing. full 500k dataset will probably take 1-2 hours to compute. only need to compute once before prod
 
 # print("Sample RecipeIds in df:", df["RecipeId"].tolist()[:10])
 
@@ -33,7 +135,7 @@ if os.path.exists(MODEL_PATH) and os.path.exists(INDEX_PATH):
     print("Loading cached model and FAISS index...")
     model, df = joblib.load(MODEL_PATH)
     index = faiss.read_index(INDEX_PATH)
-else:
+else:    
     print("Encoding recipes with MiniLM (first-time setup)...")
     model = SentenceTransformer('all-MiniLM-L6-v2')
     embeddings = model.encode(
@@ -194,7 +296,7 @@ def get_recipe_by_id(recipe_id: int):
 
 if __name__ == "__main__":
     # # local tests
-    test_user_ids = [1, 2, 3]
+    # test_user_ids = [1, 2, 3]
 
     # print("Testing recipe by ID:")
     # recipe = get_recipe_by_id(373686)
@@ -208,3 +310,11 @@ if __name__ == "__main__":
     # test_pantry = ["chicken", "rice", "broccoli"]
     # print("\nTesting content-based (pantry) recommendations:")
     # print(recommend_recipes(test_pantry, top_n=5))
+    
+    print("\n=== First 20 recipes with detected allergens ===\n")
+    for i, recipe in df.head(30).iterrows():
+        print(f"RecipeId: {recipe['RecipeId']}")
+        print(f"Name: {recipe['Name']}")
+        print(f"Ingredients: {recipe['RecipeIngredientParts']}")
+        print(f"Allergens detected: {recipe['Allergens']}")
+        print("-" * 60)
