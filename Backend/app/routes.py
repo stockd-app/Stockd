@@ -30,6 +30,7 @@ from app.utils.openfoodfacts import get_product_image_from_openfoodfacts
 from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
 from app.database.models import (
+    ItemClassification,
     LikedRecipe, PantryItemsDeleteRequest,
     PantryItemsRequest,
     Recipe,
@@ -63,10 +64,11 @@ async def upload_receipt(
     """
     Upload an image of a receipt and:
     1. Send it to Asprise OCR API
-    2. Classify items using the AI model
-    3. Store items in the database
-    4. Return the processed items to frontend
-    5. Start background task to fetch images from OpenFoodFacts
+    2. Fetch existing items from DB classifications
+    3. Classify missing items using the AI model, if no missing items, skip this step
+    4. Store items in the database
+    5. Return the processed items to frontend
+    6. Start background task to fetch images from OpenFoodFacts
     """
     db = SessionLocal()
     try:
@@ -87,92 +89,128 @@ async def upload_receipt(
                 "grouped_items": {},
                 "total_items": 0,
             }
-
-        print("Sending items to AI classifier: ", time.strftime("%Y-%m-%d %H:%M:%S"))
-        # Call AI model to classify items
-        ai_data = classify_receipt_items(parsed)
-
-        classified_results = ai_data.get("results", {})
-        print("Received classified results: ", time.strftime("%Y-%m-%d %H:%M:%S"))
-        processed_items = []
-        
-        for raw_item_name, item_data in classified_results.items():
-            if not item_data.get("is_food", False):
-                continue
-            # Sanitize inputs
-            item_name = sanitize_text(raw_item_name)
-            quantity = sanitize_quantity(item_data.get("quantity", 1))
-            category = sanitize_text(item_data.get("category", "Uncategorized"))
-            storage = sanitize_text(item_data.get("storage", "Pantry"))
-            normalized = normalize_food_name(item_name)
             
+        print("Fetching existing items classifications from DB: ", time.strftime("%Y-%m-%d %H:%M:%S"))
+        normalized_items = {
+            normalize_food_name(name): name
+            for name in parsed["items"].keys()
+        }
+        
+        cached = (
+            db.query(ItemClassification)
+            .filter(ItemClassification.normalized_name.in_(normalized_items.keys()))
+            .all()
+        )
+
+        cached_map = {}
+        for c in cached:
+            cached_map[c.normalized_name] = c
+        
+        missing_items = {}
+        for norm, raw in normalized_items.items():
+            if norm not in cached_map:
+                missing_items[norm] = raw
+
+        ai_results = {}
+        if missing_items:
+            print("Sending missing items to AI classifier: ", time.strftime("%Y-%m-%d %H:%M:%S"))
+            ai_items_payload = {name: parsed["items"][name] for name in missing_items.values()}
+            print("AI items payload: ", ai_items_payload)
+            ai_payload = {
+                "store": parsed.get("store", "Unknown"),
+                "items": ai_items_payload
+            }
+            ai_data = classify_receipt_items(ai_payload)
+            ai_results = ai_data.get("results", {})
+        
+        print("Received classified results: ", time.strftime("%Y-%m-%d %H:%M:%S"))
+        
+        for raw_name, item_data in ai_results.items():
+            normalized = normalize_food_name(raw_name)
+
+            if isinstance(item_data, dict):
+                is_food = item_data.get("is_food") == "food"
+                category = item_data.get("category", "Uncategorized")
+                storage = item_data.get("storage", "Pantry")
+                quantity = item_data.get("quantity", 1)
+            else:
+                # (1 = food, 0 = not food)
+                is_food = bool(item_data)
+                category = "Uncategorized"
+                storage = "Pantry"
+                quantity = 1
+
+            # Sanitize inputs
+            item_name = sanitize_text(raw_name)
+            quantity = sanitize_quantity(quantity)
+            category = sanitize_text(category)
+            storage = sanitize_text(storage)
+
+            existing = (
+                db.query(ItemClassification)
+                .filter(ItemClassification.normalized_name == normalized)
+                .first()
+            )
+
+            if existing:
+                cached_map[normalized] = existing
+            else:
+                classification = ItemClassification(
+                    normalized_name=normalized,
+                    is_food=is_food,
+                    category=category,
+                    storage=storage
+                )
+                db.add(classification)
+                db.flush()
+                cached_map[normalized] = classification
+
+        # Use cached_map to populate user's pantry items
+        processed_items = []
+        for norm_name, raw_name in normalized_items.items():
+            classification = cached_map.get(norm_name)
+
+            if not classification or not classification.is_food:
+                continue
+
             # Check if item already exists for this user
             existing_item = (
                 db.query(PantryItem)
                 .filter(PantryItem.user_id == user.id)
-                .filter(PantryItem.normalized_name == normalized)
+                .filter(PantryItem.normalized_name == norm_name)
                 .first()
             )
-
             if existing_item:
-                # Update existing item - add to quantity
-                existing_item.quantity_value += quantity
-                existing_item.category = category
-                existing_item.storage = storage
-                existing_item.added_on = datetime.datetime.utcnow()
-                db.flush()
+                processed_items.append(existing_item)
+                continue
 
-                processed_items.append(
-                    {
-                        "id": existing_item.id,
-                        "name": existing_item.item_name,
-                        "qty": f"x{int(existing_item.quantity_value)}",
-                        "image": existing_item.item_image or "",
-                        "category": existing_item.category,
-                        "storage": existing_item.storage,
-                    }
-                )
-            else:
-                # Add new item
-                new_item = PantryItem(
-                    user_id=user.id,
-                    item_name=item_name,
-                    normalized_name=normalized,
-                    quantity_value=quantity,
-                    quantity_unit="pcs",
-                    category=category,
-                    storage=storage,
-                    item_image=None,
-                    added_on=datetime.datetime.utcnow(),
-                )
-                db.add(new_item)
-                db.flush()
-
-                processed_items.append(
-                    {
-                        "id": new_item.id,
-                        "name": new_item.item_name,
-                        "qty": f"x{int(new_item.quantity_value)}",
-                        "image": new_item.item_image or "",
-                        "category": new_item.category,
-                        "storage": new_item.storage,
-                    }
-                )
+            # Create new PantryItem
+            new_item = PantryItem(
+                user_id=user.id,
+                item_name=sanitize_text(raw_name),
+                normalized_name=norm_name,
+                category=classification.category or "non-food",
+                storage=classification.storage or "non-food",
+                quantity_value=parsed["items"].get(raw_name, 1),
+                quantity_unit="",
+            )
+            db.add(new_item)
+            db.flush()
+            processed_items.append(new_item)
+                
         print("Processed all items: ", time.strftime("%Y-%m-%d %H:%M:%S"))
         db.commit()
 
         # Group items by storage for frontend
         grouped_items = {}
         for item in processed_items:
-            storage = item["storage"]
-            if storage not in grouped_items:
-                grouped_items[storage] = []
-            grouped_items[storage].append(
+            storage = item.storage or "Pantry"
+            grouped_items.setdefault(storage, []).append(
                 {
-                    "id": item["id"],
-                    "name": item["name"],
-                    "qty": item["qty"],
-                    "image": item["image"],
+                    "id": item.id,
+                    "name": item.item_name,
+                    "qty": item.quantity_value,
+                    "image": item.item_image,
                 }
             )
 
@@ -736,6 +774,34 @@ async def delete_pantry_items(request: Request, request_data: PantryItemsDeleteR
         db.close()
 
 
+async def fetch_recipe_from_ai(recipe_id: int) -> dict:
+    """
+    Fetch a full recipe object from the AI service by recipe ID.
+    """
+    print(recipe_id)
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.post(
+                f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recipe-by-id",
+                json={"recipe_id": recipe_id}
+            )
+            print(resp)
+            resp.raise_for_status()
+            return resp.json()
+
+        except httpx.HTTPStatusError:
+            raise HTTPException(
+                status_code=resp.status_code,
+                detail=resp.text
+            )
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error contacting recipe AI service: {str(e)}"
+            )
+
+
 @router.post("/recipes/{recipe_id}/like", tags=["Recipes"])
 @limiter.limit("10/minute")
 async def toggle_like_recipe(
@@ -743,20 +809,39 @@ async def toggle_like_recipe(
 ):
     """
     Like or unlike a recipe for the authenticated user.
+    The recipe_id parameter is the dataset's RecipeId.
     - If the user has not liked the recipe, it will be added
     - If the user has already liked the recipe, it will be removed
     """
     db = SessionLocal()
 
     try:
-        recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+        # Check if recipe exists in database by dataset_recipe_id
+        recipe = db.query(Recipe).filter(Recipe.dataset_recipe_id == recipe_id).first()
+        
+        # If recipe doesn't exist in database, fetch from AI and create it
         if not recipe:
-            raise HTTPException(status_code=404, detail="Recipe not found")
+            try:
+                recipe_data = await fetch_recipe_from_ai(recipe_id)
+                recipe_obj = recipe_data.get("recipe", {})
+                
+                recipe = Recipe(
+                    dataset_recipe_id=recipe_id,
+                    recipe_name=recipe_obj.get("Name", "Unknown Recipe"),
+                    recipe_image=recipe_obj.get("Images", [None])[0] if recipe_obj.get("Images") else None,
+                    steps=recipe_obj.get("Description", ""),
+                    prep_time=int(recipe_obj.get("PrepTime", "0").replace("PT", "").replace("M", "")) if recipe_obj.get("PrepTime") else None,
+                    cook_time=int(recipe_obj.get("CookTime", "0").replace("PT", "").replace("M", "")) if recipe_obj.get("CookTime") else None,
+                )
+                db.add(recipe)
+                db.flush()
+            except HTTPException:
+                raise HTTPException(status_code=404, detail="Recipe not found in dataset")
 
         existing_like = (
             db.query(LikedRecipe)
             .filter(LikedRecipe.user_id == user.id)
-            .filter(LikedRecipe.recipe_id == recipe_id)
+            .filter(LikedRecipe.recipe_id == recipe.id)
             .first()
         )
 
@@ -767,7 +852,7 @@ async def toggle_like_recipe(
         else:
             new_like = LikedRecipe(
                 user_id=user.id,
-                recipe_id=recipe_id,
+                recipe_id=recipe.id,
                 liked_at=datetime.datetime.utcnow(),
             )
             db.add(new_like)
@@ -790,7 +875,7 @@ async def toggle_like_recipe(
 @limiter.limit("10/minute")
 async def get_liked_recipes(request: Request, user=Depends(require_google_token)):
     """
-    Returns a list of recipes liked by the currently authenticated user.
+    Returns a list of full recipe objects liked by the currently authenticated user.
     """
     db = SessionLocal()
     try:
@@ -803,15 +888,12 @@ async def get_liked_recipes(request: Request, user=Depends(require_google_token)
 
         result = []
         for recipe in liked_recipes:
-            result.append(
-                {
-                    "id": recipe.id,
-                    "recipe_name": recipe.recipe_name,
-                    "recipe_image": recipe.recipe_image,
-                    "prep_time": recipe.prep_time,
-                    "cook_time": recipe.cook_time,
-                }
-            )
+            try:
+                # Fetch full recipe object
+                recipe_data = await fetch_recipe_from_ai(recipe.dataset_recipe_id)
+                result.append(recipe_data)
+            except HTTPException:
+                continue
 
         return {"liked_recipes": result}
 
@@ -844,12 +926,12 @@ async def get_pantry_recommendations(user_id: int, top_n: int = 10):
 
     db = SessionLocal()
     id_list = [r["RecipeId"] for r in recipes]
-    db_recipes = db.query(Recipe).filter(Recipe.id.in_(id_list)).all()
+    db_recipes = db.query(Recipe).filter(Recipe.dataset_recipe_id.in_(id_list)).all()
     db.close()
 
     merged = []
     for r in recipes:
-        db_record = next((x for x in db_recipes if x.id == r["RecipeId"]), None)
+        db_record = next((x for x in db_recipes if x.dataset_recipe_id == r["RecipeId"]), None)
         merged.append(
             {
                 **r,
@@ -879,9 +961,12 @@ def get_all_user_ids():
 def get_user_liked_recipes(user_id: int):
     db = SessionLocal()
     try:
-        rows = db.query(LikedRecipe.recipe_id).filter(
-            LikedRecipe.user_id == user_id
-        ).all()
+        rows = (
+            db.query(Recipe.dataset_recipe_id)
+            .join(LikedRecipe, LikedRecipe.recipe_id == Recipe.id)
+            .filter(LikedRecipe.user_id == user_id)
+            .all()
+        )
         return [r[0] for r in rows]
     finally:
         db.close()
@@ -947,26 +1032,7 @@ async def get_recipe_by_id_route(recipe_id: int):
     """
     Fetch a single recipe by RecipeId via the AI service.
     """
-    async with httpx.AsyncClient() as client:
-        try:
-            resp = await client.post(
-                f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recipe-by-id",
-                json={"recipe_id": recipe_id}
-            )
-            resp.raise_for_status()
-            return resp.json()
-
-        except httpx.HTTPStatusError:
-            raise HTTPException(
-                status_code=resp.status_code,
-                detail=resp.text
-            )
-
-        except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Error contacting recipe AI service: {str(e)}"
-            )
+    return await fetch_recipe_from_ai(recipe_id)
 
 @router.post("/user/post-allergens", tags=["Users"])
 @limiter.limit("10/minute")
