@@ -1,0 +1,29 @@
+@import "@/styles/variable.css";
+
+.pantryRecipes__container {
+    min-height: 100vh;
+    background: var(--color-white);
+    padding-bottom: 40px;
+}
+
+.pantryRecipes__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+}
+
+.backBtn,
+.filterIcon {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.pantryRecipes__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    padding: 16px;
+}
