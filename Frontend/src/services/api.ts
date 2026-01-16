@@ -357,3 +357,67 @@ export const deleteUserAccount = async (userId: number) => {
     }
   }
 };
+
+/**
+ * Get user's allergens
+ */
+export const getUserAllergens = async () => {
+  let idToken = localStorage.getItem("google_id_token");
+
+  try {
+    const res = await axios.get(API_ROUTES.GET_USER_ALLERGENS, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+    });
+    return res.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        idToken = localStorage.getItem("google_id_token");
+        const retry = await axios.get(API_ROUTES.GET_USER_ALLERGENS, {
+          headers: { Authorization: `Bearer ${idToken}` },
+        });
+        return retry.data;
+      }
+    }
+    throw error;
+  }
+};
+
+/**
+ * Update user's allergens
+ */
+export const updateUserAllergens = async (allergens: string[]) => {
+  let idToken = localStorage.getItem("google_id_token");
+
+  try {
+    const res = await axios.post(
+      API_ROUTES.POST_USER_ALLERGENS,
+      { allergens },
+      {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      }
+    );
+    return res.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        idToken = localStorage.getItem("google_id_token");
+        const retry = await axios.post(
+          API_ROUTES.POST_USER_ALLERGENS,
+          { allergens },
+          {
+            headers: { Authorization: `Bearer ${idToken}` },
+          }
+        );
+        return retry.data;
+      }
+    }
+    throw error;
+  }
+};

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Enum, DateTime, ForeignKey, Text, UniqueConstraint
+from sqlalchemy import Boolean, Column, Integer, String, Float, Enum, DateTime, ForeignKey, Text, UniqueConstraint, JSON
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.utils.encrypted_type import EncryptedString
@@ -17,11 +17,15 @@ class User(Base):
     email_hash = Column(String(64), nullable=False, unique=True)
     picture = Column(String(255))
     client_id = Column(EncryptedString)
+    allergens = Column(JSON, nullable=True)
     role = Column(Enum("admin", "user", "guest"), default="guest")
     created_at = Column(DateTime, default=datetime.utcnow)
 
     pantry_items = relationship("PantryItem", back_populates="owner", passive_deletes=True )
     liked_recipes = relationship("LikedRecipe", back_populates="user", passive_deletes=True)
+    
+class UserAllergensRequest(BaseModel):
+    allergens: List[str]
 
 class PantryItem(Base):
     __tablename__ = "PantryItems"
@@ -52,12 +56,28 @@ class PantryItemsRequest(BaseModel):
     user_id: int
     items: List[PantryItemInput]
     
+class ItemClassification(Base):
+    __tablename__ = "item_classifications"
+
+    id = Column(Integer, primary_key=True)
+    normalized_name = Column(String(255), unique=True, index=True, nullable=False)
+    is_food = Column(Boolean, nullable=False)
+    category = Column(String(255))
+    storage = Column(String(255))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+    )
+    
 class PantryItemsDeleteRequest(BaseModel):
     pantry_item_ids: List[int]
 
 class Recipe(Base):
     __tablename__ = "Recipes"
     id = Column(Integer, primary_key=True, index=True)
+    dataset_recipe_id = Column(Integer, nullable=False, unique=True)
     recipe_name = Column(String(255), nullable=False)
     recipe_image = Column(String(255))
     steps = Column(Text)
