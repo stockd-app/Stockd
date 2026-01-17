@@ -7,26 +7,68 @@ import faiss
 import hashlib
 from sklearn.metrics.pairwise import cosine_similarity
 from recipe_subset import canonicalize_recipe_ingredients, build_canonical_from_recipe_df, get_canonical_db, normalize_tokens
+import ast
 
 # build path to data file since relative paths can be unreliable
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH = os.path.join(BASE_DIR, "data/recipes.parquet")
+# DATA_PATH = os.path.join(BASE_DIR, "data/recipes.parquet")
 MODEL_PATH = os.path.normpath(os.path.join(BASE_DIR, "recipe_assets.pkl"))
 INDEX_PATH = os.path.normpath(os.path.join(BASE_DIR, "recipe_index.faiss"))
 
-df = pd.read_parquet(DATA_PATH)
-df = df.copy()
+# df = pd.read_parquet(DATA_PATH)
+CSV_PATH = os.path.join(BASE_DIR, "data/newdataset.csv")
+
+df = pd.read_csv(CSV_PATH)
+print("CSV loaded:", df.shape)
+
+df = df.head(5000)
+print("Using subset:", df.shape)
+
+# Drop unnamed index column
+df = df.drop(columns=[""], errors="ignore")
+
+# Rename columns to match internal schema
+df = df.rename(columns={
+    "title": "Name",
+    "ingredients": "RawIngredients",
+    "directions": "Directions",
+    "NER": "RecipeIngredientParts"
+})
+
+# Create a RecipeId
+df["RecipeId"] = df.index.astype(int)
+
+# Parse stringified lists
+df["RawIngredients"] = df["RawIngredients"].apply(
+    lambda x: ast.literal_eval(x) if isinstance(x, str) else []
+)
+
+df["Directions"] = df["Directions"].apply(
+    lambda x: ast.literal_eval(x) if isinstance(x, str) else []
+)
+
+df["RecipeIngredientParts"] = df["RecipeIngredientParts"].apply(
+    lambda x: ast.literal_eval(x) if isinstance(x, str) else []
+)
+
+# Optional metadata defaults
+df["AuthorName"] = None
+df["RecipeCategory"] = None
+df["AggregatedRating"] = None
+df["Calories"] = None
+
+# df = df.copy()
 
 # convert RecipeId to int to match IDs from likedrecipes
 df["RecipeId"] = df["RecipeId"].astype(int)
 
-df = df.head(5000) # limit to 5000 recipes for faster testing. full 500k dataset will probably take 1-2 hours to compute. only need to compute once before prod
+# df = df.head(5000) # limit to 5000 recipes for faster testing. full 500k dataset will probably take 1-2 hours to compute. only need to compute once before prod
 
 # print("Sample RecipeIds in df:", df["RecipeId"].tolist()[:10])
 
 # join each list in recipeingredientparts into a single string
 df['ingredients_text'] = df['RecipeIngredientParts'].apply(
-    lambda x: " ".join(x).lower() if isinstance(x, list) else str(x).lower()
+    lambda x: " ".join(x).lower() if isinstance(x, list) else ""
 )
 
 # build canonical DB from recipe dataset (once at startup)
