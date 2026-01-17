@@ -50,6 +50,19 @@ CREATE TABLE item_classifications (
     UNIQUE KEY unique_itemclassifications_normalized_name (normalized_name)
 );
 
+-- GROCERY ITEMS
+CREATE TABLE GroceryItems (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    item_name VARCHAR(255) NOT NULL,
+    quantity_value FLOAT DEFAULT 0,
+    quantity_unit VARCHAR(100),
+    is_purchased BOOLEAN DEFAULT FALSE,
+    added_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_on DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
+);
+
 -- RECIPES
 CREATE TABLE Recipes (
     id INT AUTO_INCREMENT PRIMARY KEY,
