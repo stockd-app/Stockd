@@ -9,6 +9,7 @@ import ExploreSection from "../../components/Dashboard/ExploreSection";
 import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
 import image_placeholder from "../../assets/images/error_handling/image_placeholder.png"
 import DOMPurify from "dompurify";
+import AllergensModal from "../../components/AllergensModal/AllergensModal";
 
 import "./dashboard.css";
 
@@ -25,11 +26,23 @@ interface DashboardProps {
  * @returns JSX.Element
  */
 const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
+  const [showAllergensModal, setShowAllergensModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [recommendedItems, setRecommendedItems] = useState<any[]>([]);
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
 
   const navigate = useNavigate();
+
+  /**
+   * Check if user has completed allergens onboarding
+   */
+  useEffect(() => {
+    const onboarded = localStorage.getItem("allergens_onboarded");
+
+    if (!onboarded) {
+      setShowAllergensModal(true);
+    }
+  }, []);
 
   useEffect(() => {
     console.log("Dashboard useEffect mounted");
@@ -57,6 +70,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
             image: imageUrl,
             rating: Number(recipe.AggregatedRating) || 4.0,
             time: formatPrepTime(recipe.PrepTime),
+            allergens: recipe.Allergens ?? [],
             // status: "Available",
           };
         });
@@ -105,10 +119,30 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     },
   ];
 
+  /**
+   * Handle confirmation of selected allergens from the modal
+   * @param selected 
+   */
+  const handleAllergensConfirm = async (selected: string[]) => {
+    try {
+      await updateUserAllergens(selected);
+      localStorage.setItem("user_allergens", JSON.stringify(selected));
+      localStorage.setItem("allergens_onboarded", "true");
+      setShowAllergensModal(false);
+    } catch (err) {
+      console.error("Failed to update allergens", err);
+    }
+  };
 
   return (
 
     <div className="dashboard__container">
+      {showAllergensModal && (
+        <AllergensModal
+          initial={JSON.parse(localStorage.getItem("user_allergens") || "[]")}
+          onConfirm={handleAllergensConfirm}
+        />
+      )}
       <SearchBar value={searchQuery} onChange={setSearchQuery} />
       <FoodCategorySection />
 

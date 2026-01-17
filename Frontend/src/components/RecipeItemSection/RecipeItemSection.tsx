@@ -13,6 +13,7 @@ interface RecipeItemSectionProps {
         rating?: number;
         time?: string;
         status?: string;
+        allergens?: string[];
     }[];
     emptyTitle?: string;
     emptySubtitle?: string;
@@ -52,6 +53,7 @@ const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = 
                             rating={item.rating}
                             time={item.time}
                             status={item.status}
+                            allergens={item.allergens}
                         />
                     ))}
                 </div>

@@ -9,9 +9,10 @@ interface RecipeItemCardProps {
     rating?: number;
     time?: string;
     status?: string;
+    allergens?: string[];
 }
 
-const RecipeItemCard: React.FC<RecipeItemCardProps> = ({ name, image, rating, time, status }) => {
+const RecipeItemCard: React.FC<RecipeItemCardProps> = ({ name, image, rating, time, status, allergens }) => {
     const statusClass =
         status && status.toLowerCase().includes("missing")
             ? "status status--missing"
@@ -37,6 +38,16 @@ const RecipeItemCard: React.FC<RecipeItemCardProps> = ({ name, image, rating, ti
                         </span>
                     )}
                 </div>
+
+                {allergens && allergens.length > 0 && (
+                    <div className="recipeitemcard__allergens">
+                        {allergens.map((a) => (
+                            <span key={a} className="recipeitemcard__allergen">
+                                {a}
+                            </span>
+                        ))}
+                    </div>
+                )}
 
                 {status && (
                     <span className={statusClass}>{status}</span>
