@@ -1158,6 +1158,7 @@ async def add_update_grocery_items(
 ):
     """
     Add or update grocery items for a user.
+    Update item by id.
     """
     db = SessionLocal()
     try:
@@ -1169,17 +1170,21 @@ async def add_update_grocery_items(
         processed_items = []
 
         for item in request_data.items:
-            existing_item = (
-                db.query(GroceryItem)
-                .filter(
-                    GroceryItem.user_id == request_data.user_id,
-                    GroceryItem.item_name == item.item_name,
+            existing_item = None
+            
+            if item.id:
+                existing_item = (
+                    db.query(GroceryItem)
+                    .filter(
+                        GroceryItem.id == item.id,
+                        GroceryItem.user_id == request_data.user_id,
+                    )
+                    .first()
                 )
-                .first()
-            )
 
             if existing_item:
                 # Update existing item
+                existing_item.item_name = item.item_name
                 existing_item.quantity_value = item.quantity_value
                 existing_item.quantity_unit = item.quantity_unit
                 existing_item.updated_on = datetime.datetime.now()
@@ -1261,6 +1266,123 @@ async def delete_grocery_items(
             "deleted_count": deleted_count,
             "not_found": not_found
         }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+
+def move_grocery_item_to_pantry(db, grocery_item: GroceryItem):
+    """
+    Helper function to move a grocery item to pantry.
+    Creates a PantryItem from a purchased GroceryItem.
+    """
+    norm_name = normalize_food_name(grocery_item.item_name)
+    
+    # Check if item already exists in pantry
+    existing_item = (
+        db.query(PantryItem)
+        .filter(PantryItem.user_id == grocery_item.user_id)
+        .filter(PantryItem.normalized_name == norm_name)
+        .first()
+    )
+    
+    if existing_item:
+        # Update quantity if exists
+        existing_item.quantity_value += grocery_item.quantity_value
+        existing_item.quantity_unit = grocery_item.quantity_unit or "pcs"
+        return existing_item
+    
+    # Create new PantryItem
+    pantry_item = PantryItem(
+        user_id=grocery_item.user_id,
+        item_name=grocery_item.item_name,
+        normalized_name=norm_name,
+        quantity_value=grocery_item.quantity_value,
+        quantity_unit=grocery_item.quantity_unit or "pcs",
+        category="Groceries",
+        storage="Pantry",
+    )
+    db.add(pantry_item)
+    db.flush()
+    return pantry_item
+
+
+@router.patch("/grocery_items/{item_id}/mark-purchased", tags=["Grocery"])
+async def mark_grocery_item_purchased(item_id: int):
+    """
+    Mark a specific grocery item as purchased and move it to pantry.
+    """
+    db = SessionLocal()
+    try:
+        grocery_item = (
+            db.query(GroceryItem)
+            .filter(GroceryItem.id == item_id)
+            .first()
+        )
+        
+        if not grocery_item:
+            raise HTTPException(status_code=404, detail="Grocery item not found")
+        
+        # Move to pantry
+        pantry_item = move_grocery_item_to_pantry(db, grocery_item)
+        
+        # Delete from grocery list
+        db.delete(grocery_item)
+        db.commit()
+        
+        return {
+            "status": "success",
+            "message": "Item moved to pantry",
+            "item_id": item_id,
+            "pantry_item_id": pantry_item.id
+        }
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+
+@router.patch("/grocery_items/mark-all-purchased", tags=["Grocery"])
+async def mark_all_grocery_items_purchased(user_id: int):
+    """
+    Mark all grocery items as purchased and move them to pantry for a user.
+    """
+    db = SessionLocal()
+    try:
+        # Verify user exists
+        db_user = db.query(User).filter(User.id == user_id).first()
+        if not db_user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Get all unpurchased items
+        grocery_items = (
+            db.query(GroceryItem)
+            .filter(GroceryItem.user_id == user_id)
+            .all()
+        )
+        
+        # Move each item to pantry
+        for item in grocery_items:
+            move_grocery_item_to_pantry(db, item)
+            db.delete(item)
+        
+        db.commit()
+        
+        return {
+            "status": "success",
+            "message": "All items moved to pantry",
+            "user_id": user_id,
+            "moved_count": len(grocery_items)
+        }
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))

@@ -7,6 +7,7 @@ import TermsPage from "./pages/TermsAndCondition/TermsPage";
 import FullTermsPage from "./pages/TermsAndCondition/FullTermsPage";
 import GoogleErrorScreen from "./pages/GoogleErrorHandling/GoogleErrorScreen";
 import PantryPage from "./pages/PantryPage/PantryPage";
+import GroceryListPage from "./pages/GroceryListPage/GroceryListPage";
 
 const App: React.FC = () => {
   const [user, setUser] = useState<string | null>(localStorage.getItem("user"));
@@ -62,6 +63,19 @@ const App: React.FC = () => {
               email={JSON.parse(localStorage.getItem("user")!)?.email || ""}
               picture={JSON.parse(localStorage.getItem("user")!)?.picture || ""}
               userId={JSON.parse(localStorage.getItem("user")!)?.id || null}
+            />
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
+      <Route
+        path="/cart"
+        element={
+          user ? (
+            <GroceryListPage
+              userId={JSON.parse(localStorage.getItem("user")!)?.id || null}
+              accessToken={localStorage.getItem("google_access_token") || ""}
             />
           ) : (
             <Navigate to="/" replace />

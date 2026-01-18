@@ -92,7 +92,6 @@ class GroceryItemInput(BaseModel):
     item_name: str
     quantity_value: Optional[float] = 0
     quantity_unit: Optional[str] = "pcs"
-    category: Optional[str] = "Uncategorized"
 
 class GroceryItemsRequest(BaseModel):
     user_id: int
