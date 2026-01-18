@@ -353,3 +353,92 @@ export const deleteUserAccount = async (userId: number) => {
     }
   }
 };
+
+/**
+ * Toggle like / unlike a recipe
+ * @param recipeId
+ */
+export const toggleLikeRecipe = async (recipeId: number) => {
+  let idToken = localStorage.getItem("google_id_token");
+   const url = API_ROUTES.TOGGLE_LIKE_RECIPE.replace(
+    ":recipeId",
+    String(recipeId)
+  );
+
+  try {
+    const res = await axios.post(
+      // API_ROUTES.TOGGLE_LIKE_RECIPE(recipeId),
+      url,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      }
+    );
+    return res.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        idToken = localStorage.getItem("google_id_token");
+        const retryRes = await axios.post(
+          // API_ROUTES.TOGGLE_LIKE_RECIPE(recipeId),
+          url,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
+        return retryRes.data;
+      } else {
+        localStorage.clear();
+        window.location.href = "/";
+        throw new Error("Session expired. Please log in again.");
+      }
+    }
+    throw error;
+  }
+};
+
+
+/**
+ * Get current user's liked recipes
+ * @returns
+ */
+export const getLikedRecipes = async () => {
+  let idToken = localStorage.getItem("google_id_token");
+
+  try {
+    const res = await axios.get(API_ROUTES.GET_LIKED_RECIPES, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+    });
+
+    return res.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        idToken = localStorage.getItem("google_id_token");
+
+        const retryRes = await axios.get(API_ROUTES.GET_LIKED_RECIPES, {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+
+        return retryRes.data;
+      } else {
+        localStorage.clear();
+        window.location.href = "/";
+        throw new Error("Session expired. Please log in again.");
+      }
+    }
+    throw error;
+  }
+};
+
