@@ -830,8 +830,8 @@ async def toggle_like_recipe(
                     recipe_name=recipe_obj.get("Name", "Unknown Recipe"),
                     recipe_image=recipe_obj.get("Images", [None])[0] if recipe_obj.get("Images") else None,
                     steps=recipe_obj.get("Description", ""),
-                    prep_time=int(recipe_obj.get("PrepTime", "0").replace("PT", "").replace("M", "")) if recipe_obj.get("PrepTime") else None,
-                    cook_time=int(recipe_obj.get("CookTime", "0").replace("PT", "").replace("M", "")) if recipe_obj.get("CookTime") else None,
+                    prep_time=int(recipe_obj.get("PrepTime", "0").replace("PT", "").replace("M", "").replace("H", "")) if recipe_obj.get("PrepTime") else None,
+                    cook_time=int(recipe_obj.get("CookTime", "0").replace("PT", "").replace("M", "").replace("H", "")) if recipe_obj.get("CookTime") else None,
                 )
                 db.add(recipe)
                 db.flush()
