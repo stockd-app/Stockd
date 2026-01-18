@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getRecipeById } from "../../services/api";
+import { getRecipeById, getLikedRecipes } from "../../services/api";
 import { getIngredientIcon } from "../../utils/ingredientIconMap";
 import { Clock, Star } from "lucide-react";
 import image_placeholder from "../../assets/images/error_handling/image_placeholder.png";
@@ -17,6 +17,9 @@ const SingleRecipePage: React.FC = () => {
 
     const [recipe, setRecipe] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    //`initialLiked` will no longer be undefined.
+    const [initialLiked, setInitialLiked] = useState(false);
+    const [likedLoading, setLikedLoading] = useState(false);
     const difficulty = recipe?.Keywords?.find((kw: string) => ["easy", "medium", "hard"].includes(kw.toLowerCase())) ?? "—";
 
     useEffect(() => {
@@ -50,6 +53,35 @@ const SingleRecipePage: React.FC = () => {
         fetchRecipe();
     }, [id]);
 
+    useEffect(() => {
+        const run = async () => {
+            if (!recipe?.RecipeId) return;
+
+            try {
+                setLikedLoading(true);
+                const res = await getLikedRecipes();
+                const likedList = res?.liked_recipes ?? [];
+
+                const isLiked = likedList.some((item: any) => {
+                    const rid =
+                        item?.recipe?.RecipeId ??
+                        item?.RecipeId ??
+                        item?.recipe_id ??
+                        item?.id;
+                    return Number(rid) === Number(recipe.RecipeId);
+                });
+
+                setInitialLiked(isLiked);
+            } catch (e) {
+                console.error("Failed to fetch liked recipes", e);
+                setInitialLiked(false);
+            } finally {
+                setLikedLoading(false);
+            }
+        };
+        run();
+    }, [recipe?.RecipeId]);
+
     if (loading) return <div>Loading...</div>;
     if (!recipe) return <div>Recipe not found</div>;
 
@@ -62,14 +94,16 @@ const SingleRecipePage: React.FC = () => {
                     <button className="recipe__back recipe__back__overlay" onClick={() => navigate(-1)} aria-label="Back" > ← </button>
                     <img className="recipe__hero-img" src={imageUrl} alt={recipe.Name} />
                 </div>
-                <LikeButton
-                    recipeId={recipe.RecipeId}
-                    // initialLiked={recipe.isLiked} 
-                    initialLiked={recipe.isLiked ?? false}
-                />
-
+                
                 <div className="recipe__content">
+                    <div className="recipe__titleRow">
                     <h1 className="recipe__title">{recipe.Name}</h1>
+                    <LikeButton
+                    recipeId={recipe.RecipeId}
+                    initialLiked={initialLiked}
+                    onLikedChange={(v) => setInitialLiked(v)}
+                    />
+                    </div>
                     <span>
                         <Star size={16} color="#FFD700" fill="#FFD700" /> {recipe.AggregatedRating}
                     </span>
@@ -119,11 +153,15 @@ const SingleRecipePage: React.FC = () => {
 
                     <section className="recipe__section">
                         <h2 className="recipe__section__title">Instructions</h2>
-                        {/* <ol className="recipe__instructions">
-                            {recipe.Instructions?.map((step: string, i: number) => (
+                        <ol className="recipe__instructions">
+                            {recipe.RecipeInstructions?.length ? (
+                                recipe.RecipeInstructions.map((step: string, i: number) => (
                                 <li key={i}>{step}</li>
-                            ))}
-                        </ol> */}
+                                ))
+                            ) : (
+                                <li>No instructions available.</li>
+                            )}
+                        </ol>
                     </section>
                 </div>
             </div>

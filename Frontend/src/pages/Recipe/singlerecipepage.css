@@ -48,6 +48,13 @@
   margin: auto;
 }
 
+.recipe__titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* gap: 15px;  */
+}
+
 .recipe__title {
   margin: 16px 0 10px;
   font-size: clamp(26px, 2.6vw, 34px);
@@ -163,7 +170,6 @@
 .recipe__instructions li {
   margin: 0 0 10px;
   line-height: 1.7;
-  color: #111827;
 }
 
 @media (max-width: 600px) {
