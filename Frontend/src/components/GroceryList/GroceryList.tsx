@@ -207,7 +207,7 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
     <div className="grocery-list__container">
       {/* Header */}
       <div className="grocery-list__header">
-        <h1 className="grocery-list__title">Shopping List</h1>
+        <h1 className="grocery-list__title">Grocery List</h1>
         <div className="grocery-list__badge">{totalItems}</div>
       </div>
 
@@ -325,7 +325,7 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
         <div className="grocery-list__loading">Loading...</div>
       ) : totalItems === 0 ? (
         <div className="grocery-list__empty">
-          <p>Your shopping list is empty</p>
+          <p>Your grocery list is empty</p>
           <small>Add items to get started</small>
         </div>
       ) : (
