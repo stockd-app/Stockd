@@ -360,15 +360,11 @@ export const deleteUserAccount = async (userId: number) => {
  */
 export const toggleLikeRecipe = async (recipeId: number) => {
   let idToken = localStorage.getItem("google_id_token");
-   const url = API_ROUTES.TOGGLE_LIKE_RECIPE.replace(
-    ":recipeId",
-    String(recipeId)
-  );
 
   try {
     const res = await axios.post(
       // API_ROUTES.TOGGLE_LIKE_RECIPE(recipeId),
-      url,
+      API_ROUTES.TOGGLE_LIKE_RECIPE.replace(":recipeId", String(recipeId)),
       {},
       {
         headers: {
@@ -384,7 +380,7 @@ export const toggleLikeRecipe = async (recipeId: number) => {
         idToken = localStorage.getItem("google_id_token");
         const retryRes = await axios.post(
           // API_ROUTES.TOGGLE_LIKE_RECIPE(recipeId),
-          url,
+          API_ROUTES.TOGGLE_LIKE_RECIPE.replace(":recipeId", String(recipeId)),
           {},
           {
             headers: {
