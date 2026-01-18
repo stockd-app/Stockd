@@ -22,6 +22,7 @@ class RecipeRecommendation(BaseModel):
 class RecipeObject(BaseModel):
     RecipeId: int
     Name: str
+    Allergens: List[str] | None = None
     AuthorId: int | None = None
     AuthorName: str | None = None
     CookTime: str | None = None
@@ -81,6 +82,7 @@ def sanitize_row_for_pydantic(row_dict):
     list_fields = [
         "Images", "Keywords", "RecipeIngredientQuantities",
         "RecipeIngredientParts","RecipeInstructions"
+        "RecipeIngredientParts", "Allergens"
     ]
     string_fields = [
         "Name", "AuthorName", "CookTime", "PrepTime",

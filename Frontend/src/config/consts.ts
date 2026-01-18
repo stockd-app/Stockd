@@ -17,6 +17,8 @@ export const API_ROUTES = {
   GET_LIKED_RECIPES: `${API_BASE_URL}/users/current/liked-recipes`,
   LOGOUT_GOOGLE: `${API_BASE_URL}/auth/google/logout`,
   DELETE_USER: `${API_BASE_URL}/delete_user`,
+  GET_USER_ALLERGENS: `${API_BASE_URL}/user/get-allergens`,
+  POST_USER_ALLERGENS: `${API_BASE_URL}/user/post-allergens`,
 };
 
 // Google OAuth related constants

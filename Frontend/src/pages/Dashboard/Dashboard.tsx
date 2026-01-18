@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getPantryRecommendations } from "../../services/api";
+import { getPantryRecommendations, updateUserAllergens } from "../../services/api";
 import { formatPrepTime } from "../../utils/utils";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import FoodCategorySection from "../../components/FoodCategoryCard/FoodCategorySection";
@@ -32,11 +32,13 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("Dashboard useEffect mounted"); 1
+    console.log("Dashboard useEffect mounted");
     if (!userId) {
       navigate("/");
       return;
     }
+
+
     const fetchRecommendations = async () => {
       try {
         console.log("Attempt fetch recommendation pantry")
@@ -69,8 +71,6 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     fetchRecommendations();
   }, [userId]);
 
-
-
   useEffect(() => {
     const query = searchQuery.trim().toLowerCase();
 
@@ -85,8 +85,6 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
 
     setFilteredItems(filtered);
   }, [searchQuery, recommendedItems]);
-
-
 
   const aiRecommended = [
     {
@@ -109,9 +107,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
 
 
   return (
+
     <div className="dashboard__container">
       <SearchBar value={searchQuery} onChange={setSearchQuery} />
       <FoodCategorySection />
+
       <RecipeItemSection title="Recommended Based on Your Pantry"
         items={filteredItems}
         onItemClick={(recipeId: number) => {
