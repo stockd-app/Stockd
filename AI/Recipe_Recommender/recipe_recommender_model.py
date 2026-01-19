@@ -208,6 +208,14 @@ MINOR_INGREDIENTS = {
     "basil", "oregano", "thyme", "rosemary", "cumin", "coriander"
 }
 
+def is_valid_ingredient(x):
+    if x is None:
+        return False
+    if not isinstance(x, str):
+        return False
+    x = x.strip().lower()
+    return x not in {"", "n/a", "na", "none", "null"}
+
 def find_semantic_subset_recipes(
     pantry_items: list,
     match_ratio_threshold: float = 1.0
@@ -233,6 +241,10 @@ def find_semantic_subset_recipes(
             ingredients = ingredients.tolist()
         elif isinstance(ingredients, str):
             ingredients = [ingredients]
+
+        valid_ingredients = [ing for ing in ingredients if is_valid_ingredient(ing)]
+        if len(valid_ingredients) < 2:
+            continue
 
         # canonicalize recipe ingredients
         recipe_canonical = canonicalize_recipe_ingredients(ingredients, auto_add=False)
@@ -281,6 +293,14 @@ if __name__ == "__main__":
     "Goya black beans can 15oz",
     "Spaghetti pasta 16oz box"
 ]
+
+    # test_pantry_exact = [
+    #     "eggs",
+    #     "chicken breast",
+    #     "pasta",
+    #     "broccoli",
+    #     "cheese"
+    # ]
     
     # print("\nTesting content-based (pantry) recommendations:")
     # print(recommend_recipes(test_pantry, top_n=5))
