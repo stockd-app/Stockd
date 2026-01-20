@@ -7,6 +7,7 @@ import TermsPage from "./pages/TermsAndCondition/TermsPage";
 import FullTermsPage from "./pages/TermsAndCondition/FullTermsPage";
 import GoogleErrorScreen from "./pages/GoogleErrorHandling/GoogleErrorScreen";
 import PantryPage from "./pages/PantryPage/PantryPage";
+import SingleRecipePage from "./pages/Recipe/SingleRecipePage";
 import BottomNavBar from "./components/NavigationBar/BottomNavBar/BottomNavBar";
 
 const App: React.FC = () => {
@@ -54,6 +55,7 @@ const App: React.FC = () => {
         path="/pantry"
         element={user ? <PantryPage /> : <Navigate to="/" replace />}
       />
+      <Route path="/recipes/:id" element={<SingleRecipePage />} />
       <Route
         path="/profile"
         element={

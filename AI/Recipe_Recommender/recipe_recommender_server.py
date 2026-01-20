@@ -35,6 +35,7 @@ class RecipeObject(BaseModel):
     Keywords: List[str] | None = None
     RecipeIngredientQuantities: List[str] | None = None
     RecipeIngredientParts: List[str] | None = None
+    RecipeInstructions: List[str] | None = None 
     AggregatedRating: float | None = None
     ReviewCount: int | None = None
     Calories: float | None = None
@@ -80,6 +81,7 @@ def sanitize_row_for_pydantic(row_dict):
     datetime_fields = ["DatePublished"]
     list_fields = [
         "Images", "Keywords", "RecipeIngredientQuantities",
+        "RecipeIngredientParts","RecipeInstructions"
         "RecipeIngredientParts", "Allergens"
     ]
     string_fields = [

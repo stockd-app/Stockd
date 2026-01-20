@@ -56,6 +56,14 @@
     color: var(--color-red);
 }
 
+.liked .notification__icon {
+    color: var(--color-red);
+}
+
+.unliked .notification__icon {
+    color: var(--color-red);
+}
+
 .notification__message {
     font-size: 14px;
     font-weight: 500;
