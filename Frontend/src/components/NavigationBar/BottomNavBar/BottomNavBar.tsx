@@ -67,6 +67,7 @@ const BottomNavBar: React.FC = () => {
     else if (location.pathname.startsWith("/pantry")) setActiveItem("pantry");
     else if (location.pathname.startsWith("/saved")) setActiveItem("saved");
     else if (location.pathname.startsWith("/cart")) setActiveItem("cart");
+
   }, [location.pathname]);
 
   // Move & resize the indicator under the active item
@@ -74,9 +75,7 @@ const BottomNavBar: React.FC = () => {
     const container = containerRef.current;
     if (!container) return;
 
-    const items = container.querySelectorAll(
-      ".bottomnav__item:not(.scan__button)",
-    );
+    const items = container.querySelectorAll(".bottomnav__item:not(.scan__button)");
     // Map activeItem to corresponding index. E.g., "home" -> 0, "pantry" -> 1, etc.
     const activeIndex = ["home", "pantry", "saved", "cart"].indexOf(activeItem);
     // Get the active element
@@ -147,10 +146,7 @@ const BottomNavBar: React.FC = () => {
 
       <div
         className={`bottomnav__item ${activeItem === "cart" ? "active" : ""}`}
-        onClick={() => {
-          setActiveItem("cart");
-          navigate("/cart");
-        }}
+        onClick={() => { setActiveItem("cart"); navigate("/cart") }}
       >
         <List size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
         <p>Grocery List</p>
