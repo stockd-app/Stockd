@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Refrigerator, Bookmark, User, Camera, PencilLine, ImagePlus, SquarePlus } from "lucide-react";
+import { Home, Refrigerator, Bookmark, List, Camera, PencilLine, ImagePlus, SquarePlus } from "lucide-react";
 import { BOTTOM_NAV_ICON_SIZE, } from "../../../config/consts";
 import CameraModal from "../../CameraModal/CameraModal";
 
@@ -58,7 +58,8 @@ const BottomNavBar: React.FC = () => {
     if (location.pathname.startsWith("/dashboard")) setActiveItem("home");
     else if (location.pathname.startsWith("/pantry")) setActiveItem("pantry");
     else if (location.pathname.startsWith("/saved")) setActiveItem("saved");
-    else if (location.pathname.startsWith("/profile")) setActiveItem("profile");
+    else if (location.pathname.startsWith("/cart")) setActiveItem("cart");
+
   }, [location.pathname]);
 
   // Move & resize the indicator under the active item
@@ -67,8 +68,8 @@ const BottomNavBar: React.FC = () => {
     if (!container) return;
 
     const items = container.querySelectorAll(".bottomnav__item:not(.scan__button)");
-    // Map activeItem to corresponding index. E.g., "home" -> 0, "update" -> 1, etc.
-    const activeIndex = ["home", "pantry", "saved", "profile"].indexOf(activeItem);
+    // Map activeItem to corresponding index. E.g., "home" -> 0, "pantry" -> 1, etc.
+    const activeIndex = ["home", "pantry", "saved", "cart"].indexOf(activeItem);
     // Get the active element
     const activeEl = items[activeIndex] as HTMLElement;
 
@@ -136,11 +137,11 @@ const BottomNavBar: React.FC = () => {
       </div>
 
       <div
-        className={`bottomnav__item ${activeItem === "profile" ? "active" : ""}`}
-        onClick={() => { setActiveItem("profile"); navigate("/profile") }}
+        className={`bottomnav__item ${activeItem === "cart" ? "active" : ""}`}
+        onClick={() => { setActiveItem("cart"); navigate("/cart") }}
       >
-        <User size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
-        <p>Profile</p>
+        <List size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
+        <p>Grocery List</p>
       </div>
 
       {/* Animated underline indicator */}
