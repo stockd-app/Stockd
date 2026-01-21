@@ -773,6 +773,100 @@ async def delete_pantry_items(request: Request, request_data: PantryItemsDeleteR
     finally:
         db.close()
 
+@router.post("/recipes/{recipe_id}/complete", tags=["Recipes"])
+@limiter.limit("10/minute")
+async def complete_recipe(
+    request: Request,
+    recipe_id: int,  # dataset_recipe_id
+    user=Depends(require_google_token),
+):
+    """
+    Mark a recipe as completed.
+    Ingredients are fetched from dataset (RecipeIngredientParts),
+    and matched against user's PantryItems.
+    """
+
+    db = SessionLocal()
+    consumed = []
+    unmatched = []
+
+    try:
+        # Fetch recipe from dataset 
+        recipe_data = await fetch_recipe_from_ai(recipe_id)
+        recipe_obj = recipe_data.get("recipe", {})
+
+        if not recipe_obj:
+            raise HTTPException(status_code=404, detail="Recipe not found in dataset")
+
+        recipe_name = recipe_obj.get("Name", "Unknown Recipe")
+        ingredients = recipe_obj.get("RecipeIngredientParts", [])
+
+        if not ingredients:
+            raise HTTPException(
+                status_code=404,
+                detail="No ingredients found for this recipe (dataset)"
+            )
+
+        # Get user pantry
+        pantry_items = (
+            db.query(PantryItem)
+            .filter(PantryItem.user_id == user.id)
+            .all()
+        )
+
+        # ingredient → match pantry → reduce quantity
+        for ingredient in ingredients:
+            ingredient_lower = ingredient.lower()
+            print("INGREDIENT:", ingredient_lower)
+            matched = False
+
+            for pantry_item in pantry_items:
+                pantry_name = pantry_item.normalized_name.lower()
+                print("PANTRY:", pantry_name)
+
+                if pantry_name in ingredient_lower or ingredient_lower in pantry_name:
+                    print("--------- MATCH ---------")
+                    pantry_item.quantity_value -= 1
+                    matched = True
+                    consumed.append({
+                        "ingredient": ingredient,
+                        "pantry_item": pantry_item.item_name,
+                        "remaining": pantry_item.quantity_value,
+                    })
+                    if pantry_item.quantity_value <= 0:
+                        db.delete(pantry_item)
+
+                    break
+
+            if not matched:
+                unmatched.append(ingredient)
+
+        db.commit()
+
+        return {
+            "status": "success",
+            "message": "Recipe completed and pantry updated",
+            "dataset_recipe_id": recipe_id,
+            "recipe_name": recipe_name,
+            "total_ingredients": len(ingredients),
+            "consumed_count": len(consumed),
+            "unmatched_ingredients": unmatched,
+            "consumed_items": consumed,
+        }
+
+    except HTTPException:
+        db.rollback()
+        raise
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to complete recipe: {str(e)}"
+        )
+
+    finally:
+        db.close()
 
 async def fetch_recipe_from_ai(recipe_id: int) -> dict:
     """
