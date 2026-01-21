@@ -15,6 +15,7 @@ export const API_ROUTES = {
   // TOGGLE_LIKE_RECIPE: (recipeId: number) => `${API_BASE_URL}/recipes/${recipeId}/like`,
   TOGGLE_LIKE_RECIPE: `${API_BASE_URL}/recipes/:recipeId/like`,
   GET_LIKED_RECIPES: `${API_BASE_URL}/users/current/liked-recipes`,
+  COMPLETE_RECIPE:`${API_BASE_URL}/recipes/:recipeId/complete`,
   LOGOUT_GOOGLE: `${API_BASE_URL}/auth/google/logout`,
   DELETE_USER: `${API_BASE_URL}/delete_user`,
   GET_USER_ALLERGENS: `${API_BASE_URL}/user/get-allergens`,
