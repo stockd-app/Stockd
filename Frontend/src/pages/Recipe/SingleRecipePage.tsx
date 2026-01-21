@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getRecipeById, getLikedRecipes } from "../../services/api";
+import { getRecipeById, getLikedRecipes,completeRecipe } from "../../services/api";
 import { getIngredientIcon } from "../../utils/ingredientIconMap";
 import { Clock, Star } from "lucide-react";
 import image_placeholder from "../../assets/images/error_handling/image_placeholder.png";
@@ -81,6 +81,20 @@ const SingleRecipePage: React.FC = () => {
         };
         run();
     }, [recipe?.RecipeId]);
+    const handleCompleteRecipe = async () => {
+        try {
+            const result = await completeRecipe(recipe.RecipeId);
+
+            console.log("Recipe completed:", result);
+
+            alert("Recipe completed! Pantry has been updated.");
+
+            navigate("/dashboard");
+        } catch (err) {
+            console.error("Failed to complete recipe", err);
+            alert("Failed to complete recipe.");
+        }
+        };
 
     if (loading) return <div>Loading...</div>;
     if (!recipe) return <div>Recipe not found</div>;
@@ -163,6 +177,11 @@ const SingleRecipePage: React.FC = () => {
                             )}
                         </ol>
                     </section>
+                    <div className="recipe__complete">
+                        <button className="complete__button" onClick={handleCompleteRecipe}>
+                            Complete Recipe
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
