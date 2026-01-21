@@ -70,6 +70,20 @@ const App: React.FC = () => {
           )
         }
       />
+      <Route
+        path="/cart"
+        element={
+          user ? (
+            <div>
+              {/* TODO  - will update this after implementing backend route */}
+              <h2>Shopping Cart</h2>
+              <BottomNavBar />
+            </div>
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/terms-full" element={<FullTermsPage />} />
       <Route path="/error/:code" element={<GoogleErrorScreen />} />

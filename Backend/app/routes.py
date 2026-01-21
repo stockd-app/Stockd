@@ -895,7 +895,16 @@ async def fetch_recipe_from_ai(recipe_id: int) -> dict:
                 detail=f"Error contacting recipe AI service: {str(e)}"
             )
 
-
+# Parse duration format
+def parse_duration(duration_str):
+    if not duration_str or not duration_str.strip():
+        return None
+    cleaned = duration_str.replace("PT", "").replace("H", "").replace("M", "").replace("S", "")
+    try:
+        return int(cleaned) if cleaned else None
+    except ValueError:
+        return None
+    
 @router.post("/recipes/{recipe_id}/like", tags=["Recipes"])
 @limiter.limit("10/minute")
 async def toggle_like_recipe(
@@ -918,6 +927,10 @@ async def toggle_like_recipe(
             try:
                 recipe_data = await fetch_recipe_from_ai(recipe_id)
                 recipe_obj = recipe_data.get("recipe", {})
+                   
+                # Join RecipeInstructions array into a single string
+                instructions = recipe_obj.get("RecipeInstructions", [])
+                steps_text = "\n".join(instructions) if isinstance(instructions, list) else str(instructions)
                 
                 recipe = Recipe(
                     dataset_recipe_id=recipe_id,
@@ -928,7 +941,7 @@ async def toggle_like_recipe(
                     cook_time=int(recipe_obj.get("CookTime", "0").replace("PT", "").replace("M", "").replace("H", "")) if recipe_obj.get("CookTime") else None,
                 )
                 db.add(recipe)
-                db.flush()
+                db.commit()
             except HTTPException:
                 raise HTTPException(status_code=404, detail="Recipe not found in dataset")
 
