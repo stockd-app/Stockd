@@ -8,6 +8,7 @@ import FullTermsPage from "./pages/TermsAndCondition/FullTermsPage";
 import GoogleErrorScreen from "./pages/GoogleErrorHandling/GoogleErrorScreen";
 import PantryPage from "./pages/PantryPage/PantryPage";
 import GroceryListPage from "./pages/GroceryListPage/GroceryListPage";
+import SingleRecipePage from "./pages/Recipe/SingleRecipePage";
 
 const App: React.FC = () => {
   const [user, setUser] = useState<string | null>(localStorage.getItem("user"));
@@ -54,6 +55,7 @@ const App: React.FC = () => {
         path="/pantry"
         element={user ? <PantryPage /> : <Navigate to="/" replace />}
       />
+      <Route path="/recipes/:id" element={<SingleRecipePage />} />
       <Route
         path="/profile"
         element={
