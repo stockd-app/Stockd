@@ -8,6 +8,7 @@ import FullTermsPage from "./pages/TermsAndCondition/FullTermsPage";
 import GoogleErrorScreen from "./pages/GoogleErrorHandling/GoogleErrorScreen";
 import PantryPage from "./pages/PantryPage/PantryPage";
 import SingleRecipePage from "./pages/Recipe/SingleRecipePage";
+import BottomNavBar from "./components/NavigationBar/BottomNavBar/BottomNavBar";
 
 const App: React.FC = () => {
   const [user, setUser] = useState<string | null>(localStorage.getItem("user"));
