@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
 import uvicorn
-from recipe_recommender_model import recommend_recipes, recommend_from_similar_users, search_recipes, get_recipe_by_id
+from recipe_recommender_model import recommend_recipes, recommend_from_similar_users, search_recipes, get_recipe_by_id, find_semantic_subset_recipes
 from datetime import datetime
 import pandas as pd
 import numpy as np
@@ -193,6 +193,32 @@ def recipe_by_id(req: RecipeByIdRequest):
         "status": "success",
         "recipe": RecipeObject(**recipe)
     }
+
+@app.post("/recommend/subset", response_model=ContentRecommendationResponse)
+def subset_recommendation(req: RecommendationRequest):
+    """
+    Recommend recipes where essential ingredients are a subset of the user's pantry.
+    """
+    try:
+        df_results = find_semantic_subset_recipes(
+            req.pantry_items,
+            match_ratio_threshold=1.0
+        )
+
+        formatted = []
+        for _, row in df_results.iterrows():
+            row_dict = row.to_dict()
+            row_dict = sanitize_row_for_pydantic(row_dict)
+            formatted.append(RecipeObject(**row_dict))
+
+        return ContentRecommendationResponse(
+            status="success",
+            type="subset",
+            recommendations=formatted
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=9001)
