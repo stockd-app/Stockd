@@ -27,7 +27,7 @@ interface RecipeItemSectionProps {
  * @param param0 
  * @returns 
  */
-const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = true, onSeeMore, items, emptyTitle, emptySubtitle, emptyImage }) => {
+const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = true, onSeeMore, items, onItemClick, emptyTitle, emptySubtitle, emptyImage }) => {
     return (
         <div className="recipeItemSection__container">
             <div className="recipeItemSection__header">
