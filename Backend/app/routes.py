@@ -1134,12 +1134,7 @@ async def get_liked_category_recommendations(user_id: int, top_n: int = 10):
     """
     db = SessionLocal()
     try:
-        liked_rows = (
-            db.query(Recipe.dataset_recipe_id)
-            .join(LikedRecipe, LikedRecipe.recipe_id == Recipe.id)
-            .filter(LikedRecipe.user_id == user_id)
-            .all()
-        )
+        liked_rows = db.query(LikedRecipe.recipe_id).filter(LikedRecipe.user_id == user_id).all()
         liked_recipe_ids = [r[0] for r in liked_rows]
     finally:
         db.close()
@@ -1151,7 +1146,7 @@ async def get_liked_category_recommendations(user_id: int, top_n: int = 10):
         "user_id": user_id,
         "user_likes": {str(user_id): liked_recipe_ids},
         "top_n": top_n,
-        "mode": "liked_categories"
+        "pantry_items": []
     }
 
     async with httpx.AsyncClient() as client:
