@@ -29,7 +29,7 @@ export const GOOGLE_CONSTS = {
   GOOGLE_ICON_SIZE: 18,
 }
 
-export const SEARCH = "Search any recipes";
+export const SEARCH = "Search recommended recipes";
 export const LANDING_PAGE = {
   STOCKD: "Stockd",
   WELCOME_TEXT: "Let's join our community to cook better food!",
@@ -46,9 +46,9 @@ export const BOTTOM_NAV_ICON_SIZE = {
 
 /* Update for pantry add/edit/delete */
 export const NOTIFICATION_MESSAGES = {
-  ADDED: "Food has been added",
-  UPDATED: "Food has been updated",
-  DELETED: "Food has been deleted",
+  ADDED: "Pantry item has been added!",
+  UPDATED: "Pantry item has been updated!",
+  DELETED: "Pantry item has been deleted!",
   LIKED: "Recipe added to liked",
   UNLIKED: "Recipe removed from liked",
 } as const;
@@ -88,3 +88,10 @@ export const CONFIRM_MODAL = {
 
 export const CONFIRM_LOGOUT_TEXT = "Are you sure you want to log out?";
 export const CONFIRM_DELETE_TEXT = "Are you sure you want to delete your account? This action cannot be undone.";
+
+export const TIME_RANGES = [
+  { label: "All", value: null },
+  { label: "Under 15 mins", value: { min: null, max: 15 } },
+  { label: "15–30 mins", value: { min: 15, max: 30 } },
+  { label: "30–60 mins", value: { min: 30, max: 60 } },
+];
