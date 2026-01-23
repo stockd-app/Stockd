@@ -1,4 +1,4 @@
-import { Check, Pencil, Trash2 } from "lucide-react";
+import { Check, Pencil, Trash2, Heart,HeartOff } from "lucide-react";
 
 // Backend API base URL
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
@@ -11,8 +11,14 @@ export const API_ROUTES = {
   GET_PANTRY: `${API_BASE_URL}/pantry_items`,
   ADD_UPDATE_PANTRY_ITEM: `${API_BASE_URL}/add_update_pantry_items`,
   GET_PANTRY_RECOMMENDATIONS: `${API_BASE_URL}/recommendations/pantry`, // Caller will append `user_id`
+  GET_RECIPE_BY_ID: `${API_BASE_URL}/recipes`,
+  // TOGGLE_LIKE_RECIPE: (recipeId: number) => `${API_BASE_URL}/recipes/${recipeId}/like`,
+  TOGGLE_LIKE_RECIPE: `${API_BASE_URL}/recipes/:recipeId/like`,
+  GET_LIKED_RECIPES: `${API_BASE_URL}/users/current/liked-recipes`,
   LOGOUT_GOOGLE: `${API_BASE_URL}/auth/google/logout`,
   DELETE_USER: `${API_BASE_URL}/delete_user`,
+  GET_USER_ALLERGENS: `${API_BASE_URL}/user/get-allergens`,
+  POST_USER_ALLERGENS: `${API_BASE_URL}/user/post-allergens`,
 };
 
 // Google OAuth related constants
@@ -43,12 +49,16 @@ export const NOTIFICATION_MESSAGES = {
   ADDED: "Food has been added",
   UPDATED: "Food has been updated",
   DELETED: "Food has been deleted",
+  LIKED: "Recipe added to liked",
+  UNLIKED: "Recipe removed from liked",
 } as const;
 
 export const NOTIFICATION_TYPES = {
   ADDED: "added",
   UPDATED: "updated",
   DELETED: "deleted",
+  LIKED: "liked",
+  UNLIKED: "unliked",
 } as const;
 
 export type NotificationType = typeof NOTIFICATION_TYPES[keyof typeof NOTIFICATION_TYPES];
@@ -57,6 +67,8 @@ export const NOTIFICATION_ICONS = {
   added: Check,
   updated: Pencil,
   deleted: Trash2,
+  liked: Heart,
+  unliked: HeartOff,
 } as const;
 
 export const NOTIFICATION_UI = {

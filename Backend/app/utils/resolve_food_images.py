@@ -1,3 +1,4 @@
+from sqlalchemy import or_
 from app.database.database import SessionLocal
 from app.database.models import FoodImageCache, PantryItem
 from app.utils.openfoodfacts import get_product_image_from_openfoodfacts
@@ -14,8 +15,14 @@ def fetch_food_images(user_id: int):
     items = (
         db.query(PantryItem)
         .filter(PantryItem.user_id == user_id)
-    .filter((PantryItem.item_image == None) | (PantryItem.item_image == ""))
-        .filter(PantryItem.normalized_name != None)
+        .filter(PantryItem.category != "non-food")
+        .filter(
+            or_(
+                PantryItem.item_image.is_(None),
+                PantryItem.item_image == ""
+            )
+        )
+        .filter(PantryItem.normalized_name.isnot(None))
         .all()
     )
 

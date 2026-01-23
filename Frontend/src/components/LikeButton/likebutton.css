@@ -1,0 +1,27 @@
+.like__button {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 999px;
+  padding: 8px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.like__button:hover {
+  transform: scale(1.05);
+}
+
+.like__button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.like__button.liked {
+  background: rgba(255, 255, 255, 1);
+}

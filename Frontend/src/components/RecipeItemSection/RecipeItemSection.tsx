@@ -8,15 +8,20 @@ interface RecipeItemSectionProps {
     title: string;
     seeMore?: boolean;
     items: {
+        id: number;
         name: string;
         image: string;
         rating?: number;
         time?: string;
         status?: string;
     }[];
+    onItemClick?: (id: number) => void;
+    emptyTitle?: string;
+    emptySubtitle?: string;
+    emptyImage?: string;
 }
 
-const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = true, items }) => {
+const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = true, items, onItemClick, emptyTitle, emptySubtitle, emptyImage }) => {
     return (
         <div className="recipeItemSection__container">
             <div className="recipeItemSection__header">
@@ -33,9 +38,9 @@ const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = 
                     />
 
                     <div className="recipeItemSection__empty_overlay">
-                        <p className="recipeItemSection__empty_text">Let’s stock your pantry!</p>
+                        <p className="recipeItemSection__empty_text">{emptyTitle ?? "Let’s stock your pantry!"}</p>
                         <p className="recipeItemSection__empty_subtext">
-                            Add ingredients by uploading a receipt or other methods.
+                            {emptySubtitle ?? "Add ingredients by uploading a receipt or manual addition."}
                         </p>
                     </div>
                 </div>
@@ -49,6 +54,7 @@ const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = 
                             rating={item.rating}
                             time={item.time}
                             status={item.status}
+                            onClick={() => onItemClick?.(item.id)}
                         />
                     ))}
                 </div>

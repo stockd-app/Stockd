@@ -22,7 +22,7 @@ def classify_receipt_items(parsed_data: dict) -> dict:
     response = requests.post(
         ai_endpoint,
         json=ai_payload,
-        timeout=120
+        timeout=250
     )
     
     response.raise_for_status()

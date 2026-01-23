@@ -10,6 +10,7 @@
   display: flex;
   align-items: center;
   gap: 20px;
+  position: relative;
 }
 
 .topnav__logo {
@@ -30,6 +31,28 @@
 .topnav__search:focus {
   box-shadow: 0 0 0 2px var(--color-secondary);
   background-color: var(--color-white);
+}
+
+.topnav__profile-button {
+  background: none;
+  border: none;
+  color: var(--color-dark-blue);
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  border-radius: 50%;
+}
+
+.topnav__profile-button:hover {
+  background-color: var(--color-light);
+  color: var(--color-primary);
+}
+
+.topnav__profile-button:active {
+  transform: scale(0.95);
 }
 
 .topnav__separator {
