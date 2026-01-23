@@ -9,12 +9,14 @@ interface RecipeItemSectionProps {
     seeMore?: boolean;
     onSeeMore?: () => void;
     items: {
+        id: number;
         name: string;
         image: string;
         rating?: number;
         time?: string;
         status?: string;
     }[];
+    onItemClick?: (id: number) => void;
     emptyTitle?: string;
     emptySubtitle?: string;
     emptyImage?: string;
@@ -65,6 +67,7 @@ const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = 
                             rating={item.rating}
                             time={item.time}
                             status={item.status}
+                            onClick={() => onItemClick?.(item.id)}
                         />
                     ))}
                 </div>

@@ -801,7 +801,16 @@ async def fetch_recipe_from_ai(recipe_id: int) -> dict:
                 detail=f"Error contacting recipe AI service: {str(e)}"
             )
 
-
+# Parse duration format
+def parse_duration(duration_str):
+    if not duration_str or not duration_str.strip():
+        return None
+    cleaned = duration_str.replace("PT", "").replace("H", "").replace("M", "").replace("S", "")
+    try:
+        return int(cleaned) if cleaned else None
+    except ValueError:
+        return None
+    
 @router.post("/recipes/{recipe_id}/like", tags=["Recipes"])
 @limiter.limit("10/minute")
 async def toggle_like_recipe(
@@ -824,17 +833,21 @@ async def toggle_like_recipe(
             try:
                 recipe_data = await fetch_recipe_from_ai(recipe_id)
                 recipe_obj = recipe_data.get("recipe", {})
+                   
+                # Join RecipeInstructions array into a single string
+                instructions = recipe_obj.get("RecipeInstructions", [])
+                steps_text = "\n".join(instructions) if isinstance(instructions, list) else str(instructions)
                 
                 recipe = Recipe(
                     dataset_recipe_id=recipe_id,
                     recipe_name=recipe_obj.get("Name", "Unknown Recipe"),
                     recipe_image=recipe_obj.get("Images", [None])[0] if recipe_obj.get("Images") else None,
-                    steps=recipe_obj.get("Description", ""),
-                    prep_time=int(recipe_obj.get("PrepTime", "0").replace("PT", "").replace("M", "")) if recipe_obj.get("PrepTime") else None,
-                    cook_time=int(recipe_obj.get("CookTime", "0").replace("PT", "").replace("M", "")) if recipe_obj.get("CookTime") else None,
+                    steps=steps_text,
+                    prep_time=parse_duration(recipe_obj.get("PrepTime")),
+                    cook_time=parse_duration(recipe_obj.get("CookTime")),
                 )
                 db.add(recipe)
-                db.flush()
+                db.commit()
             except HTTPException:
                 raise HTTPException(status_code=404, detail="Recipe not found in dataset")
 
@@ -904,7 +917,6 @@ async def get_liked_recipes(request: Request, user=Depends(require_google_token)
     finally:
         db.close()
 
-
 @router.get("/recommendations/pantry/{user_id}")
 async def get_pantry_recommendations(user_id: int, top_n: int = 10):
 
@@ -949,6 +961,13 @@ def get_user_pantry(user_id: int):
     finally:
         db.close()
 
+def get_user_pantry_exact_match(user_id: int):
+    db = SessionLocal()
+    try:
+        items = db.query(PantryItem.item_name).filter(PantryItem.user_id == user_id).all()
+        return [item[0] for item in items]
+    finally:
+        db.close()
 
 def get_all_user_ids():
     db = SessionLocal()
@@ -1088,3 +1107,22 @@ async def get_user_allergens(request: Request, user=Depends(require_google_token
         }
     finally:
         db.close()
+
+@router.get("/recommendations/subset/{user_id}")
+async def get_subset_recommendations(user_id: int):
+    pantry_items = get_user_pantry_exact_match(user_id)
+
+    payload = {
+        "user_id": user_id,
+        "pantry_items": pantry_items,
+        "top_n": 20
+    }
+
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend/subset",
+            json=payload
+        )
+        resp.raise_for_status()
+
+    return resp.json()

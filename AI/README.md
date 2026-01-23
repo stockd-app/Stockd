@@ -68,15 +68,21 @@ Follow the steps below to set up the environment and run the server.
    AI/Recipe_Recommender/data
 
 5. Place **`recipes.parquet`** into this newly created `data` folder.
+6. There should be a folder called canonical_db inside Recipe_Recommender. Ensure there is nothing in it (delete existinf files) as it will be generated at startup.
 
 Your file structure should look like:
 AI/
 └─ Recipe_Recommender/
+├─ canonical_db/
+│ └─canonical_emb.npy (after running the recipe_recommender_model once)
+│ └─canonical_names.json (after running the recipe_recommender_model once)
+│ └─canonical.faiss (after running the recipe_recommender_model once)
 ├─ data/
 │ └─ recipes.parquet
 ├─ recipe_recommender_model.py
 ├─ recipe_recommender_requirements.txt
-└─ recipe_recommender_server.py
+├─ recipe_recommender_server.py
+└─ recipe_subset.py
 
 ## 📦 2. Install Dependencies
 
@@ -110,6 +116,13 @@ python recipe_recommender_server.py
 Now you can navigate to the Swagger docs to test the endpoints. You can find the Swagger doc by going to this URL:
 
 http://<your_ip>:9001/docs for recipe recommender
+
+## Any Issues
+
+Ensure you have your correct IP address in the Backend .env file.
+If any changes are made regarding the dataset in the Recipe Recommender, it is safe to delete recipe_assets.pkl. recipe_index.faiss, anything inside canonical_db, and then re-run them. Just note they will require a few extra minutes at startup to regenerate.
+Ensure the database/XAMPP/MySQL is running and you have the latest schema.
+
 
 ## 🔐 Input Sanitization
 

@@ -9,61 +9,121 @@
 
 /* The white rounded search box */
 .searchbar__wrapper {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    max-width: 700px;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 700px;
 
-    background: var(--color-white);
-    border-radius: 14px;
+  background: var(--color-white);
+  border-radius: 14px;
 
-    padding: 12px 16px;
-    gap: 12px;
+  padding: 12px 16px;
+  gap: 12px;
 
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Search icon styling */
 .searchbar__icon {
-    color: var(--color-dark-grey);
+  color: var(--color-dark-grey);
 }
 
 /* Input text */
 .searchbar__input {
-    border: none;
-    outline: none;
-    width: 100%;
-    font-size: 17px;
-    color: var(--color-dark-grey);
-    background: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 17px;
+  color: var(--color-dark-grey);
+  background: transparent;
+}
+
+/* Profile button styling - modern app style */
+.searchbar__profile-button {
+  background: var(--color-white);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: var(--color-dark-blue);
+  cursor: pointer;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  border-radius: 50%;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+  margin-right: 4px;
+}
+
+.searchbar__profile-button:hover {
+  background-color: var(--color-light);
+  color: var(--color-primary);
+  box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
+}
+
+.searchbar__profile-button:active {
+  transform: scale(0.95);
 }
 
 .searchbar__input::placeholder {
-    color: var(--color-dark-grey);
+  color: var(--color-dark-grey);
 }
 
 /* Small screens (mobile) */
 @media (min-width: 600px) {
-    .searchbar__container {
-        padding: 16px 24px;
-    }
+  .searchbar__container {
+    padding: 16px 24px;
+  }
 
-    .searchbar__input {
-        padding: 16px 20px;
-        font-size: 16px;
-        max-width: 700px;
-    }
+  .searchbar__input {
+    padding: 16px 20px;
+    font-size: 16px;
+    max-width: 700px;
+  }
 }
 
 /* Medium screens (tablet) */
 @media (min-width: 601px) and (max-width: 1024px) {
-    .searchbar__container {
-        padding: 24px 32px;
-    }
+  .searchbar__container {
+    padding: 24px 32px;
+  }
 
-    .searchbar__input {
-        max-width: 800px;
-        padding: 18px 22px;
-    }
+  .searchbar__input {
+    max-width: 800px;
+    padding: 18px 22px;
+  }
+}
+
+/* Large screens (desktop) */
+@media (min-width: 1025px) {
+  .searchbar__container {
+    padding: 20px 32px;
+    gap: 20px;
+    justify-content: center;
+  }
+
+  .searchbar__wrapper {
+    flex: 0 1 500px;
+    max-width: 500px;
+    padding: 14px 20px;
+  }
+
+  .searchbar__input {
+    font-size: 16px;
+  }
+
+  .searchbar__icon {
+    flex-shrink: 0;
+  }
+
+  .searchbar__profile-button {
+    width: 48px;
+    height: 48px;
+    margin-right: 0;
+    flex-shrink: 0;
+  }
 }

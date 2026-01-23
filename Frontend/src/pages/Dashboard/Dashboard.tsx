@@ -148,6 +148,9 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
 
       <RecipeItemSection title="Recommended Based on Your Pantry"
         items={filteredRecipes}
+        onItemClick={(recipeId: number) => {
+          navigate(`/recipes/${recipeId}`);
+        }}
         onSeeMore={() => navigate("/pantry-recipes")}
         emptyTitle={
           searchQuery
