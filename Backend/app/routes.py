@@ -1126,3 +1126,40 @@ async def get_subset_recommendations(user_id: int):
         resp.raise_for_status()
 
     return resp.json()
+
+@router.get("/recommendations/liked-categories/{user_id}")
+async def get_liked_category_recommendations(user_id: int, top_n: int = 10):
+    """
+    Recommend recipes based on the categories of recipes a user has liked.
+    """
+    db = SessionLocal()
+    try:
+        liked_rows = (
+            db.query(Recipe.dataset_recipe_id)
+            .join(LikedRecipe, LikedRecipe.recipe_id == Recipe.id)
+            .filter(LikedRecipe.user_id == user_id)
+            .all()
+        )
+        liked_recipe_ids = [r[0] for r in liked_rows]
+    finally:
+        db.close()
+
+    if not liked_recipe_ids:
+        return {"status": "success", "recommendations": []}
+
+    payload = {
+        "user_id": user_id,
+        "user_likes": {str(user_id): liked_recipe_ids},  # must be dict keyed by user_id
+        "top_n": top_n,
+        "mode": "liked_categories"
+    }
+
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend/by-liked-categories",
+            json=payload
+        )
+        resp.raise_for_status()
+        data = resp.json()
+
+    return data

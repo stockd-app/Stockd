@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
 import uvicorn
-from recipe_recommender_model import recommend_recipes, recommend_from_similar_users, search_recipes, get_recipe_by_id, find_semantic_subset_recipes
+from recipe_recommender_model import recommend_recipes, recommend_from_similar_users, search_recipes, get_recipe_by_id, find_semantic_subset_recipes, recommend_by_liked_categories
 from datetime import datetime
 import pandas as pd
 import numpy as np
@@ -214,6 +214,36 @@ def subset_recommendation(req: RecommendationRequest):
         return ContentRecommendationResponse(
             status="success",
             type="subset",
+            recommendations=formatted
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/recommend/by-liked-categories", response_model=ContentRecommendationResponse)
+def recommend_by_categories(req: RecommendationRequest):
+    """
+    Recommend recipes based on the user's liked recipes' category distribution.
+    """
+    try:
+        if not req.user_likes or str(req.user_id) not in req.user_likes:
+            raise HTTPException(400, "No liked recipes found for this user.")
+
+        liked_recipe_ids = req.user_likes[str(req.user_id)]
+
+        results = recommend_by_liked_categories(
+            liked_recipe_ids,
+            total_recommendations=req.top_n
+        )
+
+        formatted = []
+        for r in results:
+            r = sanitize_row_for_pydantic(r)
+            formatted.append(RecipeObject(**r))
+
+        return ContentRecommendationResponse(
+            status="success",
+            type="liked_categories",
             recommendations=formatted
         )
 
