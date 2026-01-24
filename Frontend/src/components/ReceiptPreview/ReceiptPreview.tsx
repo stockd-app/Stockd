@@ -132,7 +132,7 @@ const ReceiptPreview: React.FC = () => {
                             <div key={img.id} className="rp__secondaryCard">
                                 <img src={img.url} />
                                 <button onClick={() => handleDelete(img.id)}>
-                                    <Trash2 size={14} />
+                                    <Trash2 size={14} /> Delete
                                 </button>
                             </div>
                         ))}
