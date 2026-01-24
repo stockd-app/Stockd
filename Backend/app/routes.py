@@ -922,7 +922,6 @@ async def get_liked_recipes(request: Request, user=Depends(require_google_token)
     finally:
         db.close()
 
-
 @router.get("/recommendations/pantry/{user_id}")
 async def get_pantry_recommendations(user_id: int, top_n: int = 10):
 
@@ -967,6 +966,13 @@ def get_user_pantry(user_id: int):
     finally:
         db.close()
 
+def get_user_pantry_exact_match(user_id: int):
+    db = SessionLocal()
+    try:
+        items = db.query(PantryItem.item_name).filter(PantryItem.user_id == user_id).all()
+        return [item[0] for item in items]
+    finally:
+        db.close()
 
 def get_all_user_ids():
     db = SessionLocal()
@@ -1401,3 +1407,21 @@ async def mark_all_grocery_items_purchased(user_id: int):
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
+@router.get("/recommendations/subset/{user_id}")
+async def get_subset_recommendations(user_id: int):
+    pantry_items = get_user_pantry_exact_match(user_id)
+
+    payload = {
+        "user_id": user_id,
+        "pantry_items": pantry_items,
+        "top_n": 20
+    }
+
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend/subset",
+            json=payload
+        )
+        resp.raise_for_status()
+
+    return resp.json()

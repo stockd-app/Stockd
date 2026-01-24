@@ -8,6 +8,7 @@ import FullTermsPage from "./pages/TermsAndCondition/FullTermsPage";
 import GoogleErrorScreen from "./pages/GoogleErrorHandling/GoogleErrorScreen";
 import PantryPage from "./pages/PantryPage/PantryPage";
 import GroceryListPage from "./pages/GroceryListPage/GroceryListPage";
+import PantryRecipeRecommendationPage from "./pages/PantryRecipeRecommendationPage/PantryRecipeRecommendationPage";
 import SingleRecipePage from "./pages/Recipe/SingleRecipePage";
 
 const App: React.FC = () => {
@@ -50,6 +51,10 @@ const App: React.FC = () => {
             <Navigate to="/" replace />
           )
         }
+      />
+      <Route
+        path="/pantry-recipes"
+        element={user ? <PantryRecipeRecommendationPage /> : <Navigate to="/" replace />}
       />
       <Route
         path="/pantry"
