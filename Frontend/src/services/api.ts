@@ -173,6 +173,50 @@ export const addOrUpdatePantryItem = async (userId: number, items: any) => {
   }
 };
 
+
+
+/**
+ * Delete pantry items by their IDs
+ * @param itemIds 
+ * @returns 
+ */
+export const deletePantryItems = async (itemIds: number[]) => {
+  let idToken = localStorage.getItem("google_id_token");
+
+  try {
+    const res = await axios.delete(API_ROUTES.DELETE_PANTRY_ITEMS, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+      data: {
+        pantry_item_ids: itemIds,
+      },
+    });
+
+    return res.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        idToken = localStorage.getItem("google_id_token");
+        const retry = await axios.delete(API_ROUTES.DELETE_PANTRY_ITEMS, {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+          data: {
+            pantry_item_ids: itemIds,
+          },
+        });
+        return retry.data;
+      }
+      throw error;
+    }
+    throw error;
+  }
+};
+
+
+
 /**
  * Get single recipe by recipe ID
  * @param recipeId
