@@ -7,6 +7,7 @@ import TermsPage from "./pages/TermsAndCondition/TermsPage";
 import FullTermsPage from "./pages/TermsAndCondition/FullTermsPage";
 import GoogleErrorScreen from "./pages/GoogleErrorHandling/GoogleErrorScreen";
 import PantryPage from "./pages/PantryPage/PantryPage";
+import ReceiptPreview from "./components/ReceiptPreview/ReceiptPreview";
 import PantryItemDetails from "./components/PantryItemDetails/PantryItemDetails";
 import PantryRecipeRecommendationPage from "./pages/PantryRecipeRecommendationPage/PantryRecipeRecommendationPage";
 import SingleRecipePage from "./pages/Recipe/SingleRecipePage";
@@ -62,6 +63,10 @@ const App: React.FC = () => {
         <Route
           path="/pantry"
           element={user ? <PantryPage /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/receipt_preview"
+          element={user ? <ReceiptPreview /> : <Navigate to="/" replace />}
         />
         <Route path="/recipes/:id" element={<SingleRecipePage />} />
         <Route
