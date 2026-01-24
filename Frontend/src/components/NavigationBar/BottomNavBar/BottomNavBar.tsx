@@ -58,10 +58,12 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ onManualAdd }) => {
 
   // Sync activeItem with URL (persistent underline)
   useEffect(() => {
-    if (location.pathname.startsWith("/dashboard")) setActiveItem("home");
-    else if (location.pathname.startsWith("/pantry")) setActiveItem("pantry");
-    else if (location.pathname.startsWith("/saved")) setActiveItem("saved");
-    else if (location.pathname.startsWith("/cart")) setActiveItem("cart");
+    const path = location.pathname;
+
+    if (path === "/dashboard") setActiveItem("home");
+    else if (path === "/pantry") setActiveItem("pantry");
+    else if (path === "/saved") setActiveItem("saved");
+    else if (path === "/cart") setActiveItem("cart");
 
   }, [location.pathname]);
 

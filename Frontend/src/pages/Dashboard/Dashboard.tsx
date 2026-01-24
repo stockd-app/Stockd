@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getPantryRecommendations, updateUserAllergens } from "../../services/api";
-import { formatPrepTime, isoDurationToMinutes } from "../../utils/utils";
+import { applyAllergenFilter, formatPrepTime, isoDurationToMinutes } from "../../utils/utils";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import FoodCategorySection from "../../components/FoodCategoryCard/FoodCategorySection";
 import RecipeItemSection from "../../components/RecipeItemSection/RecipeItemSection";
@@ -9,6 +9,7 @@ import ExploreSection from "../../components/Dashboard/ExploreSection";
 import image_placeholder from "../../assets/images/error_handling/image_placeholder.png"
 import DOMPurify from "dompurify";
 import AllergensModal from "../../components/AllergensModal/AllergensModal";
+import AllergenPreferenceModal from "../../components/AllergenPreferenceModal/AllergenPreferenceModal";
 
 import "./dashboard.css";
 
@@ -51,15 +52,23 @@ export interface RecipeFilters {
  * @returns JSX.Element
  */
 const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
+  // Initial state for showing allergens modal
   const [showAllergensModal, setShowAllergensModal] = useState(false);
+
+  // State to control showing allergen preference modal
+  const [showAllergenFilterModal, setShowAllergenFilterModal] = useState(false);
 
   // State to hold and pass input-text down to RecipeItemSection for UI display
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Pantry-based recommended recipes, fetched directly from Backend/API (source of truth for pantry recommendations)
+  // All pantry recipes as returned from the backend (source of truth, never filtered)
+  const [allPantryRecipes, setAllPantryRecipes] = useState<Recipe[]>([]);
+
+  // Pantry recipes currently visible to the user (may be filtered by allergens, search, etc.)
   const [pantryRecipes, setPantryRecipes] = useState<Recipe[]>([]);
 
-  // Filtered recipes by search query, derived/based on pantryRecipes
+  // Recipes currently displayed in the UI after applying transient UI filters (e.g. search)
+  // Derived from pantryRecipes and reset when UI filters are cleared
   const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
 
   const navigate = useNavigate();
@@ -108,7 +117,15 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
           };
         });
 
-        setPantryRecipes(formatted);
+        setAllPantryRecipes(formatted);
+
+        const mode = localStorage.getItem("allergen_visibility");
+
+        if (mode === "hide") {
+          setPantryRecipes(applyAllergenFilter(formatted));
+        } else {
+          setPantryRecipes(formatted);
+        }
       } catch (err) {
         console.error("Error fetching recommendations:", err);
       }
@@ -162,6 +179,12 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
       localStorage.setItem("user_allergens", JSON.stringify(selected));
       localStorage.setItem("allergens_onboarded", "true");
       setShowAllergensModal(false);
+
+      // Show second modal for allergen filtering if not dismissed before
+      const dismissed = localStorage.getItem("allergen_modal_dismissed");
+      if (!dismissed) {
+        setShowAllergenFilterModal(true);
+      }
     } catch (err) {
       console.error("Failed to update allergens", err);
     }
@@ -174,6 +197,23 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         <AllergensModal
           initial={JSON.parse(localStorage.getItem("user_allergens") || "[]")}
           onConfirm={handleAllergensConfirm}
+        />
+      )}
+      {showAllergenFilterModal && (
+        <AllergenPreferenceModal
+          onConfirm={(mode) => {
+            if (mode === "hide") {
+              setPantryRecipes(applyAllergenFilter(allPantryRecipes));
+            } else {
+              setPantryRecipes(allPantryRecipes);
+            }
+
+            setShowAllergenFilterModal(false);
+          }}
+          onCancel={() => {
+            setPantryRecipes(allPantryRecipes);
+            setShowAllergenFilterModal(false);
+          }}
         />
       )}
       <div className="dashboard__searchRow">

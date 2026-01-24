@@ -1,3 +1,5 @@
+import type { Recipe } from "../pages/Dashboard/Dashboard";
+
 /**
  * Format Prep time for ItemCard component
  * Convert "PT45M" to "45m" for example
@@ -51,4 +53,24 @@ export const isSameRange = (
     if (!a && !b) return true;
     if (!a || !b) return false;
     return a.min === b.min && a.max === b.max;
+};
+
+/**
+ * Apply allergen filter to recipes based on user preferences
+ * @param recipes 
+ * @returns 
+ */
+export const applyAllergenFilter = (recipes: Recipe[]) => {
+    const mode = localStorage.getItem("allergen_visibility");
+    if (mode !== "hide") return recipes;
+
+    const userAllergens = JSON.parse(
+        localStorage.getItem("user_allergens") || "[]"
+    );
+
+    if (!userAllergens.length) return recipes;
+
+    return recipes.filter(recipe =>
+        !recipe.allergens?.some(a => userAllergens.includes(a))
+    );
 };
