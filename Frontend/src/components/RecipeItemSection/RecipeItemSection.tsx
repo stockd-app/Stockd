@@ -7,7 +7,9 @@ import "./recipeitemsection.css";
 interface RecipeItemSectionProps {
     title: string;
     seeMore?: boolean;
+    onSeeMore?: () => void;
     items: {
+        id: number;
         name: string;
         image: string;
         rating?: number;
@@ -15,17 +17,30 @@ interface RecipeItemSectionProps {
         status?: string;
         allergens?: string[];
     }[];
+    onItemClick?: (id: number) => void;
     emptyTitle?: string;
     emptySubtitle?: string;
     emptyImage?: string;
 }
 
-const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = true, items, emptyTitle, emptySubtitle, emptyImage }) => {
+/**
+ * Renders a Recipe Item Section with a title, optional "See more" link, and a list of RecipeItemCards
+ * @param param0 
+ * @returns 
+ */
+const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = true, onSeeMore, items, onItemClick, emptyTitle, emptySubtitle, emptyImage }) => {
     return (
         <div className="recipeItemSection__container">
             <div className="recipeItemSection__header">
                 <h3> {title} </h3>
-                {seeMore && <span className="recipeItemSection__seeMore">See more</span>}
+                {seeMore && onSeeMore && (
+                    <span
+                        className="recipeItemSection__seeMore"
+                        onClick={onSeeMore}
+                    >
+                        See more
+                    </span>
+                )}
             </div>
 
             {items.length === 0 ? (
@@ -54,6 +69,7 @@ const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = 
                             time={item.time}
                             status={item.status}
                             allergens={item.allergens}
+                            onClick={() => onItemClick?.(item.id)}
                         />
                     ))}
                 </div>

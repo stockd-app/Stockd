@@ -10,15 +10,16 @@ interface RecipeItemCardProps {
     time?: string;
     status?: string;
     allergens?: string[];
+    onClick?: () => void;
 }
 
-const RecipeItemCard: React.FC<RecipeItemCardProps> = ({ name, image, rating, time, status, allergens }) => {
+const RecipeItemCard: React.FC<RecipeItemCardProps> = ({ name, image, rating, time, status, allergens, onClick, }) => {
     const statusClass =
         status && status.toLowerCase().includes("missing")
             ? "status status--missing"
             : "status status--available";
     return (
-        <div className={`recipeitemcard`}>
+        <div className={`recipeitemcard`} onClick={onClick}>
             <div className="recipeitemcard__image_container">
                 <img src={image} alt={name} className="recipeitemcard__image" />
             </div>
