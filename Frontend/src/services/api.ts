@@ -213,6 +213,46 @@ export const deletePantryItems = async (itemIds: number[]) => {
 
 
 /**
+ * Get single recipe by recipe ID
+ * @param recipeId
+ * @returns
+ */
+export const getRecipeById = async (recipeId: number) => {
+  let idToken = localStorage.getItem("google_id_token");
+
+  try {
+    const res = await axios.get(`${API_ROUTES.GET_RECIPE_BY_ID}/${recipeId}`, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+    });
+
+    return res.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        idToken = localStorage.getItem("google_id_token");
+        const retryRes = await axios.get(
+          `${API_ROUTES.GET_RECIPE_BY_ID}/${recipeId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
+        return retryRes.data;
+      } else {
+        localStorage.clear();
+        window.location.href = "/";
+        throw new Error("Session expired. Please log in again.");
+      }
+    }
+    throw error;
+  }
+};
+
+/**
  * Handles Google login using the authorization code
  * @params authCode
  * @returns
@@ -421,3 +461,87 @@ export const updateUserAllergens = async (allergens: string[]) => {
     throw error;
   }
 };
+
+/**
+ * Toggle like / unlike a recipe
+ * @param recipeId
+ */
+export const toggleLikeRecipe = async (recipeId: number) => {
+  let idToken = localStorage.getItem("google_id_token");
+
+  try {
+    const res = await axios.post(
+      // API_ROUTES.TOGGLE_LIKE_RECIPE(recipeId),
+      API_ROUTES.TOGGLE_LIKE_RECIPE.replace(":recipeId", String(recipeId)),
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      }
+    );
+    return res.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        idToken = localStorage.getItem("google_id_token");
+        const retryRes = await axios.post(
+          // API_ROUTES.TOGGLE_LIKE_RECIPE(recipeId),
+          API_ROUTES.TOGGLE_LIKE_RECIPE.replace(":recipeId", String(recipeId)),
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
+        return retryRes.data;
+      } else {
+        localStorage.clear();
+        window.location.href = "/";
+        throw new Error("Session expired. Please log in again.");
+      }
+    }
+    throw error;
+  }
+};
+
+/**
+ * Get current user's liked recipes
+ * @returns
+ */
+export const getLikedRecipes = async () => {
+  let idToken = localStorage.getItem("google_id_token");
+
+  try {
+    const res = await axios.get(API_ROUTES.GET_LIKED_RECIPES, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+    });
+
+    return res.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        idToken = localStorage.getItem("google_id_token");
+
+        const retryRes = await axios.get(API_ROUTES.GET_LIKED_RECIPES, {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+
+        return retryRes.data;
+      } else {
+        localStorage.clear();
+        window.location.href = "/";
+        throw new Error("Session expired. Please log in again.");
+      }
+    }
+    throw error;
+  }
+};
+

@@ -7,8 +7,10 @@ import TermsPage from "./pages/TermsAndCondition/TermsPage";
 import FullTermsPage from "./pages/TermsAndCondition/FullTermsPage";
 import GoogleErrorScreen from "./pages/GoogleErrorHandling/GoogleErrorScreen";
 import PantryPage from "./pages/PantryPage/PantryPage";
-import BottomNavBar from "./components/NavigationBar/BottomNavBar/BottomNavBar";
 import PantryItemDetails from "./components/PantryItemDetails/PantryItemDetails";
+import PantryRecipeRecommendationPage from "./pages/PantryRecipeRecommendationPage/PantryRecipeRecommendationPage";
+import SingleRecipePage from "./pages/Recipe/SingleRecipePage";
+import BottomNavBar from "./components/NavigationBar/BottomNavBar/BottomNavBar";
 
 const App: React.FC = () => {
   const [user, setUser] = useState<string | null>(localStorage.getItem("user"));
@@ -54,9 +56,14 @@ const App: React.FC = () => {
           }
         />
         <Route
+          path="/pantry-recipes"
+          element={user ? <PantryRecipeRecommendationPage /> : <Navigate to="/" replace />}
+        />
+        <Route
           path="/pantry"
           element={user ? <PantryPage /> : <Navigate to="/" replace />}
         />
+        <Route path="/recipes/:id" element={<SingleRecipePage />} />
         <Route
           path="/profile"
           element={
@@ -67,6 +74,20 @@ const App: React.FC = () => {
                 picture={JSON.parse(localStorage.getItem("user")!)?.picture || ""}
                 userId={JSON.parse(localStorage.getItem("user")!)?.id || null}
               />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            user ? (
+              <div>
+                {/* TODO  - will update this after implementing backend route */}
+                <h2>Shopping Cart</h2>
+                <BottomNavBar />
+              </div>
             ) : (
               <Navigate to="/" replace />
             )
