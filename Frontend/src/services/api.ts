@@ -38,16 +38,21 @@ const refreshToken = async () => {
  * @param file
  * @returns
  */
-export const uploadReceipt = async (file: File) => {
+export const uploadReceipt = async (files: File[]) => {
   let idToken = localStorage.getItem("google_id_token");
 
+  if (!idToken) {
+    throw new Error("Not authenticated. Please log in again.");
+  }
+
   const formData = new FormData();
-  formData.append("file", file);
+  files.forEach((file) => {
+    formData.append("files", file); // MUST match backend param name
+  });
 
   try {
     const response = await axios.post(API_ROUTES.UPLOAD_RECEIPT, formData, {
       headers: {
-        "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${idToken}`,
       },
     });
