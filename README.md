@@ -9,6 +9,7 @@ A smart pantry management application that helps you track food items, reduce wa
 - [Development Setup](#development-setup)
 - [Mobile Testing](#mobile-testing)
 - [Troubleshooting](#troubleshooting)
+- [Deployment](#deployment)
 
 ## Features
 
@@ -293,6 +294,19 @@ npm run build
 docker-compose down
 docker-compose up -d --build
 ```
+
+## Deployment
+
+To test stockd on your mobile browser:
+
+1. Have all the services running (Frontend, Backend, Recipe Recommneder, Food Classifier)
+2. In a new terminal run
+   `ngrok http 5173 --log=stdout --log-level=info`
+3. The new url needs to be added to google console for authentication under
+   - Authorized JavaScript origins
+   - Authorized redirect URIs
+
+4. Access stockd using the url given by ngrok
 
 ---
 
