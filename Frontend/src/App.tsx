@@ -10,6 +10,7 @@ import PantryPage from "./pages/PantryPage/PantryPage";
 import PantryRecipeRecommendationPage from "./pages/PantryRecipeRecommendationPage/PantryRecipeRecommendationPage";
 import SingleRecipePage from "./pages/Recipe/SingleRecipePage";
 import BottomNavBar from "./components/NavigationBar/BottomNavBar/BottomNavBar";
+import SavedRecipes from "./pages/SavedRecipesPage/SavedRecipesPage";
 
 const App: React.FC = () => {
   const [user, setUser] = useState<string | null>(localStorage.getItem("user"));
@@ -61,6 +62,10 @@ const App: React.FC = () => {
         element={user ? <PantryPage /> : <Navigate to="/" replace />}
       />
       <Route path="/recipes/:id" element={<SingleRecipePage />} />
+      <Route
+        path="/saved"
+        element={user ? <SavedRecipes /> : <Navigate to="/" replace />}
+      />
       <Route
         path="/profile"
         element={

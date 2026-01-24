@@ -1,0 +1,22 @@
+.savedRecipes__container {
+  padding: 16px;
+  padding-bottom: 90px; /* 给 BottomNavBar 留空间 */
+}
+
+.savedRecipes__title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.savedRecipes__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.savedRecipes__empty {
+  text-align: center;
+  margin-top: 60px;
+  color: #666;
+}
