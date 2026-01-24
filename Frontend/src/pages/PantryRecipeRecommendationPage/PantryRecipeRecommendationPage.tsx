@@ -47,6 +47,7 @@ const PantryRecipeRecommendationPage: React.FC = () => {
                 rating: Number(r.AggregatedRating) || 0,
                 rawTime: r.PrepTime,               // ISO string
                 time: formatPrepTime(r.PrepTime),  // UI string
+                allergens: r.Allergens ?? [],
             }));
 
             setRecipes(formatted);
@@ -104,6 +105,9 @@ const PantryRecipeRecommendationPage: React.FC = () => {
                         image={recipe.image}
                         rating={recipe.rating}
                         time={recipe.time}
+                        status={recipe.status}
+                        allergens={recipe.allergens}
+                        onClick={() => navigate(`/recipes/${recipe.id}`)}
                     />
                 ))}
             </div>

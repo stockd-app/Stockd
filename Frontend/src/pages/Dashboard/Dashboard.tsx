@@ -28,6 +28,7 @@ export interface Recipe {
   time?: string;     // e.g. "35m" (For UI display)
   rawTime?: string;  // e.g. "PT35M" (For filtering purposes)
   status?: string;
+  allergens?: string[];
 }
 
 /**
