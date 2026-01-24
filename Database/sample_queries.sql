@@ -23,14 +23,14 @@ VALUES
 (2, 'Rice', 'Grains', 'Pantry', 1, 'kg', 'https://example.com/rice.jpg');
 
 -- Insert Recipe 1
-INSERT INTO Recipes (recipe_name, recipe_image, steps, prep_time, cook_time) 
-VALUES 
-('Chicken Stir Fry', 'https://example.com/chicken_stirfry.jpg', '1. Cook chicken; 2. Add veggies; 3. Stir fry for 10 mins', 10, 15);
+INSERT INTO Recipes (dataset_recipe_id, recipe_name, recipe_image, steps, prep_time, cook_time)
+VALUES
+(397496, 'Crabmeat Artichoke Casserole', '', 'Recipe from my beloved grandmother. Very easy & quick. Can use 3 cans crabmeat in place of fresh.', 0, 30);
 
 -- Insert Recipe 2
-INSERT INTO Recipes (recipe_name, recipe_image, steps, prep_time, cook_time) 
-VALUES 
-('Veggie Soup', 'https://example.com/veggie_soup.jpg', '1. Boil vegetables; 2. Add seasonings; 3. Simmer for 30 mins', 15, 30);
+INSERT INTO Recipes (dataset_recipe_id, recipe_name, recipe_image, steps, prep_time, cook_time)
+VALUES
+(275874, 'Veggie Soup', 'https://example.com/veggie_soup.jpg', '1. Boil vegetables; 2. Add seasonings; 3. Simmer for 30 mins', 15, 30);
 
 -- Insert Ingredients for Chicken Stir Fry
 INSERT INTO RecipeIngredients (recipe_id, pantry_item_id, ingredient_name, quantity) 

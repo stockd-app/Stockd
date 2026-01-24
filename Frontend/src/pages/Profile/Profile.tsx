@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Accessibility, ShieldCheck, MessageSquare, LogOut, UserX } from "lucide-react";
+import { Accessibility, ShieldCheck, MessageSquare, LogOut, UserX, Wheat } from "lucide-react";
 import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
 import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
-import { deleteUserAccount, handleLogout } from "../../services/api";
+import { deleteUserAccount, handleLogout, getUserAllergens, updateUserAllergens } from "../../services/api";
 import { CONFIRM_DELETE_TEXT, CONFIRM_LOGOUT_TEXT } from "../../config/consts";
 import DOMPurify from "dompurify";
+import AllergensModal from "../../components/AllergensModal/AllergensModal";
+
 
 import "./profile.css";
 
@@ -21,11 +23,32 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
 
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showAllergensModal, setShowAllergensModal] = useState(false);
+    const [initialAllergens, setInitialAllergens] = useState<string[]>([]);
 
     const handleDelete = async () => {
         console.log("userId to delete: ", userId)
         handleLogout();
         await deleteUserAccount(userId!);
+    };
+
+    const openAllergensModal = async () => {
+        try {
+            const res = await getUserAllergens();
+            setInitialAllergens(res.allergens || []);
+            setShowAllergensModal(true);
+        } catch (err) {
+            console.error("Failed to fetch allergens", err);
+        }
+    };
+
+    const handleAllergensConfirm = async (selected: string[]) => {
+        try {
+            await updateUserAllergens(selected);
+            setShowAllergensModal(false);
+        } catch (err) {
+            console.error("Failed to update allergens", err);
+        }
     };
 
     return (
@@ -58,6 +81,11 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
                     <span>Feedback</span>
                 </div>
 
+                <div className="profile__item" onClick={openAllergensModal}>
+                    <Wheat className="profile__icon" size={22} />
+                    <span>Food Allergies</span>
+                </div>
+
                 <div className="profile__item" onClick={() => setShowLogoutModal(true)}>
                     <LogOut className="profile__icon" size={22} />
                     <span>Logout</span>
@@ -70,6 +98,13 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
             </div>
 
             <BottomNavBar />
+
+            {showAllergensModal && (
+                <AllergensModal
+                    initial={initialAllergens}
+                    onConfirm={handleAllergensConfirm}
+                />
+            )}
 
             {/* Logout Modal */}
             {showLogoutModal && (

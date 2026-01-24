@@ -10,6 +10,7 @@ CREATE TABLE Users (
     email_hash CHAR(64) NOT NULL,          
     picture VARCHAR(255),
     client_id VARBINARY(512),
+    allergens JSON,
     role ENUM('admin', 'user', 'guest') DEFAULT 'guest',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -19,6 +20,7 @@ CREATE TABLE PantryItems (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     item_name VARCHAR(255) NOT NULL,
+    normalized_name VARCHAR(255),
     category VARCHAR(255),
     storage VARCHAR(255),
     quantity_value FLOAT DEFAULT 0,
@@ -28,9 +30,30 @@ CREATE TABLE PantryItems (
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE FoodImageCache (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    normalized_name VARCHAR(255) NOT NULL UNIQUE,
+    image_url VARCHAR(255) NOT NULL,
+    source VARCHAR(100) DEFAULT 'openfoodfacts',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE item_classifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    normalized_name VARCHAR(255) NOT NULL,
+    is_food BOOLEAN NOT NULL,
+    category VARCHAR(255),
+    storage VARCHAR(255),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_itemclassifications_normalized_name (normalized_name)
+);
+
 -- RECIPES
 CREATE TABLE Recipes (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    dataset_recipe_id INT NOT NULL UNIQUE,
     recipe_name VARCHAR(255) NOT NULL,
     recipe_image VARCHAR(255),
     steps TEXT,
@@ -234,6 +257,39 @@ BEGIN
             'quantity_value', OLD.quantity_value,
             'quantity_unit', OLD.quantity_unit,
             'item_image', OLD.item_image
+        )
+    );
+END$$
+
+DELIMITER $$
+
+CREATE TRIGGER itemclassifications_update_audit
+AFTER UPDATE ON item_classifications
+FOR EACH ROW
+BEGIN
+    INSERT INTO audit_logs (
+        timestamp,
+        db_user,
+        action,
+        table_name,
+        record_id,
+        changes
+    )
+    VALUES (
+        NOW(),
+        CURRENT_USER(),
+        'UPDATE',
+        'item_classifications',
+        NEW.id,
+        JSON_OBJECT(
+            'old', JSON_OBJECT(
+                'category', OLD.category,
+                'storage', OLD.storage
+            ),
+            'new', JSON_OBJECT(
+                'category', NEW.category,
+                'storage', NEW.storage
+            )
         )
     );
 END$$

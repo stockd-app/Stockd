@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getPantryRecommendations } from "../../services/api";
-import { formatPrepTime } from "../../utils/utils";
+import { getPantryRecommendations, updateUserAllergens } from "../../services/api";
+import { formatPrepTime, isoDurationToMinutes } from "../../utils/utils";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import FoodCategorySection from "../../components/FoodCategoryCard/FoodCategorySection";
 import RecipeItemSection from "../../components/RecipeItemSection/RecipeItemSection";
@@ -17,21 +17,53 @@ interface DashboardProps {
 }
 
 /**
+ * Represent what a recipe is
+ */
+export interface Recipe {
+  id: number;
+  name: string;
+  image: string;
+  rating?: number;
+  time?: string;     // e.g. "35m" (For UI display)
+  rawTime?: string;  // e.g. "PT35M" (For filtering purposes)
+  status?: string;
+}
+
+/**
+ * Represents how the user wants to filter recipes
+ */
+export interface RecipeFilters {
+  minRating: number;
+  timeRange: {
+    min: number | null;
+    max: number | null;
+  } | null;
+}
+
+
+/**
  * Dashboard Page Component
  * TODO : Fetch and display dynamic data for AI  ***
  * TODO : Handling the situation where the backend pantry has no ingredients (an empty pantry displays a blur layer) ***
  * TODO : Click on the recipe to go to the single recipe page
- * TODO : SearchBar needs improvement
  * TODO : API encapsulated into the services layer ***
  * @returns JSX.Element
  */
 const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
-  const [recommendedItems, setRecommendedItems] = useState<any[]>([]);
+  // State to hold and pass input-text down to RecipeItemSection for UI display
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Pantry-based recommended recipes, fetched directly from Backend/API (source of truth for pantry recommendations)
+  const [pantryRecipes, setPantryRecipes] = useState<Recipe[]>([]);
+
+  // Filtered recipes by search query, derived/based on pantryRecipes
+  const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("Dashboard useEffect mounted"); 1
+    console.log("Dashboard useEffect mounted");
+    console.log("Dashboard useEffect mounted");
     if (!userId) {
       navigate("/");
       return;
@@ -54,13 +86,14 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
             id: Number(recipe.RecipeId) || index + 1,
             name: DOMPurify.sanitize(recipe.Name || "Unnamed Recipe"),
             image: imageUrl,
-            rating: Number(recipe.AggregatedRating) || 4.0,
-            time: formatPrepTime(recipe.PrepTime),
+            rating: Number(recipe.AggregatedRating) || 0,
+            rawTime: recipe.PrepTime,               // ISO string
+            time: formatPrepTime(recipe.PrepTime),  // UI string
             // status: "Available",
           };
         });
 
-        setRecommendedItems(formatted);
+        setPantryRecipes(formatted);
       } catch (err) {
         console.error("Error fetching recommendations:", err);
       }
@@ -68,6 +101,22 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
 
     fetchRecommendations();
   }, [userId]);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredRecipes(pantryRecipes);
+      return;
+    }
+
+    const q = searchQuery.toLowerCase();
+    setFilteredRecipes(
+      pantryRecipes.filter(r =>
+        r.name.toLowerCase().includes(q)
+      )
+    );
+  }, [searchQuery, pantryRecipes]);
+
+
 
   const aiRecommended = [
     {
@@ -90,11 +139,29 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
 
 
   return (
+
     <div className="dashboard__container">
-      <SearchBar />
+      <div className="dashboard__searchRow">
+        <SearchBar value={searchQuery} onChange={setSearchQuery} />
+      </div>
       <FoodCategorySection />
+
       <RecipeItemSection title="Recommended Based on Your Pantry"
-        items={recommendedItems}
+        items={filteredRecipes}
+        onItemClick={(recipeId: number) => {
+          navigate(`/recipes/${recipeId}`);
+        }}
+        onSeeMore={() => navigate("/pantry-recipes")}
+        emptyTitle={
+          searchQuery
+            ? "No recipes found"
+            : "Let’s stock your pantry!"
+        }
+        emptySubtitle={
+          searchQuery
+            ? `No results for "${searchQuery}"`
+            : "Add ingredients by uploading a receipt or other methods."
+        }
       />
 
       <RecipeItemSection title="AI - Recommended Recipes For You"
