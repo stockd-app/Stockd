@@ -6,7 +6,6 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 import FoodCategorySection from "../../components/FoodCategoryCard/FoodCategorySection";
 import RecipeItemSection from "../../components/RecipeItemSection/RecipeItemSection";
 import ExploreSection from "../../components/Dashboard/ExploreSection";
-import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
 import image_placeholder from "../../assets/images/error_handling/image_placeholder.png"
 import DOMPurify from "dompurify";
 import AllergensModal from "../../components/AllergensModal/AllergensModal";
@@ -204,7 +203,6 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         items={aiRecommended} // mock data for now
       />
       <ExploreSection />
-      <BottomNavBar />
     </div>
   );
 };

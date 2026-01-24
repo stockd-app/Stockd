@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
 import PantryItemSection, { type PantryItem } from "../../components/PantryItemSection/PantryItemSection"; import { getPantryItems } from "../../services/api";
 import "./pantrypage.css";
 
@@ -21,6 +20,11 @@ const PantryPage: React.FC = () => {
 
     useEffect(() => {
         fetchPantryData();
+
+        const refresh = () => fetchPantryData();
+        window.addEventListener("pantry:refresh", refresh);
+
+        return () => window.removeEventListener("pantry:refresh", refresh);
     }, []);
 
     const fetchPantryData = async () => {
@@ -78,7 +82,6 @@ const PantryPage: React.FC = () => {
                 <div className="pantry__content">
                     <p>Loading your pantry...</p>
                 </div>
-                <BottomNavBar />
             </div>
         );
     }
@@ -89,7 +92,6 @@ const PantryPage: React.FC = () => {
                 <div className="pantry__content">
                     <p>{error}</p>
                 </div>
-                <BottomNavBar />
             </div>
         );
     }
@@ -110,7 +112,6 @@ const PantryPage: React.FC = () => {
                     ))
                 )}
             </div>
-            <BottomNavBar />
         </div>
     );
 };

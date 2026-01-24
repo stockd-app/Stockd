@@ -4,9 +4,12 @@ import { Home, Refrigerator, Bookmark, List, Camera, PencilLine, ImagePlus, Squa
 import { BOTTOM_NAV_ICON_SIZE, } from "../../../config/consts";
 import CameraModal from "../../CameraModal/CameraModal";
 
-
 import "./bottomnavbar.css";
 import "@/styles/variable.css";
+
+interface BottomNavBarProps {
+  onManualAdd?: () => void;
+}
 
 /**
  * Bottom Navigation Bar Component
@@ -14,7 +17,7 @@ import "@/styles/variable.css";
  * TODO : Ensure navigation state persists across pages
  * @returns 
  */
-const BottomNavBar: React.FC = () => {
+const BottomNavBar: React.FC<BottomNavBarProps> = ({ onManualAdd }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -37,7 +40,7 @@ const BottomNavBar: React.FC = () => {
 
   const handleManualAdd = () => {
     setShowCreationOptions(false);
-    navigate("/additem"); //TODO：Implement the manual add page and route in App.tsx
+    onManualAdd?.();
   };
 
   const handleSelectPhoto = () => {
@@ -91,11 +94,20 @@ const BottomNavBar: React.FC = () => {
   }, [activeItem]);
 
   const handleFileSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    const imageURL = URL.createObjectURL(file);
-    navigate("/preview_receipt", {
-      state: { image: imageURL, file }
+    const files = Array.from(event.target.files ?? []);
+    if (files.length === 0) return;
+
+    const images = files.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+      id: crypto.randomUUID(),
+    }));
+
+    // allow selecting the same files again later
+    event.target.value = "";
+
+    navigate("/receipt_preview", {
+      state: { images },
     });
   };
 
@@ -104,6 +116,7 @@ const BottomNavBar: React.FC = () => {
       <input
         type="file"
         accept="image/*"
+        multiple
         ref={fileInputRef}
         style={{ display: "none" }}
         onChange={handleFileSelected}
@@ -159,7 +172,7 @@ const BottomNavBar: React.FC = () => {
 
             <button className="creation__button large" onClick={handleTakePhoto}>
               <Camera size={BOTTOM_NAV_ICON_SIZE.NORMAL} color={"var(--color-primary)"} />
-              Take Photo
+              Take Receipt Photo
             </button>
             <div className="creation__row">
               <button className="creation__button" onClick={handleManualAdd}>
@@ -168,7 +181,7 @@ const BottomNavBar: React.FC = () => {
               </button>
               <button className="creation__button" onClick={handleSelectPhoto}>
                 <ImagePlus size={BOTTOM_NAV_ICON_SIZE.NORMAL} color={"var(--color-primary)"} />
-                Select Photo
+                Select Receipt Photo
               </button>
             </div>
           </div>
@@ -177,7 +190,15 @@ const BottomNavBar: React.FC = () => {
       {showCamera && (
         <CameraModal
           onClose={() => setShowCamera(false)}
-          onUploadSuccess={handleUploadSuccess}
+          onPhotoCaptured={(file, url) => {
+            navigate("/receipt_preview", {
+              state: {
+                images: [
+                  { id: crypto.randomUUID(), file, url }
+                ]
+              }
+            });
+          }}
         />
       )}
     </div>
