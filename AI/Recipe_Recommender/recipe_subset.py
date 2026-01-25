@@ -27,6 +27,8 @@ from sentence_transformers import SentenceTransformer
 import faiss
 from nltk.stem import WordNetLemmatizer
 import pandas as pd
+import nltk
+nltk.data.path.append('<path to nltk>')
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CANONICAL_DB_DIR = os.path.join(BASE_DIR, "canonical_db")

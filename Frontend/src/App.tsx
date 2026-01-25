@@ -103,7 +103,7 @@ const App: React.FC = () => {
         <Route path="/error/:code" element={<GoogleErrorScreen />} />
       </Routes>
 
-      <BottomNavBar onManualAdd={() => setShowAddItem(true)} />
+      {user && (<BottomNavBar onManualAdd={() => setShowAddItem(true)} />)}
 
       {showAddItem && (
         <PantryItemDetails
