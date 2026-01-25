@@ -9,9 +9,10 @@ import GoogleErrorScreen from "./pages/GoogleErrorHandling/GoogleErrorScreen";
 import PantryPage from "./pages/PantryPage/PantryPage";
 import ReceiptPreview from "./components/ReceiptPreview/ReceiptPreview";
 import PantryItemDetails from "./components/PantryItemDetails/PantryItemDetails";
-import PantryRecipeRecommendationPage from "./pages/PantryRecipeRecommendationPage/PantryRecipeRecommendationPage";
 import SingleRecipePage from "./pages/Recipe/SingleRecipePage";
 import BottomNavBar from "./components/NavigationBar/BottomNavBar/BottomNavBar";
+import SubsetRecipeRecPage from "./pages/PantryRecipeListPage/SubsetRecipeRecPage";
+import IncompleteRecipeRecPage from "./pages/PantryRecipeListPage/IncompleteRecipeRecPage";
 
 const App: React.FC = () => {
   const [user, setUser] = useState<string | null>(localStorage.getItem("user"));
@@ -57,8 +58,12 @@ const App: React.FC = () => {
           }
         />
         <Route
-          path="/pantry-recipes"
-          element={user ? <PantryRecipeRecommendationPage /> : <Navigate to="/" replace />}
+          path="/pantry-subset-recipes"
+          element={user ? <SubsetRecipeRecPage /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/pantry-incomplete-recipes"
+          element={user ? <IncompleteRecipeRecPage /> : <Navigate to="/" replace />}
         />
         <Route
           path="/pantry"

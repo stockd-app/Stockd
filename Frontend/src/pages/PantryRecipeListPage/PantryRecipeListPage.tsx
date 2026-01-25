@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SlidersHorizontal } from "lucide-react";
 import type { Recipe } from "../Dashboard/Dashboard";
-import { getPantryRecommendations } from "../../services/api";
-import { applyAllergenFilter, formatPrepTime, isoDurationToMinutes, isSameRange } from "../../utils/utils";
+import { getIncompleteRecipes } from "../../services/api";
+import { applyAllergenFilter, formatPrepTime, formatRecipes, isoDurationToMinutes, isSameRange } from "../../utils/utils";
 import { TIME_RANGES } from "../../config/consts";
 import FilterDrawer from "../../components/FilterDrawer/FilterDrawer";
 import FilterChip from "../../components/FilterChip/FilterChip";
@@ -11,13 +11,18 @@ import RecipeItemCard from "../../components/RecipeItemCard/RecipeItemCard";
 import image_placeholder from "../../assets/images/error_handling/image_placeholder.png";
 import DOMPurify from "dompurify";
 
-import "./pantryreciperecommendationpage.css";
+import "./pantryrecipelistpage.css";
+
+interface PantryRecipeListPageProps {
+    title: string;
+    fetchRecipes: (userId: number) => Promise<any>;
+}
 
 /**
- * Pantry Recipe Recommendation Page Component
+ * Reusable Pantry Recipe List Recommendation Page Component
  * @returns 
  */
-const PantryRecipeRecommendationPage: React.FC = () => {
+const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetchRecipes }) => {
     const navigate = useNavigate();
 
     // Recipes visible to the user after applying allergen preferences
@@ -41,32 +46,20 @@ const PantryRecipeRecommendationPage: React.FC = () => {
             return;
         }
 
-        const fetchRecipes = async () => {
-            const data = await getPantryRecommendations(user.id, 50);
+        const load = async () => {
+            const data = await fetchRecipes(user.id);
+            console.log("Fetched pantry recipes:", data);
 
-            const formatted = data.content_based.map((r: any, i: number) => ({
-                id: r.RecipeId || i,
-                name: DOMPurify.sanitize(r.Name),
-                image: r.Images?.[0] || image_placeholder,
-                rating: Number(r.AggregatedRating) || 0,
-                rawTime: r.PrepTime,               // ISO string
-                time: formatPrepTime(r.PrepTime),  // UI string
-                allergens: r.Allergens ?? [],
-            }));
+            const formatted = formatRecipes(data.content_based);
 
             const mode = localStorage.getItem("allergen_visibility");
+            const visible =
+                mode === "hide" ? applyAllergenFilter(formatted) : formatted;
 
-            if (mode === "hide") {
-                const visible = applyAllergenFilter(formatted);
-                setRecipes(visible);
-                setFilteredRecipes(visible);
-            } else {
-                setRecipes(formatted);
-                setFilteredRecipes(formatted);
-            }
+            setRecipes(visible);
+            setFilteredRecipes(visible);
         };
-
-        fetchRecipes();
+        load();
     }, []);
 
     useEffect(() => {
@@ -89,8 +82,6 @@ const PantryRecipeRecommendationPage: React.FC = () => {
                 return true;
             });
         }
-
-
         setFilteredRecipes(result);
     }, [filters, recipes]);
 
@@ -99,7 +90,8 @@ const PantryRecipeRecommendationPage: React.FC = () => {
             {/* Header */}
             <div className="pantryRecipes__header">
                 <button onClick={() => navigate(-1)} className="backBtn">←</button>
-                <h2>Discover Recipes</h2>
+                {/* <h2>Discover Recipes</h2> */}
+                <h2>{title}</h2>
                 <button
                     className="filterIcon"
                     onClick={() => setShowFilters(true)}
@@ -187,4 +179,4 @@ const PantryRecipeRecommendationPage: React.FC = () => {
     );
 };
 
-export default PantryRecipeRecommendationPage;
+export default PantryRecipeListPage;

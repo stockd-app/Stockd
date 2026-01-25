@@ -1129,4 +1129,6 @@ async def get_subset_recommendations(user_id: int):
         )
         resp.raise_for_status()
 
-    return resp.json()
+    data = resp.json()
+
+    return {"status": "success", "content_based": data.get("recommendations", data)}
