@@ -7,9 +7,12 @@ import TermsPage from "./pages/TermsAndCondition/TermsPage";
 import FullTermsPage from "./pages/TermsAndCondition/FullTermsPage";
 import GoogleErrorScreen from "./pages/GoogleErrorHandling/GoogleErrorScreen";
 import PantryPage from "./pages/PantryPage/PantryPage";
+import PantryItemDetails from "./components/PantryItemDetails/PantryItemDetails";
+import PantryPantryPage from "./pages/PantryPage/PantryPantryPage";
+import PantryFridgePage from "./pages/PantryPage/PantryFridgePage";
+import PantryFreezerPage from "./pages/PantryPage/PantryFreezerPage";
 import GroceryListPage from "./pages/GroceryListPage/GroceryListPage";
 import ReceiptPreview from "./components/ReceiptPreview/ReceiptPreview";
-import PantryItemDetails from "./components/PantryItemDetails/PantryItemDetails";
 import SingleRecipePage from "./pages/Recipe/SingleRecipePage";
 import BottomNavBar from "./components/NavigationBar/BottomNavBar/BottomNavBar";
 import SubsetRecipeRecPage from "./pages/PantryRecipeListPage/SubsetRecipeRecPage";
@@ -69,6 +72,18 @@ const App: React.FC = () => {
         <Route
           path="/pantry"
           element={user ? <PantryPage /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/pantry-pantry"
+          element={user ? <PantryPantryPage /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/pantry-fridge"
+          element={user ? <PantryFridgePage /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/pantry-freezer"
+          element={user ? <PantryFreezerPage /> : <Navigate to="/" replace />}
         />
         <Route
           path="/receipt_preview"

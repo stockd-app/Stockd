@@ -1,0 +1,19 @@
+.pantrySection__container {
+    min-height: 100vh;
+    background: var(--color-white);
+    padding-bottom: 40px;
+}
+
+.pantrySection__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+}
+
+.pantrySection__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    padding: 16px;
+}

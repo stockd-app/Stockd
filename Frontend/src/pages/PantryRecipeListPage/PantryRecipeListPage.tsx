@@ -2,14 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SlidersHorizontal } from "lucide-react";
 import type { Recipe } from "../Dashboard/Dashboard";
-import { getIncompleteRecipes } from "../../services/api";
-import { applyAllergenFilter, formatPrepTime, formatRecipes, isoDurationToMinutes, isSameRange } from "../../utils/utils";
+import { applyAllergenFilter, formatRecipes, isoDurationToMinutes, isSameRange } from "../../utils/utils";
 import { TIME_RANGES } from "../../config/consts";
 import FilterDrawer from "../../components/FilterDrawer/FilterDrawer";
 import FilterChip from "../../components/FilterChip/FilterChip";
 import RecipeItemCard from "../../components/RecipeItemCard/RecipeItemCard";
-import image_placeholder from "../../assets/images/error_handling/image_placeholder.png";
-import DOMPurify from "dompurify";
 
 import "./pantryrecipelistpage.css";
 

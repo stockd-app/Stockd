@@ -19,9 +19,10 @@ interface PantryItemSectionProps {
     section: string;
     items: PantryItem[];
     onRefresh: () => void;
+    onSeeMore?: (section: string) => void;
 }
 
-const PantryItemSection: React.FC<PantryItemSectionProps> = ({ section, items, onRefresh }) => {
+const PantryItemSection: React.FC<PantryItemSectionProps> = ({ section, items, onRefresh, onSeeMore }) => {
     const [selectedItem, setSelectedItem] = useState<any | null>(null);
     console.log("Rendering ItemSection for section:", section);
 
@@ -34,7 +35,14 @@ const PantryItemSection: React.FC<PantryItemSectionProps> = ({ section, items, o
             <div className="pantryitemsection__container">
                 <div className="pantryitemsecton__header">
                     <h2>{section}</h2>
-                    <p className="see__more">See more</p>
+                    {onSeeMore && (
+                        <p
+                            className="see__more"
+                            onClick={() => onSeeMore(section)}
+                        >
+                            See more
+                        </p>
+                    )}
                 </div>
 
                 <div className="pantryitemsection__items">
