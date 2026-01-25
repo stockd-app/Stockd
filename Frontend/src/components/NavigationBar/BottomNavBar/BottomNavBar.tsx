@@ -1,7 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Refrigerator, Bookmark, List, Camera, PencilLine, ImagePlus, SquarePlus } from "lucide-react";
-import { BOTTOM_NAV_ICON_SIZE, } from "../../../config/consts";
+import {
+  Home,
+  Refrigerator,
+  Bookmark,
+  List,
+  Camera,
+  PencilLine,
+  ImagePlus,
+  SquarePlus,
+} from "lucide-react";
+import { BOTTOM_NAV_ICON_SIZE } from "../../../config/consts";
 import CameraModal from "../../CameraModal/CameraModal";
 
 import "./bottomnavbar.css";
@@ -15,7 +24,7 @@ interface BottomNavBarProps {
  * Bottom Navigation Bar Component
  * TODO : Add navigation functionality
  * TODO : Ensure navigation state persists across pages
- * @returns 
+ * @returns
  */
 const BottomNavBar: React.FC<BottomNavBarProps> = ({ onManualAdd }) => {
   const navigate = useNavigate();

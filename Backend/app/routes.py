@@ -2,6 +2,7 @@ import datetime
 import os
 import time
 import traceback
+from datetime import datetime as dt
 from dotenv import load_dotenv
 from fastapi import (
     APIRouter,
@@ -38,6 +39,10 @@ from app.database.models import (
     User,
     PantryItem,
     UserAllergensRequest,
+    GroceryItem,
+    GroceryItemsRequest,
+    GroceryItemsDeleteRequest,
+    GroceryItemMarkRequest,
 )
 from app.utils.ai_recommender import get_recipe_recommendations
 from app.utils.sanitizer import sanitize_text, sanitize_quantity, sanitize_url, sanitize_google_url
@@ -1112,6 +1117,300 @@ async def get_user_allergens(request: Request, user=Depends(require_google_token
     finally:
         db.close()
 
+
+def fetch_grocery_items(user_id: int):
+    "Fetch grocery items for a specific user."
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return None, None
+
+        items = (
+            db.query(GroceryItem)
+            .filter(GroceryItem.user_id == user_id)
+            .all()
+        )
+        return user, items
+    finally:
+        db.close()
+
+@router.get("/grocery_items/{user_id}", tags=["Grocery"])
+async def get_grocery_items(user_id: int):
+    """Get all grocery items for a specific user and return unpurchased count."""
+    user, grocery_items =  fetch_grocery_items(user_id)
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if not grocery_items:
+        return {
+            "status": "success",
+            "user_id": user_id,
+            "items": [],
+            "total_unpurchased": 0,
+        }
+
+    items = [
+        {
+            "id": item.id,
+            "item_name": item.item_name,
+            "quantity_value": item.quantity_value,
+            "quantity_unit": item.quantity_unit,
+            "is_purchased": item.is_purchased,
+        }
+        for item in grocery_items
+    ]
+
+    unpurchased_count = sum(
+        1 for item in grocery_items if not item.is_purchased
+    )
+
+    return {
+        "status": "success",
+        "user_id": user_id,
+        "items": items,
+        "total_unpurchased": unpurchased_count,
+    }
+
+@router.post("/add_update_grocery_items", tags=["Grocery"])
+@limiter.limit("10/minute")
+async def add_update_grocery_items(
+    request: Request,
+    request_data: GroceryItemsRequest,
+):
+    """
+    Add or update grocery items for a user.
+    Update item by id.
+    """
+    db = SessionLocal()
+    try:
+        # Verify user exists
+        db_user = db.query(User).filter(User.id == request_data.user_id).first()
+        if not db_user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        processed_items = []
+
+        for item in request_data.items:
+            existing_item = None
+            
+            if item.id:
+                existing_item = (
+                    db.query(GroceryItem)
+                    .filter(
+                        GroceryItem.id == item.id,
+                        GroceryItem.user_id == request_data.user_id,
+                    )
+                    .first()
+                )
+
+            if existing_item:
+                # Update existing item
+                existing_item.item_name = item.item_name
+                existing_item.quantity_value = item.quantity_value
+                existing_item.quantity_unit = item.quantity_unit
+                existing_item.updated_on = datetime.datetime.now()
+
+                processed_items.append(
+                    {
+                        "id": existing_item.id,
+                        "item_name": existing_item.item_name,
+                        "action": "updated",
+                    }
+                )
+            else:
+                # Create new item
+                new_item = GroceryItem(
+                    user_id=request_data.user_id,
+                    item_name=item.item_name,
+                    quantity_value=item.quantity_value,
+                    quantity_unit=item.quantity_unit,
+                    is_purchased=False,
+                )
+                db.add(new_item)
+                db.flush()  # get new_item.id
+
+                processed_items.append(
+                    {
+                        "id": new_item.id,
+                        "item_name": new_item.item_name,
+                        "action": "created",
+                    }
+                )
+
+        db.commit()
+
+        return {
+            "status": "success",
+            "user_id": request_data.user_id,
+            "processed_count": len(processed_items),
+            "items": processed_items,
+        }
+
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+@router.delete("/grocery_items/delete", tags=["Grocery"])
+@limiter.limit("10/minute")
+async def delete_grocery_items(
+    request: Request,
+    request_data: GroceryItemsDeleteRequest,
+):
+    """
+    Delete multiple grocery items by their IDs.
+    """
+    db = SessionLocal()
+    try:
+        deleted_count = 0
+        not_found = []
+        
+        for item_id in request_data.grocery_item_ids:
+            grocery_item = db.query(GroceryItem).filter(
+                GroceryItem.id == item_id
+            ).first()
+            
+            if grocery_item:
+                db.delete(grocery_item)
+                deleted_count += 1
+            else:
+                not_found.append(item_id)
+        
+        db.commit()
+        
+        return {
+            "status": "success",
+            "deleted_count": deleted_count,
+            "not_found": not_found
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+
+def move_grocery_item_to_pantry(db, grocery_item: GroceryItem):
+    """
+    Helper function to move a grocery item to pantry.
+    Creates a PantryItem from a purchased GroceryItem.
+    """
+    norm_name = normalize_food_name(grocery_item.item_name)
+    
+    # Check if item already exists in pantry
+    existing_item = (
+        db.query(PantryItem)
+        .filter(PantryItem.user_id == grocery_item.user_id)
+        .filter(PantryItem.normalized_name == norm_name)
+        .first()
+    )
+    
+    if existing_item:
+        # Update quantity if exists
+        existing_item.quantity_value += grocery_item.quantity_value
+        existing_item.quantity_unit = grocery_item.quantity_unit or "pcs"
+        return existing_item
+    
+    # Create new PantryItem
+    pantry_item = PantryItem(
+        user_id=grocery_item.user_id,
+        item_name=grocery_item.item_name,
+        normalized_name=norm_name,
+        quantity_value=grocery_item.quantity_value,
+        quantity_unit=grocery_item.quantity_unit or "pcs",
+        category="Groceries",
+        storage="Pantry",
+    )
+    db.add(pantry_item)
+    db.flush()
+    return pantry_item
+
+
+@router.patch("/grocery_items/{item_id}/mark-purchased", tags=["Grocery"])
+async def mark_grocery_item_purchased(item_id: int):
+    """
+    Mark a specific grocery item as purchased and move it to pantry.
+    """
+    db = SessionLocal()
+    try:
+        grocery_item = (
+            db.query(GroceryItem)
+            .filter(GroceryItem.id == item_id)
+            .first()
+        )
+        
+        if not grocery_item:
+            raise HTTPException(status_code=404, detail="Grocery item not found")
+        
+        # Move to pantry
+        pantry_item = move_grocery_item_to_pantry(db, grocery_item)
+        
+        # Delete from grocery list
+        db.delete(grocery_item)
+        db.commit()
+        
+        return {
+            "status": "success",
+            "message": "Item moved to pantry",
+            "item_id": item_id,
+            "pantry_item_id": pantry_item.id
+        }
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+
+@router.patch("/grocery_items/mark-all-purchased", tags=["Grocery"])
+async def mark_all_grocery_items_purchased(user_id: int):
+    """
+    Mark all grocery items as purchased and move them to pantry for a user.
+    """
+    db = SessionLocal()
+    try:
+        # Verify user exists
+        db_user = db.query(User).filter(User.id == user_id).first()
+        if not db_user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Get all unpurchased items
+        grocery_items = (
+            db.query(GroceryItem)
+            .filter(GroceryItem.user_id == user_id)
+            .all()
+        )
+        
+        # Move each item to pantry
+        for item in grocery_items:
+            move_grocery_item_to_pantry(db, item)
+            db.delete(item)
+        
+        db.commit()
+        
+        return {
+            "status": "success",
+            "message": "All items moved to pantry",
+            "user_id": user_id,
+            "moved_count": len(grocery_items)
+        }
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
 @router.get("/recommendations/subset/{user_id}")
 async def get_subset_recommendations(user_id: int):
     pantry_items = get_user_pantry_exact_match(user_id)
