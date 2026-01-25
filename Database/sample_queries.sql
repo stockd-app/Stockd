@@ -62,11 +62,11 @@ VALUES
 -- Insert Grocery Items for User 1
 INSERT INTO GroceryItems (user_id, item_name, quantity_value, quantity_unit, is_purchased) 
 VALUES 
-(3, 'Olive Oil', 1, 'bottle', FALSE),
-(3, 'Garlic', 5, 'cloves', FALSE),
-(3, 'Pasta', 500, 'grams', FALSE),
-(3, 'Cheddar Cheese', 250, 'grams', FALSE),
-(3, 'Butter', 'Dairy', 200, 'grams', FALSE);
+(1, 'Olive Oil', 1, 'bottle', FALSE),
+(1, 'Garlic', 5, 'cloves', FALSE),
+(1, 'Pasta', 500, 'grams', FALSE),
+(1, 'Cheddar Cheese', 250, 'grams', FALSE),
+(1, 'Butter', 'Dairy', 200, 'grams', FALSE);
 
 -- Insert Grocery Items for User 2 
 INSERT INTO GroceryItems (user_id, item_name, quantity_value, quantity_unit, is_purchased) 
