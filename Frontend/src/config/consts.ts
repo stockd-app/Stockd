@@ -21,6 +21,11 @@ export const API_ROUTES = {
   DELETE_USER: `${API_BASE_URL}/delete_user`,
   GET_USER_ALLERGENS: `${API_BASE_URL}/user/get-allergens`,
   POST_USER_ALLERGENS: `${API_BASE_URL}/user/post-allergens`,
+  GET_GROCERY_ITEMS: `${API_BASE_URL}/grocery_items`,
+  ADD_UPDATE_GROCERY_ITEM: `${API_BASE_URL}/add_update_grocery_items`,
+  DELETE_GROCERY_ITEM: `${API_BASE_URL}/grocery_items/delete`,
+  MARK_GROCERY_PURCHASED: `${API_BASE_URL}/grocery_items`,
+  MARK_ALL_GROCERY_PURCHASED: `${API_BASE_URL}/grocery_items/mark-all-purchased`,
 };
 
 // Google OAuth related constants
@@ -29,22 +34,22 @@ export const GOOGLE_CONSTS = {
   GOOGLE_TEXT: "Continue with Google",
   GOOGLE_ALT_TEXT: "Google logo",
   GOOGLE_ICON_SIZE: 18,
-}
+};
 
 export const SEARCH = "Search recommended recipes";
 export const LANDING_PAGE = {
   STOCKD: "Stockd",
   WELCOME_TEXT: "Let's join our community to cook better food!",
-}
+};
 
 export const TOP_NAV_BAR = {
   CATEGORY: "Category",
-}
+};
 
 export const BOTTOM_NAV_ICON_SIZE = {
   NORMAL: 22,
   LARGE: 26,
-}
+};
 
 /* Update for pantry add/edit/delete */
 export const NOTIFICATION_MESSAGES = {
@@ -63,7 +68,8 @@ export const NOTIFICATION_TYPES = {
   UNLIKED: "unliked",
 } as const;
 
-export type NotificationType = typeof NOTIFICATION_TYPES[keyof typeof NOTIFICATION_TYPES];
+export type NotificationType =
+  (typeof NOTIFICATION_TYPES)[keyof typeof NOTIFICATION_TYPES];
 
 export const NOTIFICATION_ICONS = {
   added: Check,
@@ -76,7 +82,7 @@ export const NOTIFICATION_ICONS = {
 export const NOTIFICATION_UI = {
   ICON_SIZE: 18,
   ICON_STROKE_WIDTH: 2,
-}
+};
 
 export const NOTIFICATION_TIMEOUTS = {
   AUTO_REMOVE_MS: 1500,
@@ -86,9 +92,10 @@ export const NOTIFICATION_TIMEOUTS = {
 export const CONFIRM_MODAL = {
   YES: "Yes",
   NO: "No",
-}
+};
 
 export const CONFIRM_LOGOUT_TEXT = "Are you sure you want to log out?";
+
 export const CONFIRM_DELETE_TEXT = "Are you sure you want to delete your account? This action cannot be undone.";
 export const CONFIRM_DELETE_PANTRY_ITEM = "Are you sure you want to delete this item?";
 

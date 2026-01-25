@@ -7,6 +7,7 @@ import TermsPage from "./pages/TermsAndCondition/TermsPage";
 import FullTermsPage from "./pages/TermsAndCondition/FullTermsPage";
 import GoogleErrorScreen from "./pages/GoogleErrorHandling/GoogleErrorScreen";
 import PantryPage from "./pages/PantryPage/PantryPage";
+import GroceryListPage from "./pages/GroceryListPage/GroceryListPage";
 import ReceiptPreview from "./components/ReceiptPreview/ReceiptPreview";
 import PantryItemDetails from "./components/PantryItemDetails/PantryItemDetails";
 import SingleRecipePage from "./pages/Recipe/SingleRecipePage";
@@ -93,11 +94,10 @@ const App: React.FC = () => {
           path="/cart"
           element={
             user ? (
-              <div>
-                {/* TODO  - will update this after implementing backend route */}
-                <h2>Shopping Cart</h2>
-                <BottomNavBar />
-              </div>
+              <GroceryListPage
+                userId={JSON.parse(localStorage.getItem("user")!)?.id || null}
+                accessToken={localStorage.getItem("google_access_token") || ""}
+              />
             ) : (
               <Navigate to="/" replace />
             )
