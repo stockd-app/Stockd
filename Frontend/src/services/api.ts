@@ -38,16 +38,21 @@ const refreshToken = async () => {
  * @param file
  * @returns
  */
-export const uploadReceipt = async (file: File) => {
+export const uploadReceipt = async (files: File[]) => {
   let idToken = localStorage.getItem("google_id_token");
 
+  if (!idToken) {
+    throw new Error("Not authenticated. Please log in again.");
+  }
+
   const formData = new FormData();
-  formData.append("file", file);
+  files.forEach((file) => {
+    formData.append("files", file); // MUST match backend param name
+  });
 
   try {
     const response = await axios.post(API_ROUTES.UPLOAD_RECEIPT, formData, {
       headers: {
-        "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${idToken}`,
       },
     });
@@ -167,6 +172,50 @@ export const addOrUpdatePantryItem = async (userId: number, items: any) => {
     }
   }
 };
+
+
+
+/**
+ * Delete pantry items by their IDs
+ * @param itemIds 
+ * @returns 
+ */
+export const deletePantryItems = async (itemIds: number[]) => {
+  let idToken = localStorage.getItem("google_id_token");
+
+  try {
+    const res = await axios.delete(API_ROUTES.DELETE_PANTRY_ITEMS, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+      data: {
+        pantry_item_ids: itemIds,
+      },
+    });
+
+    return res.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        idToken = localStorage.getItem("google_id_token");
+        const retry = await axios.delete(API_ROUTES.DELETE_PANTRY_ITEMS, {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+          data: {
+            pantry_item_ids: itemIds,
+          },
+        });
+        return retry.data;
+      }
+      throw error;
+    }
+    throw error;
+  }
+};
+
+
 
 /**
  * Get single recipe by recipe ID

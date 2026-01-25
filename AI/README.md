@@ -88,6 +88,15 @@ AI/
 
 Navigate into the Recipe_Recommender directory:
 pip install -r recipe_recommender_requirements.txt
+Note that pip install does not work for ntlk for unknown reason. Therefore, you would need to:
+   - Perform steps according to `https://www.nltk.org/data.html#manual-installation`. (Only corpora)
+   - `nltk_data` folder and `corpora` subfolder could be placed under:
+      - 'C:\\Users\\yourusername/nltk_data'
+      - 'C:\\Users\\yourusername\\AppData\\Roaming\\nltk_data'
+      - 'C:\\nltk_data'
+      - 'D:\\nltk_data'
+      - 'E:\\nltk_data' 
+   - Populate the `corpora` subfolder with the unzipped folder of `https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/corpora/wordnet.zip` and `https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/corpora/omw-1.4.zip`. And those steps should suffice.
 
 ## ⚙️ 3. Configure Environment Variables
 

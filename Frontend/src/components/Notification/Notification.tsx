@@ -9,6 +9,11 @@ interface NotificationProps {
     leaving?: boolean;
 }
 
+/**
+ * To display a notification message to the user.
+ * @param param0 
+ * @returns 
+ */
 const Notification: React.FC<NotificationProps> = ({ message, type, leaving }) => {
     const Icon = NOTIFICATION_ICONS[type];
 

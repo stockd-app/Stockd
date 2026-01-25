@@ -1,3 +1,5 @@
+@import "@/styles/variable.css";
+
 .modal__overlay {
   position: fixed;
   inset: 0;
@@ -9,12 +11,12 @@
 }
 
 .modal__content {
-  background: white;
+  background: var(--color-white);
   border-radius: 12px;
   padding: 24px;
   width: 90%;
   max-width: 400px;
-  color: black;
+  color: var(--color-black);
 }
 
 .modal__list {
@@ -35,8 +37,8 @@
   padding: 10px;
   border-radius: 8px;
   border: none;
-  background: #4caf50;
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-white);
   font-weight: bold;
   cursor: pointer;
 }

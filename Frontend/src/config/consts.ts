@@ -1,4 +1,4 @@
-import { Check, Pencil, Trash2, Heart,HeartOff } from "lucide-react";
+import { Check, Pencil, Trash2, Heart, HeartOff } from "lucide-react";
 
 // Backend API base URL
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
@@ -10,6 +10,7 @@ export const API_ROUTES = {
   VERIFY_GOOGLE: `${API_BASE_URL}/auth/google`,
   GET_PANTRY: `${API_BASE_URL}/pantry_items`,
   ADD_UPDATE_PANTRY_ITEM: `${API_BASE_URL}/add_update_pantry_items`,
+  DELETE_PANTRY_ITEMS: `${API_BASE_URL}/pantry_items/delete`,
   GET_PANTRY_RECOMMENDATIONS: `${API_BASE_URL}/recommendations/pantry`, // Caller will append `user_id`
   GET_RECIPE_BY_ID: `${API_BASE_URL}/recipes`,
   // TOGGLE_LIKE_RECIPE: (recipeId: number) => `${API_BASE_URL}/recipes/${recipeId}/like`,
@@ -95,6 +96,7 @@ export const CONFIRM_MODAL = {
 export const CONFIRM_LOGOUT_TEXT = "Are you sure you want to log out?";
 
 export const CONFIRM_DELETE_TEXT = "Are you sure you want to delete your account? This action cannot be undone.";
+export const CONFIRM_DELETE_PANTRY_ITEM = "Are you sure you want to delete this item?";
 
 export const TIME_RANGES = [
   { label: "All", value: null },
