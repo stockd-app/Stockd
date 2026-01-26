@@ -12,12 +12,19 @@ export default defineConfig({
   },
   server: {
     // Use default HMR settings to avoid binding to port 443
+    middlewareMode: false,
     hmr: {
       protocol: "ws",
       host: process.env.VITE_HMR_HOST || "localhost",
       port: 5173,
     },
-    allowedHosts: ["localhost", "127.0.0.1", "*.ngrok-free.dev", "*.ngrok.io"],
+    allowedHosts: [
+      "localhost",
+      "127.0.0.1",
+      "*.ngrok-free.dev",
+      "*.ngrok.io",
+      "unclawed-dot-interequinoctial.ngrok-free.dev",
+    ],
     proxy: {
       "/api": {
         target: "http://localhost:8000",
