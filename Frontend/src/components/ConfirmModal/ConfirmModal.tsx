@@ -4,7 +4,7 @@ import { CONFIRM_MODAL } from "../../config/consts";
 import "./confirmmodal.css";
 
 interface ConfirmModalProps {
-    text: string;
+    text: React.ReactNode;
     onConfirm: () => void;
     onCancel: () => void;
     confirmLabel?: string;

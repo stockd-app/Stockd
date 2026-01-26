@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getPantryRecommendations, updateUserAllergens } from "../../services/api";
-import { formatPrepTime, isoDurationToMinutes } from "../../utils/utils";
+import { applyAllergenFilter, formatPrepTime, isoDurationToMinutes } from "../../utils/utils";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import FoodCategorySection from "../../components/FoodCategoryCard/FoodCategorySection";
 import RecipeItemSection from "../../components/RecipeItemSection/RecipeItemSection";
 import ExploreSection from "../../components/Dashboard/ExploreSection";
-import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
 import image_placeholder from "../../assets/images/error_handling/image_placeholder.png"
 import DOMPurify from "dompurify";
+import AllergensModal from "../../components/AllergensModal/AllergensModal";
+import AllergenPreferenceModal from "../../components/AllergenPreferenceModal/AllergenPreferenceModal";
 
 import "./dashboard.css";
 
@@ -27,6 +28,7 @@ export interface Recipe {
   time?: string;     // e.g. "35m" (For UI display)
   rawTime?: string;  // e.g. "PT35M" (For filtering purposes)
   status?: string;
+  allergens?: string[];
 }
 
 /**
@@ -50,16 +52,37 @@ export interface RecipeFilters {
  * @returns JSX.Element
  */
 const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
+  // Initial state for showing allergens modal
+  const [showAllergensModal, setShowAllergensModal] = useState(false);
+
+  // State to control showing allergen preference modal
+  const [showAllergenFilterModal, setShowAllergenFilterModal] = useState(false);
+
   // State to hold and pass input-text down to RecipeItemSection for UI display
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Pantry-based recommended recipes, fetched directly from Backend/API (source of truth for pantry recommendations)
+  // All pantry recipes as returned from the backend (source of truth, never filtered)
+  const [allPantryRecipes, setAllPantryRecipes] = useState<Recipe[]>([]);
+
+  // Pantry recipes currently visible to the user (may be filtered by allergens, search, etc.)
   const [pantryRecipes, setPantryRecipes] = useState<Recipe[]>([]);
 
-  // Filtered recipes by search query, derived/based on pantryRecipes
+  // Recipes currently displayed in the UI after applying transient UI filters (e.g. search)
+  // Derived from pantryRecipes and reset when UI filters are cleared
   const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
 
   const navigate = useNavigate();
+
+  /**
+   * Check if user has completed allergens onboarding
+   */
+  useEffect(() => {
+    const onboarded = localStorage.getItem("allergens_onboarded");
+
+    if (!onboarded) {
+      setShowAllergensModal(true);
+    }
+  }, []);
 
   useEffect(() => {
     console.log("Dashboard useEffect mounted");
@@ -86,14 +109,23 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
             id: Number(recipe.RecipeId) || index + 1,
             name: DOMPurify.sanitize(recipe.Name || "Unnamed Recipe"),
             image: imageUrl,
-            rating: Number(recipe.AggregatedRating) || 0,
+            rating: Number(recipe.AggregatedRating) || 0.0,
             rawTime: recipe.PrepTime,               // ISO string
             time: formatPrepTime(recipe.PrepTime),  // UI string
+            allergens: recipe.Allergens ?? [],
             // status: "Available",
           };
         });
 
-        setPantryRecipes(formatted);
+        setAllPantryRecipes(formatted);
+
+        const mode = localStorage.getItem("allergen_visibility");
+
+        if (mode === "hide") {
+          setPantryRecipes(applyAllergenFilter(formatted));
+        } else {
+          setPantryRecipes(formatted);
+        }
       } catch (err) {
         console.error("Error fetching recommendations:", err);
       }
@@ -137,10 +169,53 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     },
   ];
 
+  /**
+   * Handle confirmation of selected allergens from the modal
+   * @param selected 
+   */
+  const handleAllergensConfirm = async (selected: string[]) => {
+    try {
+      await updateUserAllergens(selected);
+      localStorage.setItem("user_allergens", JSON.stringify(selected));
+      localStorage.setItem("allergens_onboarded", "true");
+      setShowAllergensModal(false);
+
+      // Show second modal for allergen filtering if not dismissed before
+      const dismissed = localStorage.getItem("allergen_modal_dismissed");
+      if (!dismissed) {
+        setShowAllergenFilterModal(true);
+      }
+    } catch (err) {
+      console.error("Failed to update allergens", err);
+    }
+  };
 
   return (
 
     <div className="dashboard__container">
+      {showAllergensModal && (
+        <AllergensModal
+          initial={JSON.parse(localStorage.getItem("user_allergens") || "[]")}
+          onConfirm={handleAllergensConfirm}
+        />
+      )}
+      {showAllergenFilterModal && (
+        <AllergenPreferenceModal
+          onConfirm={(mode) => {
+            if (mode === "hide") {
+              setPantryRecipes(applyAllergenFilter(allPantryRecipes));
+            } else {
+              setPantryRecipes(allPantryRecipes);
+            }
+
+            setShowAllergenFilterModal(false);
+          }}
+          onCancel={() => {
+            setPantryRecipes(allPantryRecipes);
+            setShowAllergenFilterModal(false);
+          }}
+        />
+      )}
       <div className="dashboard__searchRow">
         <SearchBar value={searchQuery} onChange={setSearchQuery} />
       </div>
@@ -168,7 +243,6 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         items={aiRecommended} // mock data for now
       />
       <ExploreSection />
-      <BottomNavBar />
     </div>
   );
 };

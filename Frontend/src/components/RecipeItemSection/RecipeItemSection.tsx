@@ -15,6 +15,7 @@ interface RecipeItemSectionProps {
         rating?: number;
         time?: string;
         status?: string;
+        allergens?: string[];
     }[];
     onItemClick?: (id: number) => void;
     emptyTitle?: string;
@@ -67,6 +68,7 @@ const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = 
                             rating={item.rating}
                             time={item.time}
                             status={item.status}
+                            allergens={item.allergens}
                             onClick={() => onItemClick?.(item.id)}
                         />
                     ))}

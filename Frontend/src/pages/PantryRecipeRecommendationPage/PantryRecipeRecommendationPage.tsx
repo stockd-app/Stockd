@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { SlidersHorizontal } from "lucide-react";
 import type { Recipe } from "../Dashboard/Dashboard";
 import { getPantryRecommendations } from "../../services/api";
-import { formatPrepTime, isoDurationToMinutes, isSameRange } from "../../utils/utils";
+import { applyAllergenFilter, formatPrepTime, isoDurationToMinutes, isSameRange } from "../../utils/utils";
 import { TIME_RANGES } from "../../config/consts";
 import FilterDrawer from "../../components/FilterDrawer/FilterDrawer";
 import FilterChip from "../../components/FilterChip/FilterChip";
@@ -20,8 +20,12 @@ import "./pantryreciperecommendationpage.css";
 const PantryRecipeRecommendationPage: React.FC = () => {
     const navigate = useNavigate();
 
+    // Recipes visible to the user after applying allergen preferences
     const [recipes, setRecipes] = useState<Recipe[]>([]);
+
+    // Recipes displayed after applying UI-level filters (rating, time, etc.)
     const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
+
     const [showFilters, setShowFilters] = useState(false);
 
     const [filters, setFilters] = useState({
@@ -47,10 +51,19 @@ const PantryRecipeRecommendationPage: React.FC = () => {
                 rating: Number(r.AggregatedRating) || 0,
                 rawTime: r.PrepTime,               // ISO string
                 time: formatPrepTime(r.PrepTime),  // UI string
+                allergens: r.Allergens ?? [],
             }));
 
-            setRecipes(formatted);
-            setFilteredRecipes(formatted);
+            const mode = localStorage.getItem("allergen_visibility");
+
+            if (mode === "hide") {
+                const visible = applyAllergenFilter(formatted);
+                setRecipes(visible);
+                setFilteredRecipes(visible);
+            } else {
+                setRecipes(formatted);
+                setFilteredRecipes(formatted);
+            }
         };
 
         fetchRecipes();
@@ -104,6 +117,9 @@ const PantryRecipeRecommendationPage: React.FC = () => {
                         image={recipe.image}
                         rating={recipe.rating}
                         time={recipe.time}
+                        status={recipe.status}
+                        allergens={recipe.allergens}
+                        onClick={() => navigate(`/recipes/${recipe.id}`)}
                     />
                 ))}
             </div>

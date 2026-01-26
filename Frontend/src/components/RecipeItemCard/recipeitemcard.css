@@ -44,6 +44,20 @@
     max-width: 150px;
 }
 
+.recipeitemcard__allergens {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.recipeitemcard__allergen {
+    background: var(--color-light-red);
+    color: var(--color-red);
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
 .status--available {
     background-color: #e7f8e7;
     color: var(--color-green);

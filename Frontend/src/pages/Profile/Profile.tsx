@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Accessibility, ShieldCheck, MessageSquare, LogOut, UserX, Wheat } from "lucide-react";
-import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
 import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
 import { deleteUserAccount, handleLogout, getUserAllergens, updateUserAllergens } from "../../services/api";
 import { CONFIRM_DELETE_TEXT, CONFIRM_LOGOUT_TEXT } from "../../config/consts";
@@ -45,6 +44,8 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
     const handleAllergensConfirm = async (selected: string[]) => {
         try {
             await updateUserAllergens(selected);
+            localStorage.setItem("user_allergens", JSON.stringify(selected));
+            localStorage.setItem("allergens_onboarded", "true");
             setShowAllergensModal(false);
         } catch (err) {
             console.error("Failed to update allergens", err);
@@ -96,8 +97,6 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
                     <span>Delete Account</span>
                 </div>
             </div>
-
-            <BottomNavBar />
 
             {showAllergensModal && (
                 <AllergensModal
