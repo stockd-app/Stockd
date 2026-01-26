@@ -1,0 +1,41 @@
+@import "@/styles/variable.css";
+
+.savedRecipes__container {
+  min-height: 100vh;
+  background: var(--color-white);
+  padding-bottom: 40px;
+}
+
+.savedRecipes__header {
+  padding: 16px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.savedRecipes__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  padding: 16px;
+}
+
+.savedRecipes__empty {
+  text-align: center;
+  margin-top: 80px;
+  color: var(--color-gray-500);
+}
+
+.savedRecipes__empty p {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.savedRecipes__empty span {
+  font-size: 14px;
+}
+
+@media (max-width: 360px) {
+  .savedRecipes__grid {
+    grid-template-columns: 1fr;
+  }
+}

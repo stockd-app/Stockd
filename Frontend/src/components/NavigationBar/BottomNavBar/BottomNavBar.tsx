@@ -154,7 +154,7 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ onManualAdd }) => {
 
       <div
         className={`bottomnav__item ${activeItem === "saved" ? "active" : ""}`}
-        onClick={() => { setActiveItem("saved"); navigate("/dashboard") }}
+        onClick={() => { setActiveItem("saved"); navigate("/saved") }}
       >
         <Bookmark size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
         <p>Saved</p>

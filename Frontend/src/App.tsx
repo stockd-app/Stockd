@@ -15,6 +15,7 @@ import GroceryListPage from "./pages/GroceryListPage/GroceryListPage";
 import ReceiptPreview from "./components/ReceiptPreview/ReceiptPreview";
 import SingleRecipePage from "./pages/Recipe/SingleRecipePage";
 import BottomNavBar from "./components/NavigationBar/BottomNavBar/BottomNavBar";
+import SavedRecipes from "./pages/SavedRecipesPage/SavedRecipesPage";
 import SubsetRecipeRecPage from "./pages/PantryRecipeListPage/SubsetRecipeRecPage";
 import IncompleteRecipeRecPage from "./pages/PantryRecipeListPage/IncompleteRecipeRecPage";
 
@@ -84,6 +85,10 @@ const App: React.FC = () => {
         <Route
           path="/pantry-freezer"
           element={user ? <PantryFreezerPage /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/saved"
+          element={user ? <SavedRecipes /> : <Navigate to="/" replace />}
         />
         <Route
           path="/receipt_preview"
