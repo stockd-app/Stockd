@@ -1,10 +1,10 @@
 @import "@/styles/variable.css";
 
 .searchbar__container {
-    width: 100%;
-    padding: 16px;
-    display: flex;
-    align-items: center;
+  width: 100%;
+  padding: 16px;
+  display: flex;
+  justify-content: center;
 }
 
 /* The white rounded search box */
@@ -37,25 +37,6 @@
   font-size: 17px;
   color: var(--color-dark-grey);
   background: transparent;
-}
-
-/* Profile button styling */
-.searchbar__profile-button {
-  background: var(--color-white);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  color: var(--color-dark-blue);
-  cursor: pointer;
-  padding: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  border-radius: 50%;
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
-  margin-right: 4px;
 }
 
 .searchbar__profile-button:hover {
@@ -117,13 +98,6 @@
   }
 
   .searchbar__icon {
-    flex-shrink: 0;
-  }
-
-  .searchbar__profile-button {
-    width: 48px;
-    height: 48px;
-    margin-right: 0;
     flex-shrink: 0;
   }
 }

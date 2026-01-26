@@ -14,6 +14,7 @@ import PantryFreezerPage from "./pages/PantryPage/PantryFreezerPage";
 import GroceryListPage from "./pages/GroceryListPage/GroceryListPage";
 import ReceiptPreview from "./components/ReceiptPreview/ReceiptPreview";
 import SingleRecipePage from "./pages/Recipe/SingleRecipePage";
+import TopNavBar from "./components/NavigationBar/TopNavBar/TopNavBar";
 import BottomNavBar from "./components/NavigationBar/BottomNavBar/BottomNavBar";
 import SavedRecipes from "./pages/SavedRecipesPage/SavedRecipesPage";
 import SubsetRecipeRecPage from "./pages/PantryRecipeListPage/SubsetRecipeRecPage";
@@ -43,6 +44,8 @@ const App: React.FC = () => {
 
   return (
     <>
+      {user && <TopNavBar />}
+
       <Routes>
         {/* If user exists, go to dashboard */}
         <Route

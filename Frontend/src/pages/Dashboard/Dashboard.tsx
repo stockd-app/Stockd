@@ -225,8 +225,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
       <div className="dashboard__searchRow">
         <SearchBar value={searchQuery} onChange={setSearchQuery} />
       </div>
-      <FoodCategorySection />
 
+      {/* <FoodCategorySection /> */}
 
       <RecipeItemSection
         title="Based On Your Pantry"
