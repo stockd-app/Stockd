@@ -6,8 +6,7 @@ import { getLikedRecipes } from "../../services/api";
 import { formatPrepTime } from "../../utils/utils";
 import image_placeholder from "../../assets/images/error_handling/image_placeholder.png";
 import DOMPurify from "dompurify";
-
-// import "./savedrecipespage.css";
+import "./savedrecipespage.css";
 
 const SavedRecipesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -46,7 +45,9 @@ const SavedRecipesPage: React.FC = () => {
 
   return (
     <div className="savedRecipes__container">
-      <h2 className="savedRecipes__title">Saved Recipes</h2>
+      <div className="savedRecipes__header">
+        <h2>Saved Recipes</h2>
+      </div>
 
       {loading ? (
         <p>Loading...</p>
@@ -65,7 +66,6 @@ const SavedRecipesPage: React.FC = () => {
               rating={recipe.rating}
               time={recipe.time}
               onClick={() => navigate(`/recipes/${recipe.id}`)}
-              
             />
           ))}
         </div>
