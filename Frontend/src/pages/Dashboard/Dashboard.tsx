@@ -235,8 +235,16 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
           navigate(`/recipes/${recipeId}`);
         }}
         onSeeMore={() => navigate("/pantry-subset-recipes")}
-        emptyTitle="Nothing cookable yet"
-        emptySubtitle="Add more ingredients to your pantry to unlock recipes."
+        emptyTitle={
+          searchQuery
+            ? "No Recipes Found!"
+            : "Nothing Cookable Yet!"
+        }
+        emptySubtitle={
+          searchQuery
+            ? `No results for "${searchQuery}"`
+            : "Add more ingredients to your pantry to unlock new recipes!"
+        }
       />
 
       <RecipeItemSection title="You May Not Have All The Ingredients"
@@ -247,13 +255,13 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         onSeeMore={() => navigate("/pantry-incomplete-recipes")}
         emptyTitle={
           searchQuery
-            ? "No recipes found"
-            : "Let’s stock your pantry!"
+            ? "No Recipes Found!"
+            : "Let’s Stock Your Pantry!"
         }
         emptySubtitle={
           searchQuery
             ? `No results for "${searchQuery}"`
-            : "Add ingredients by uploading a receipt or other methods."
+            : "Add ingredients by uploading a receipt or other methods!"
         }
       />
 

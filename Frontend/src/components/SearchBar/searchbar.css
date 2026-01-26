@@ -2,7 +2,7 @@
 
 .searchbar__container {
   width: 100%;
-  padding: 16px;
+  padding: 16px 0 16px 0;
   display: flex;
   justify-content: center;
 }

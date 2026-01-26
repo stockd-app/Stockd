@@ -1,6 +1,6 @@
 import React from "react";
 import RecipeItemCard from "../RecipeItemCard/RecipeItemCard";
-import EmptyFridge from "../../assets/images/Emptyfridge.png";
+import EmptyPantry from "../../assets/images/EmptyPantry.jpg";
 
 import "./recipeitemsection.css";
 
@@ -46,7 +46,7 @@ const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = 
             {items.length === 0 ? (
                 <div className="recipeItemSection__empty">
                     <img
-                        src={EmptyFridge}
+                        src={EmptyPantry}
                         alt="Empty Pantry"
                         className="recipeItemSection__empty_image"
                     />
