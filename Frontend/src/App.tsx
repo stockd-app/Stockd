@@ -12,6 +12,8 @@ import ReceiptPreview from "./components/ReceiptPreview/ReceiptPreview";
 import PantryItemDetails from "./components/PantryItemDetails/PantryItemDetails";
 import PantryRecipeRecommendationPage from "./pages/PantryRecipeRecommendationPage/PantryRecipeRecommendationPage";
 import SingleRecipePage from "./pages/Recipe/SingleRecipePage";
+import BottomNavBar from "./components/NavigationBar/BottomNavBar/BottomNavBar";
+import SavedRecipes from "./pages/SavedRecipesPage/SavedRecipesPage";
 
 const App: React.FC = () => {
   const [user, setUser] = useState<string | null>(localStorage.getItem("user"));
@@ -63,6 +65,10 @@ const App: React.FC = () => {
         <Route
           path="/pantry"
           element={user ? <PantryPage /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/saved"
+          element={user ? <SavedRecipes /> : <Navigate to="/" replace />}
         />
         <Route
           path="/receipt_preview"
