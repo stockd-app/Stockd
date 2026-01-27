@@ -1,6 +1,6 @@
 @import "@/styles/variable.css";
 
-.recipeitemcarditemcard {
+.recipeitemcard {
     width: 150px;
     flex-shrink: 0;
 }

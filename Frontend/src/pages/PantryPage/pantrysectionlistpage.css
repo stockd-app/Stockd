@@ -1,7 +1,7 @@
 .pantrySection__container {
     min-height: 100vh;
     background: var(--color-white);
-    padding-bottom: 40px;
+    padding-bottom: 90px;
 }
 
 .pantrySection__header {
