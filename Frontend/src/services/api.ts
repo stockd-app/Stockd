@@ -347,6 +347,21 @@ export const getRecommendLikeRecipes = async (userId: number, topN: number = 10)
 };
 
 
+export const getCollaborativeRecipes = async (userId: number, topN: number = 10) =>{
+  try {
+    const url = `${API_ROUTES.GET_COLLABORATIVE_RECIPES}/${userId}?top_n=${topN}`;
+
+    const res = await axios.get(url);
+    
+    return res.data;
+  } catch (err: any) {
+    console.error("Failed to fetch collaborative recipes recommendations:", err);
+    throw err;
+  }
+};
+
+
+
 /**
  * Logout from Google Account'
  * @returns

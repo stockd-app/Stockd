@@ -1019,10 +1019,28 @@ async def get_collaborative_recommendations(user_id: int, top_n: int = 5):
     }
 
     async with httpx.AsyncClient() as client:
-        resp = await client.post(f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend", json=payload)
-        resp.raise_for_status()
+        try:
+            resp = await client.post(f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend",json=payload,)
+            resp.raise_for_status()
+            data = resp.json()
 
-    return resp.json()
+            if not isinstance(data, dict) or "recommendations" not in data:
+                data = {
+                    "status": "success",
+                    "type": "collaborative",
+                    "recommendations": []
+                }
+
+        except Exception as e:
+            print(f"[WARN] Collaborative recommender failed for user {user_id}: {e}")
+            data = {
+                "status": "success",
+                "type": "collaborative",
+                "recommendations": []
+            }
+
+    return data
+
 
 
 @router.get("/recipes/search", tags=["Recipes"])
