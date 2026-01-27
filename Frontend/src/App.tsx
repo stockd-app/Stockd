@@ -40,9 +40,6 @@ const App: React.FC = () => {
     setUser(localStorage.getItem("user"));
   }, [location.pathname]);
 
-  // TODO : Remove when prod
-  console.log("Current user state:", user);
-
   return (
     <>
       {user && <TopNavBar />}
