@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import PantryItemCard from "../../components/PantryItemCard/PantryItemCard";
+import PantryItemDetails from "../../components/PantryItemDetails/PantryItemDetails";
 import type { PantryItem } from "../../components/PantryItemSection/PantryItemSection";
 import { getPantryItems } from "../../services/api";
 
@@ -17,6 +18,7 @@ const PantrySectionListPage: React.FC<PantrySectionListPageProps> = ({
     storage,
 }) => {
     const navigate = useNavigate();
+    const [selectedItem, setSelectedItem] = useState<any | null>(null);
     const [items, setItems] = useState<PantryItem[]>([]);
 
     useEffect(() => {
@@ -35,33 +37,50 @@ const PantrySectionListPage: React.FC<PantrySectionListPageProps> = ({
     }, [storage, navigate]);
 
     return (
-        <div className="pantrySection__container">
-            <div className="pantrySection__header">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="pantrySection__back"
-                    aria-label="Go back"
-                >
-                    <ArrowLeft size={22} />
-                </button>
+        <>
+            <div className="pantrySection__container">
+                <div className="pantrySection__header">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="pantrySection__back"
+                        aria-label="Go back"
+                    >
+                        <ArrowLeft size={22} />
+                    </button>
 
-                <h2 className="pantrySection__title">{title}</h2>
+                    <h2 className="pantrySection__title">{title}</h2>
 
-                {/* Empty spacer to mirror right-side button space */}
-                <div className="pantrySection__spacer" />
+                    {/* Empty spacer to mirror right-side button space */}
+                    <div className="pantrySection__spacer" />
+                </div>
+
+                <div className="pantrySection__grid">
+                    {items.map(item => (
+                        <PantryItemCard
+                            key={item.id}
+                            name={item.name}
+                            qty={item.qty}
+                            image={item.image}
+                            onClick={() => setSelectedItem(item)}
+                        />
+                    ))}
+                </div>
             </div>
 
-            <div className="pantrySection__grid">
-                {items.map(item => (
-                    <PantryItemCard
-                        key={item.id}
-                        name={item.name}
-                        qty={item.qty}
-                        image={item.image}
-                    />
-                ))}
-            </div>
-        </div>
+            {selectedItem && (
+                <PantryItemDetails
+                    {...selectedItem}
+                    onClose={() => setSelectedItem(null)}
+                    onSaved={async () => {
+                        const user = JSON.parse(localStorage.getItem("user") || "null");
+                        if (!user) return;
+
+                        const res = await getPantryItems(user.id);
+                        setItems(res.grouped_items?.[storage] ?? []);
+                    }}
+                />
+            )}
+        </>
     );
 };
 
