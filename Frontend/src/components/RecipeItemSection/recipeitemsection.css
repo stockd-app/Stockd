@@ -40,6 +40,10 @@
     scrollbar-width: none;
 }
 
+.recipeItemSection__items_scroll .recipeitemcard {
+  width: 150px;
+}
+
 .recipeItemSection__empty {
     position: relative;
     width: 92%;
