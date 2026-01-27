@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getRecipeById, getLikedRecipes } from "../../services/api";
 import { getIngredientIcon } from "../../utils/ingredientIconMap";
-import { Clock, Star } from "lucide-react";
+import { Clock, Star, ArrowLeft } from "lucide-react";
 import image_placeholder from "../../assets/images/error_handling/image_placeholder.png";
 import { formatPrepTime } from "../../utils/utils";
 import { parseQuantity, resolveIngredientDisplay } from "../../utils/ingredientUnit";
@@ -91,18 +91,22 @@ const SingleRecipePage: React.FC = () => {
         <div className="recipe__page">
             <div className="recipe__container">
                 <div className="recipe__hero">
-                    <button className="recipe__back recipe__back__overlay" onClick={() => navigate(-1)} aria-label="Back" > ← </button>
+                    <button
+                        className="recipe__back recipe__back__overlay"
+                        onClick={() => navigate(-1)}
+                        aria-label="Back" >
+                        <ArrowLeft size={22} />
+                    </button>
                     <img className="recipe__hero-img" src={imageUrl} alt={recipe.Name} />
                 </div>
-                
                 <div className="recipe__content">
                     <div className="recipe__titleRow">
-                    <h1 className="recipe__title">{recipe.Name}</h1>
-                    <LikeButton
-                    recipeId={recipe.RecipeId}
-                    initialLiked={initialLiked}
-                    onLikedChange={(v) => setInitialLiked(v)}
-                    />
+                        <h1 className="recipe__title">{recipe.Name}</h1>
+                        <LikeButton
+                            recipeId={recipe.RecipeId}
+                            initialLiked={initialLiked}
+                            onLikedChange={(v) => setInitialLiked(v)}
+                        />
                     </div>
                     <span>
                         <Star size={16} color="#FFD700" fill="#FFD700" /> {recipe.AggregatedRating}
@@ -156,7 +160,7 @@ const SingleRecipePage: React.FC = () => {
                         <ol className="recipe__instructions">
                             {recipe.RecipeInstructions?.length ? (
                                 recipe.RecipeInstructions.map((step: string, i: number) => (
-                                <li key={i}>{step}</li>
+                                    <li key={i}>{step}</li>
                                 ))
                             ) : (
                                 <li>No instructions available.</li>
