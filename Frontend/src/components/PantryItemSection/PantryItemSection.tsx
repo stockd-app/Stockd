@@ -36,12 +36,7 @@ const PantryItemSection: React.FC<PantryItemSectionProps> = ({ section, items, o
                 <div className="pantryitemsecton__header">
                     <h2>{section}</h2>
                     {onSeeMore && (
-                        <p
-                            className="see__more"
-                            onClick={() => onSeeMore(section)}
-                        >
-                            See more
-                        </p>
+                        <p className="see__more" onClick={() => onSeeMore(section)} > See more </p>
                     )}
                 </div>
 
