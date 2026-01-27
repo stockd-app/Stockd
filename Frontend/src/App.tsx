@@ -19,6 +19,7 @@ import BottomNavBar from "./components/NavigationBar/BottomNavBar/BottomNavBar";
 import SavedRecipes from "./pages/SavedRecipesPage/SavedRecipesPage";
 import SubsetRecipeRecPage from "./pages/PantryRecipeListPage/SubsetRecipeRecPage";
 import IncompleteRecipeRecPage from "./pages/PantryRecipeListPage/IncompleteRecipeRecPage";
+import LikedRecipeRecPage from "./pages/PantryRecipeListPage/LikeRecipeRecPage";
 
 const App: React.FC = () => {
   const [user, setUser] = useState<string | null>(localStorage.getItem("user"));
@@ -72,6 +73,10 @@ const App: React.FC = () => {
         <Route
           path="/pantry-incomplete-recipes"
           element={user ? <IncompleteRecipeRecPage /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/pantry-recommend-liked-recipes"
+          element={user ? <LikedRecipeRecPage /> : <Navigate to="/" replace />}
         />
         <Route
           path="/pantry"

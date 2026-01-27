@@ -1467,4 +1467,6 @@ async def get_liked_category_recommendations(user_id: int, top_n: int = 10):
         resp.raise_for_status()
         data = resp.json()
 
-    return data
+    data = resp.json()
+
+    return {"status": "success", "content_based": data.get("recommendations", data)}

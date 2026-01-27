@@ -13,6 +13,7 @@ export const API_ROUTES = {
   DELETE_PANTRY_ITEMS: `${API_BASE_URL}/pantry_items/delete`,
   GET_SUBSET_PANTRY_RECIPES: `${API_BASE_URL}/recommendations/subset`,  // Caller will append `user_id`
   GET_INCOMPLETE_PANTRY_RECIPES: `${API_BASE_URL}/recommendations/pantry`,   // Caller will append `user_id`
+  GET_RECOMMEND_LIKED_RECIPES: `${API_BASE_URL}/recommendations/liked-categories`,   // Caller will append `user_id`
   GET_RECIPE_BY_ID: `${API_BASE_URL}/recipes`,
   // TOGGLE_LIKE_RECIPE: (recipeId: number) => `${API_BASE_URL}/recipes/${recipeId}/like`,
   TOGGLE_LIKE_RECIPE: `${API_BASE_URL}/recipes/:recipeId/like`,

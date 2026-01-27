@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getSubsetRecipes, getIncompleteRecipes, updateUserAllergens } from "../../services/api";
+import { getSubsetRecipes, getIncompleteRecipes, updateUserAllergens, getRecommendLikeRecipes } from "../../services/api";
 import { applyAllergenFilter, formatRecipes } from "../../utils/utils";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import FoodCategorySection from "../../components/FoodCategoryCard/FoodCategorySection";
@@ -79,6 +79,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
   // Derived from incompleteRecipes and reset when UI filters are cleared
   const [filteredIncompleteRecipes, setFilteredIncompleteRecipes] = useState<Recipe[]>([]);
 
+  // Recipes recommended based on user's liked recipes
+  const [likedRecommendedRecipes, setLikedRecommendedRecipes] = useState<Recipe[]>([]);
+  const [filteredLikedRecommendedRecipes, setFilteredLikedRecommendedRecipes] = useState<Recipe[]>([]);
+
+
   const navigate = useNavigate();
 
   /**
@@ -105,15 +110,18 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     const fetchRecommendations = async () => {
       try {
         console.log("Attempt fetch recommendation pantry")
-        const [subsetData, incompleteData] = await Promise.all([
+        const [subsetData, incompleteData, likedData] = await Promise.all([
           getSubsetRecipes(userId, 5),
           getIncompleteRecipes(userId, 5),
+          getRecommendLikeRecipes(userId, 5),
         ]);
         console.log("Cookable subset pantry recommendations:", subsetData.content_based);
         console.log("Incomplete ingredient pantry recommendations:", incompleteData.content_based);
+        console.log("Liked recipe recommendations:", likedData.content_based);
 
         const formattedSubset = formatRecipes(subsetData.content_based);
         const formattedIncompleteIngredient = formatRecipes(incompleteData.content_based);
+        const formattedLiked = formatRecipes(likedData.content_based);
         const mode = localStorage.getItem("allergen_visibility");
 
         // Apply allergen filter if set
@@ -127,10 +135,17 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
             ? applyAllergenFilter(formattedIncompleteIngredient)
             : formattedIncompleteIngredient;
 
+        const visibleLikedRecipes =
+          mode === "hide"
+            ? applyAllergenFilter(formattedLiked)
+            : formattedLiked;
+
         setSubsetRecipes(visibleSubsetRecipe);
         setIncompleteRecipes(visibleIncmpltIngrdRecipe);
+        setLikedRecommendedRecipes(visibleLikedRecipes);
         setFilteredSubsetRecipes(visibleSubsetRecipe);
         setFilteredIncompleteRecipes(visibleIncmpltIngrdRecipe);
+        setFilteredLikedRecommendedRecipes(visibleLikedRecipes);
       } catch (err) {
         console.error("Error fetching recommendations:", err);
       }
@@ -143,6 +158,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     if (!searchQuery.trim()) {
       setFilteredSubsetRecipes(subsetRecipes);
       setFilteredIncompleteRecipes(incompleteRecipes);
+      setFilteredLikedRecommendedRecipes(likedRecommendedRecipes);
       return;
     }
 
@@ -157,28 +173,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         r.name.toLowerCase().includes(q)
       )
     );
-  }, [searchQuery, subsetRecipes, incompleteRecipes]);
+    setFilteredLikedRecommendedRecipes(
+      likedRecommendedRecipes.filter(r => r.name.toLowerCase().includes(q))
+    );
+  }, [searchQuery, subsetRecipes, incompleteRecipes, likedRecommendedRecipes]);
 
-
-
-  const aiRecommended = [
-    {
-      id: 3,
-      name: "Shepherd’s Pie",
-      image: "https://www.thewholesomedish.com/wp-content/uploads/2019/02/The-Best-Classic-Shepherds-Pie-550.jpg",
-      rating: 4.0,
-      time: "35m",
-      status: "Missing 1 item",
-    },
-    {
-      id: 4,
-      name: "Scrambled Eggs",
-      image: "https://recipeteacher.com/wp-content/uploads/2016/08/Restaurant-Style-Scrambled-Eggs-20-scaled.jpg",
-      rating: 4.5,
-      time: "10m",
-      status: "Available",
-    },
-  ];
 
   /**
    * Handle confirmation of selected allergens from the modal
@@ -265,8 +264,22 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         }
       />
 
-      <RecipeItemSection title="AI - Recommended Recipes For You"
-        items={aiRecommended} // mock data for now
+      <RecipeItemSection title="Based On Your Liked Recipes"
+        items={filteredLikedRecommendedRecipes}
+        onItemClick={(recipeId: number) => {
+          navigate(`/recipes/${recipeId}`);
+        }}
+        onSeeMore={() => navigate("/pantry-recommend-liked-recipes")}
+        emptyTitle={
+          searchQuery
+            ? "No Recipes Found!"
+            : "No Liked Recipe Recommendations Yet!"
+        }
+        emptySubtitle={
+          searchQuery
+            ? `No results for "${searchQuery}"`
+            : "Like A Few Recipes To Get Personalized Recommendations!"
+        }
       />
       <ExploreSection />
     </div>
