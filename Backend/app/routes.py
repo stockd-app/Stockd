@@ -1428,7 +1428,9 @@ async def get_subset_recommendations(user_id: int):
         )
         resp.raise_for_status()
 
-    return resp.json()
+    data = resp.json()
+
+    return {"status": "success", "content_based": data.get("recommendations", data)}
 
 @router.get("/recommendations/liked-categories/{user_id}")
 async def get_liked_category_recommendations(user_id: int, top_n: int = 10):
@@ -1465,4 +1467,6 @@ async def get_liked_category_recommendations(user_id: int, top_n: int = 10):
         resp.raise_for_status()
         data = resp.json()
 
-    return data
+    data = resp.json()
+
+    return {"status": "success", "content_based": data.get("recommendations", data)}

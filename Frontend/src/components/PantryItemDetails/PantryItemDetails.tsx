@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import type { PantryItem } from "../PantryItemSection/PantryItemSection";
 import { addOrUpdatePantryItem, deletePantryItems } from "../../services/api";
 import { useNotification } from "../Notification/NotificationContext";
@@ -79,8 +80,20 @@ const PantryItemDetails: React.FC<PantryItemDetailProps> = ({
             <div className="pid__modal">
 
                 <div className="pid__header">
-                    <button className="pid__back" onClick={onClose}>←</button>
-                    <h2>{id === 0 ? "Add Pantry Item" : "Pantry Item"}</h2>
+                    <button
+                        className="pid__back"
+                        onClick={onClose}
+                        aria-label="Go back"
+                    >
+                        <ArrowLeft size={22} />
+                    </button>
+
+                    <h2 className="pid__title">
+                        {id === 0 ? "Add Pantry Item" : "Pantry Item"}
+                    </h2>
+
+                    {/* Right-side spacer to mirror back button */}
+                    <div className="pid__spacer" />
                 </div>
 
                 <div className="pid__body">

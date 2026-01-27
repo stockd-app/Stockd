@@ -7,13 +7,19 @@ import TermsPage from "./pages/TermsAndCondition/TermsPage";
 import FullTermsPage from "./pages/TermsAndCondition/FullTermsPage";
 import GoogleErrorScreen from "./pages/GoogleErrorHandling/GoogleErrorScreen";
 import PantryPage from "./pages/PantryPage/PantryPage";
+import PantryItemDetails from "./components/PantryItemDetails/PantryItemDetails";
+import PantryPantryPage from "./pages/PantryPage/PantryPantryPage";
+import PantryFridgePage from "./pages/PantryPage/PantryFridgePage";
+import PantryFreezerPage from "./pages/PantryPage/PantryFreezerPage";
 import GroceryListPage from "./pages/GroceryListPage/GroceryListPage";
 import ReceiptPreview from "./components/ReceiptPreview/ReceiptPreview";
-import PantryItemDetails from "./components/PantryItemDetails/PantryItemDetails";
-import PantryRecipeRecommendationPage from "./pages/PantryRecipeRecommendationPage/PantryRecipeRecommendationPage";
 import SingleRecipePage from "./pages/Recipe/SingleRecipePage";
+import TopNavBar from "./components/NavigationBar/TopNavBar/TopNavBar";
 import BottomNavBar from "./components/NavigationBar/BottomNavBar/BottomNavBar";
 import SavedRecipes from "./pages/SavedRecipesPage/SavedRecipesPage";
+import SubsetRecipeRecPage from "./pages/PantryRecipeListPage/SubsetRecipeRecPage";
+import IncompleteRecipeRecPage from "./pages/PantryRecipeListPage/IncompleteRecipeRecPage";
+import LikedRecipeRecPage from "./pages/PantryRecipeListPage/LikeRecipeRecPage";
 
 const App: React.FC = () => {
   const [user, setUser] = useState<string | null>(localStorage.getItem("user"));
@@ -34,11 +40,10 @@ const App: React.FC = () => {
     setUser(localStorage.getItem("user"));
   }, [location.pathname]);
 
-  // TODO : Remove when prod
-  console.log("Current user state:", user);
-
   return (
     <>
+      {user && <TopNavBar />}
+
       <Routes>
         {/* If user exists, go to dashboard */}
         <Route
@@ -59,12 +64,32 @@ const App: React.FC = () => {
           }
         />
         <Route
-          path="/pantry-recipes"
-          element={user ? <PantryRecipeRecommendationPage /> : <Navigate to="/" replace />}
+          path="/pantry-subset-recipes"
+          element={user ? <SubsetRecipeRecPage /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/pantry-incomplete-recipes"
+          element={user ? <IncompleteRecipeRecPage /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/pantry-recommend-liked-recipes"
+          element={user ? <LikedRecipeRecPage /> : <Navigate to="/" replace />}
         />
         <Route
           path="/pantry"
           element={user ? <PantryPage /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/pantry-pantry"
+          element={user ? <PantryPantryPage /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/pantry-fridge"
+          element={user ? <PantryFridgePage /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/pantry-freezer"
+          element={user ? <PantryFreezerPage /> : <Navigate to="/" replace />}
         />
         <Route
           path="/saved"

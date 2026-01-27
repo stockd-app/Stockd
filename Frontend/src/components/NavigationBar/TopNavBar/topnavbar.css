@@ -33,6 +33,13 @@
   background-color: var(--color-white);
 }
 
+.topnav__profile {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+
 .topnav__profile-button {
   background: none;
   border: none;
@@ -59,7 +66,7 @@
   border: none;
   height: 8px;
   background-color: var(--color-grey);
-  margin-top: 2rem;
+  margin-top: 1rem;
   /* Stretch beyond container padding */
   margin-left: -1rem;
   margin-right: -1rem;

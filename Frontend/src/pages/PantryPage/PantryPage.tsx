@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import PantryItemSection, { type PantryItem } from "../../components/PantryItemSection/PantryItemSection"; import { getPantryItems } from "../../services/api";
+
 import "./pantrypage.css";
 
 /**
@@ -17,6 +19,8 @@ const PantryPage: React.FC = () => {
     const [pantryData, setPantryData] = useState<PantrySection[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchPantryData();
@@ -108,6 +112,9 @@ const PantryPage: React.FC = () => {
                             section={section.section}
                             items={section.items}
                             onRefresh={fetchPantryData}
+                            onSeeMore={(storage) =>
+                                navigate(`/pantry-${storage.toLowerCase()}`)
+                            }
                         />
                     ))
                 )}

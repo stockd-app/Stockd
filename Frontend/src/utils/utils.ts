@@ -1,4 +1,6 @@
 import type { Recipe } from "../pages/Dashboard/Dashboard";
+import image_placeholder from "../assets/images/error_handling/image_placeholder.png"
+import DOMPurify from "dompurify";
 
 /**
  * Format Prep time for ItemCard component
@@ -74,3 +76,24 @@ export const applyAllergenFilter = (recipes: Recipe[]) => {
         !recipe.allergens?.some(a => userAllergens.includes(a))
     );
 };
+
+/**
+ * Format recipes from backend to frontend structure
+ * @param recipes 
+ * @returns 
+ */
+export const formatRecipes = (recipes: any[]) =>
+    recipes.map((recipe: any, index: number) => {
+        const hasImages = Array.isArray(recipe.Images) && recipe.Images.length > 0;
+        const imageUrl = hasImages ? recipe.Images[0] : image_placeholder;
+
+        return {
+            id: Number(recipe.RecipeId) || index + 1,
+            name: DOMPurify.sanitize(recipe.Name || "Unnamed Recipe"),
+            image: imageUrl,
+            rating: Number(recipe.AggregatedRating) || 0.0,
+            rawTime: recipe.PrepTime,
+            time: formatPrepTime(recipe.PrepTime),
+            allergens: recipe.Allergens ?? [],
+        };
+    });

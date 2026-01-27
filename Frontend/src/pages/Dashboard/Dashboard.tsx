@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getPantryRecommendations, updateUserAllergens } from "../../services/api";
-import { applyAllergenFilter, formatPrepTime, isoDurationToMinutes } from "../../utils/utils";
+import { getSubsetRecipes, getIncompleteRecipes, updateUserAllergens, getRecommendLikeRecipes } from "../../services/api";
+import { applyAllergenFilter, formatRecipes } from "../../utils/utils";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import FoodCategorySection from "../../components/FoodCategoryCard/FoodCategorySection";
 import RecipeItemSection from "../../components/RecipeItemSection/RecipeItemSection";
 import ExploreSection from "../../components/Dashboard/ExploreSection";
-import image_placeholder from "../../assets/images/error_handling/image_placeholder.png"
-import DOMPurify from "dompurify";
 import AllergensModal from "../../components/AllergensModal/AllergensModal";
 import AllergenPreferenceModal from "../../components/AllergenPreferenceModal/AllergenPreferenceModal";
 
@@ -58,18 +56,33 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
   // State to control showing allergen preference modal
   const [showAllergenFilterModal, setShowAllergenFilterModal] = useState(false);
 
+
+
   // State to hold and pass input-text down to RecipeItemSection for UI display
   const [searchQuery, setSearchQuery] = useState("");
 
-  // All pantry recipes as returned from the backend (source of truth, never filtered)
-  const [allPantryRecipes, setAllPantryRecipes] = useState<Recipe[]>([]);
 
-  // Pantry recipes currently visible to the user (may be filtered by allergens, search, etc.)
-  const [pantryRecipes, setPantryRecipes] = useState<Recipe[]>([]);
+
+  // Recipes that are fully cookable with current pantry items (may be filtered by allergens, search, etc.)
+  const [subsetRecipes, setSubsetRecipes] = useState<Recipe[]>([]);
+
+  // Recipes with possible missing ingredients (may be filtered by allergens, search, etc.)
+  const [incompleteRecipes, setIncompleteRecipes] = useState<Recipe[]>([]);
+
+
 
   // Recipes currently displayed in the UI after applying transient UI filters (e.g. search)
-  // Derived from pantryRecipes and reset when UI filters are cleared
-  const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
+  // Derived from subsetRecipes and reset when UI filters are cleared
+  const [filteredSubsetRecipes, setFilteredSubsetRecipes] = useState<Recipe[]>([]);
+
+  // Recipes currently displayed in the UI after applying transient UI filters (e.g. search)
+  // Derived from incompleteRecipes and reset when UI filters are cleared
+  const [filteredIncompleteRecipes, setFilteredIncompleteRecipes] = useState<Recipe[]>([]);
+
+  // Recipes recommended based on user's liked recipes
+  const [likedRecommendedRecipes, setLikedRecommendedRecipes] = useState<Recipe[]>([]);
+  const [filteredLikedRecommendedRecipes, setFilteredLikedRecommendedRecipes] = useState<Recipe[]>([]);
+
 
   const navigate = useNavigate();
 
@@ -84,9 +97,10 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     }
   }, []);
 
+  /**
+   * Fetch recipe recommendations
+   */
   useEffect(() => {
-    console.log("Dashboard useEffect mounted");
-    console.log("Dashboard useEffect mounted");
     if (!userId) {
       navigate("/");
       return;
@@ -96,36 +110,42 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     const fetchRecommendations = async () => {
       try {
         console.log("Attempt fetch recommendation pantry")
-        const pantryData = await getPantryRecommendations(userId, 5);
+        const [subsetData, incompleteData, likedData] = await Promise.all([
+          getSubsetRecipes(userId, 5),
+          getIncompleteRecipes(userId, 5),
+          getRecommendLikeRecipes(userId, 5),
+        ]);
+        console.log("Cookable subset pantry recommendations:", subsetData.content_based);
+        console.log("Incomplete ingredient pantry recommendations:", incompleteData.content_based);
+        console.log("Liked recipe recommendations:", likedData.content_based);
 
-        console.log("FULL pantryData response:", pantryData);
-        console.log("Pantry-based recommendations:", pantryData.content_based);
-
-        const formatted = pantryData.content_based.map((recipe: any, index: number) => {
-          const hasImages = Array.isArray(recipe.Images) && recipe.Images.length > 0;
-          const imageUrl = hasImages ? recipe.Images[0] : image_placeholder;
-
-          return {
-            id: Number(recipe.RecipeId) || index + 1,
-            name: DOMPurify.sanitize(recipe.Name || "Unnamed Recipe"),
-            image: imageUrl,
-            rating: Number(recipe.AggregatedRating) || 0.0,
-            rawTime: recipe.PrepTime,               // ISO string
-            time: formatPrepTime(recipe.PrepTime),  // UI string
-            allergens: recipe.Allergens ?? [],
-            // status: "Available",
-          };
-        });
-
-        setAllPantryRecipes(formatted);
-
+        const formattedSubset = formatRecipes(subsetData.content_based);
+        const formattedIncompleteIngredient = formatRecipes(incompleteData.content_based);
+        const formattedLiked = formatRecipes(likedData.content_based);
         const mode = localStorage.getItem("allergen_visibility");
 
-        if (mode === "hide") {
-          setPantryRecipes(applyAllergenFilter(formatted));
-        } else {
-          setPantryRecipes(formatted);
-        }
+        // Apply allergen filter if set
+        const visibleSubsetRecipe =
+          mode === "hide"
+            ? applyAllergenFilter(formattedSubset)
+            : formattedSubset;
+
+        const visibleIncmpltIngrdRecipe =
+          mode === "hide"
+            ? applyAllergenFilter(formattedIncompleteIngredient)
+            : formattedIncompleteIngredient;
+
+        const visibleLikedRecipes =
+          mode === "hide"
+            ? applyAllergenFilter(formattedLiked)
+            : formattedLiked;
+
+        setSubsetRecipes(visibleSubsetRecipe);
+        setIncompleteRecipes(visibleIncmpltIngrdRecipe);
+        setLikedRecommendedRecipes(visibleLikedRecipes);
+        setFilteredSubsetRecipes(visibleSubsetRecipe);
+        setFilteredIncompleteRecipes(visibleIncmpltIngrdRecipe);
+        setFilteredLikedRecommendedRecipes(visibleLikedRecipes);
       } catch (err) {
         console.error("Error fetching recommendations:", err);
       }
@@ -136,38 +156,28 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
 
   useEffect(() => {
     if (!searchQuery.trim()) {
-      setFilteredRecipes(pantryRecipes);
+      setFilteredSubsetRecipes(subsetRecipes);
+      setFilteredIncompleteRecipes(incompleteRecipes);
+      setFilteredLikedRecommendedRecipes(likedRecommendedRecipes);
       return;
     }
 
     const q = searchQuery.toLowerCase();
-    setFilteredRecipes(
-      pantryRecipes.filter(r =>
+    setFilteredSubsetRecipes(
+      subsetRecipes.filter(r =>
         r.name.toLowerCase().includes(q)
       )
     );
-  }, [searchQuery, pantryRecipes]);
+    setFilteredIncompleteRecipes(
+      incompleteRecipes.filter(r =>
+        r.name.toLowerCase().includes(q)
+      )
+    );
+    setFilteredLikedRecommendedRecipes(
+      likedRecommendedRecipes.filter(r => r.name.toLowerCase().includes(q))
+    );
+  }, [searchQuery, subsetRecipes, incompleteRecipes, likedRecommendedRecipes]);
 
-
-
-  const aiRecommended = [
-    {
-      id: 3,
-      name: "Shepherd’s Pie",
-      image: "https://www.thewholesomedish.com/wp-content/uploads/2019/02/The-Best-Classic-Shepherds-Pie-550.jpg",
-      rating: 4.0,
-      time: "35m",
-      status: "Missing 1 item",
-    },
-    {
-      id: 4,
-      name: "Scrambled Eggs",
-      image: "https://recipeteacher.com/wp-content/uploads/2016/08/Restaurant-Style-Scrambled-Eggs-20-scaled.jpg",
-      rating: 4.5,
-      time: "10m",
-      status: "Available",
-    },
-  ];
 
   /**
    * Handle confirmation of selected allergens from the modal
@@ -202,16 +212,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
       {showAllergenFilterModal && (
         <AllergenPreferenceModal
           onConfirm={(mode) => {
-            if (mode === "hide") {
-              setPantryRecipes(applyAllergenFilter(allPantryRecipes));
-            } else {
-              setPantryRecipes(allPantryRecipes);
-            }
-
+            setSubsetRecipes(prev => mode === "hide" ? applyAllergenFilter(prev) : prev);
+            setIncompleteRecipes(prev => mode === "hide" ? applyAllergenFilter(prev) : prev);
             setShowAllergenFilterModal(false);
           }}
           onCancel={() => {
-            setPantryRecipes(allPantryRecipes);
             setShowAllergenFilterModal(false);
           }}
         />
@@ -219,28 +224,62 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
       <div className="dashboard__searchRow">
         <SearchBar value={searchQuery} onChange={setSearchQuery} />
       </div>
-      <FoodCategorySection />
 
-      <RecipeItemSection title="Recommended Based on Your Pantry"
-        items={filteredRecipes}
+      {/* <FoodCategorySection /> */}
+
+      <RecipeItemSection
+        title="Based On Your Pantry"
+        items={filteredSubsetRecipes}
         onItemClick={(recipeId: number) => {
           navigate(`/recipes/${recipeId}`);
         }}
-        onSeeMore={() => navigate("/pantry-recipes")}
+        onSeeMore={() => navigate("/pantry-subset-recipes")}
         emptyTitle={
           searchQuery
-            ? "No recipes found"
-            : "Let’s stock your pantry!"
+            ? "No Recipes Found!"
+            : "Nothing Cookable Yet!"
         }
         emptySubtitle={
           searchQuery
             ? `No results for "${searchQuery}"`
-            : "Add ingredients by uploading a receipt or other methods."
+            : "Add more ingredients to your pantry to unlock new recipes!"
         }
       />
 
-      <RecipeItemSection title="AI - Recommended Recipes For You"
-        items={aiRecommended} // mock data for now
+      <RecipeItemSection title="You May Not Have All The Ingredients"
+        items={filteredIncompleteRecipes}
+        onItemClick={(recipeId: number) => {
+          navigate(`/recipes/${recipeId}`);
+        }}
+        onSeeMore={() => navigate("/pantry-incomplete-recipes")}
+        emptyTitle={
+          searchQuery
+            ? "No Recipes Found!"
+            : "Let’s Stock Your Pantry!"
+        }
+        emptySubtitle={
+          searchQuery
+            ? `No results for "${searchQuery}"`
+            : "Add ingredients by uploading a receipt or other methods!"
+        }
+      />
+
+      <RecipeItemSection title="Based On Your Liked Recipes"
+        items={filteredLikedRecommendedRecipes}
+        onItemClick={(recipeId: number) => {
+          navigate(`/recipes/${recipeId}`);
+        }}
+        onSeeMore={() => navigate("/pantry-recommend-liked-recipes")}
+        emptyTitle={
+          searchQuery
+            ? "No Recipes Found!"
+            : "No Liked Recipe Recommendations Yet!"
+        }
+        emptySubtitle={
+          searchQuery
+            ? `No results for "${searchQuery}"`
+            : "Like A Few Recipes To Get Personalized Recommendations!"
+        }
       />
       <ExploreSection />
     </div>
