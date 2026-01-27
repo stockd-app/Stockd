@@ -7,10 +7,24 @@
 }
 
 .pantryRecipes__header {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 16px;
+}
+
+.pantryRecipes__title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-dark);
+    text-align: center;
+    pointer-events: none;
+    /* prevents overlap issues */
 }
 
 .backBtn,
@@ -19,6 +33,7 @@
     border: none;
     font-size: 18px;
     cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
 }
 
 .pantryRecipes__grid {

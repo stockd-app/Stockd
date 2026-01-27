@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, ArrowLeft } from "lucide-react";
 import type { Recipe } from "../Dashboard/Dashboard";
 import { applyAllergenFilter, formatRecipes, isoDurationToMinutes, isSameRange } from "../../utils/utils";
 import { TIME_RANGES } from "../../config/consts";
@@ -86,12 +86,20 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
         <div className="pantryRecipes__container">
             {/* Header */}
             <div className="pantryRecipes__header">
-                <button onClick={() => navigate(-1)} className="backBtn">←</button>
-                {/* <h2>Discover Recipes</h2> */}
-                <h2>{title}</h2>
+                <button
+                    onClick={() => navigate(-1)}
+                    className="backBtn"
+                    aria-label="Go back"
+                >
+                    <ArrowLeft size={22} />
+                </button>
+
+                <h2 className="pantryRecipes__title">{title}</h2>
+
                 <button
                     className="filterIcon"
                     onClick={() => setShowFilters(true)}
+                    aria-label="Open filters"
                 >
                     <SlidersHorizontal size={20} />
                 </button>
