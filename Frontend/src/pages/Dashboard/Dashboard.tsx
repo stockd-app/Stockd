@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getSubsetRecipes, getIncompleteRecipes, updateUserAllergens, getRecommendLikeRecipes,getCollaborativeRecipes } from "../../services/api";
+import { getSubsetRecipes, getIncompleteRecipes, updateUserAllergens, getRecommendLikeRecipes, getCollaborativeRecipes } from "../../services/api";
 import { applyAllergenFilter, formatRecipes } from "../../utils/utils";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import FoodCategorySection from "../../components/FoodCategoryCard/FoodCategorySection";
@@ -261,7 +261,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         emptySubtitle={
           searchQuery
             ? `No results for "${searchQuery}"`
-            : "Add more ingredients to your pantry to unlock new recipes!"
+            : "Add More Ingredients To Your Pantry To Unlock New Recipes!"
         }
       />
 
@@ -314,7 +314,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         emptySubtitle={
           searchQuery
             ? `No results for "${searchQuery}"`
-            : "Cook and like more recipes to improve recommendations!"
+            : "Cook And Like More Recipes To Improve Recommendations!"
         }
       />
       <ExploreSection />
