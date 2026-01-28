@@ -46,8 +46,7 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
         const load = async () => {
             const data = await fetchRecipes(user.id);
             console.log("Fetched pantry recipes:", data);
-
-            const formatted = formatRecipes(data.content_based);
+            const formatted = formatRecipes(data.content_based || data.recommendations || []);
 
             const mode = localStorage.getItem("allergen_visibility");
             const visible =

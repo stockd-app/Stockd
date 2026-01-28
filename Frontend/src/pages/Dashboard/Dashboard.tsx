@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getSubsetRecipes, getIncompleteRecipes, updateUserAllergens, getRecommendLikeRecipes } from "../../services/api";
+import { getSubsetRecipes, getIncompleteRecipes, updateUserAllergens, getRecommendLikeRecipes, getCollaborativeRecipes } from "../../services/api";
 import { applyAllergenFilter, formatRecipes } from "../../utils/utils";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import FoodCategorySection from "../../components/FoodCategoryCard/FoodCategorySection";
@@ -83,6 +83,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
   const [likedRecommendedRecipes, setLikedRecommendedRecipes] = useState<Recipe[]>([]);
   const [filteredLikedRecommendedRecipes, setFilteredLikedRecommendedRecipes] = useState<Recipe[]>([]);
 
+  // Collaborative filtering
+  const [collaborativeRecipes, setCollaborativeRecipes] = useState<Recipe[]>([]);
+  const [filteredCollaborativeRecipes, setFilteredCollaborativeRecipes] = useState<Recipe[]>([]);
+
+
 
   const navigate = useNavigate();
 
@@ -110,18 +115,21 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     const fetchRecommendations = async () => {
       try {
         console.log("Attempt fetch recommendation pantry")
-        const [subsetData, incompleteData, likedData] = await Promise.all([
+        const [subsetData, incompleteData, likedData, collaborativeData] = await Promise.all([
           getSubsetRecipes(userId, 5),
           getIncompleteRecipes(userId, 5),
           getRecommendLikeRecipes(userId, 5),
+          getCollaborativeRecipes(userId, 5),
         ]);
         console.log("Cookable subset pantry recommendations:", subsetData.content_based);
         console.log("Incomplete ingredient pantry recommendations:", incompleteData.content_based);
         console.log("Liked recipe recommendations:", likedData.content_based);
+        console.log("Collaborative recommendations:", collaborativeData.recommendations);
 
         const formattedSubset = formatRecipes(subsetData.content_based);
         const formattedIncompleteIngredient = formatRecipes(incompleteData.content_based);
-        const formattedLiked = formatRecipes(likedData.content_based);
+        const formattedLiked = formatRecipes(likedData.content_based ?? []);
+        const formattedCollaborative = formatRecipes(collaborativeData.recommendations ?? []);
         const mode = localStorage.getItem("allergen_visibility");
 
         // Apply allergen filter if set
@@ -140,12 +148,19 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
             ? applyAllergenFilter(formattedLiked)
             : formattedLiked;
 
+        const visibleCollaborative =
+          mode === "hide"
+            ? applyAllergenFilter(formattedCollaborative)
+            : formattedCollaborative;
+
         setSubsetRecipes(visibleSubsetRecipe);
         setIncompleteRecipes(visibleIncmpltIngrdRecipe);
         setLikedRecommendedRecipes(visibleLikedRecipes);
         setFilteredSubsetRecipes(visibleSubsetRecipe);
         setFilteredIncompleteRecipes(visibleIncmpltIngrdRecipe);
         setFilteredLikedRecommendedRecipes(visibleLikedRecipes);
+        setCollaborativeRecipes(visibleCollaborative);
+        setFilteredCollaborativeRecipes(visibleCollaborative);
       } catch (err) {
         console.error("Error fetching recommendations:", err);
       }
@@ -159,6 +174,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
       setFilteredSubsetRecipes(subsetRecipes);
       setFilteredIncompleteRecipes(incompleteRecipes);
       setFilteredLikedRecommendedRecipes(likedRecommendedRecipes);
+      setFilteredCollaborativeRecipes(collaborativeRecipes);
       return;
     }
 
@@ -176,7 +192,10 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     setFilteredLikedRecommendedRecipes(
       likedRecommendedRecipes.filter(r => r.name.toLowerCase().includes(q))
     );
-  }, [searchQuery, subsetRecipes, incompleteRecipes, likedRecommendedRecipes]);
+    setFilteredCollaborativeRecipes(
+      collaborativeRecipes.filter(r => r.name.toLowerCase().includes(q))
+    );
+  }, [searchQuery, subsetRecipes, incompleteRecipes, likedRecommendedRecipes, collaborativeRecipes]);
 
 
   /**
@@ -242,7 +261,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         emptySubtitle={
           searchQuery
             ? `No results for "${searchQuery}"`
-            : "Add more ingredients to your pantry to unlock new recipes!"
+            : "Add More Ingredients To Your Pantry To Unlock New Recipes!"
         }
       />
 
@@ -279,6 +298,23 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
           searchQuery
             ? `No results for "${searchQuery}"`
             : "Like A Few Recipes To Get Personalized Recommendations!"
+        }
+      />
+      <RecipeItemSection title="Collaborative Recipes Recommended"
+        items={filteredCollaborativeRecipes}
+        onItemClick={(recipeId: number) => {
+          navigate(`/recipes/${recipeId}`);
+        }}
+        onSeeMore={() => navigate("/pantry-collaborative-recipes")}
+        emptyTitle={
+          searchQuery
+            ? "No Recipes Found!"
+            : "No Collaborative Recommendations Yet!"
+        }
+        emptySubtitle={
+          searchQuery
+            ? `No results for "${searchQuery}"`
+            : "Cook And Like More Recipes To Improve Recommendations!"
         }
       />
       <ExploreSection />
