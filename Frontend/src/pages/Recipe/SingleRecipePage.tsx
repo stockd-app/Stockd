@@ -1,26 +1,42 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getRecipeById, getLikedRecipes } from "../../services/api";
+import { getRecipeById, getLikedRecipes,getPantryItems } from "../../services/api";
 import { getIngredientIcon } from "../../utils/ingredientIconMap";
 import { Clock, Star, ArrowLeft } from "lucide-react";
 import image_placeholder from "../../assets/images/error_handling/image_placeholder.png";
 import { formatPrepTime } from "../../utils/utils";
 import { parseQuantity, resolveIngredientDisplay } from "../../utils/ingredientUnit";
 import LikeButton from "../../components/LikeButton/LikeButton";
+import { API_ROUTES } from "../../config/consts";
 
 
 import "./singlerecipepage.css";
 
+const normalize = (s: string) =>
+  s.toLowerCase().replace(/[^a-z\s]/g, "").trim();
+
 const SingleRecipePage: React.FC = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    const userId = user?.id;
+    const accessToken = localStorage.getItem("google_access_token");
 
     const [recipe, setRecipe] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     //`initialLiked` will no longer be undefined.
     const [initialLiked, setInitialLiked] = useState(false);
     const [likedLoading, setLikedLoading] = useState(false);
+    const [pantryNames, setPantryNames] = useState<string[]>([]);
+    const [missingIngredients, setMissingIngredients] = useState<string[]>([]);
+    const [addedToGrocery, setAddedToGrocery] = useState<Set<string>>(new Set());
     const difficulty = recipe?.Keywords?.find((kw: string) => ["easy", "medium", "hard"].includes(kw.toLowerCase())) ?? "—";
+    const isInPantry = (ingredient: string, pantry: string[]) => {
+        const normIng = normalize(ingredient);
+        return pantry.some(
+            (p) => normIng.includes(p) || p.includes(normIng)
+        );
+    };
 
     useEffect(() => {
         if (!id) return;
@@ -82,6 +98,81 @@ const SingleRecipePage: React.FC = () => {
         run();
     }, [recipe?.RecipeId]);
 
+    useEffect(() => {
+    if (!userId) return;
+
+    const run = async () => {
+            try {
+                const res = await getPantryItems(userId);
+                const pantryItems = res?.grouped_items?.Pantry || [];
+                const names = pantryItems
+                .map((i: any) => i?.name)     
+                .filter(Boolean)              
+                .map((name: string) => normalize(name));
+                console.log("Pantry normalized names:", names);
+                setPantryNames(names);
+            } catch (e) {
+                console.error("Failed to fetch pantry", e);
+            }
+        };
+
+        run();
+    }, [userId]);
+
+    useEffect(() => {
+    if (!recipe) return;
+
+    const missing = recipe.RecipeIngredientParts.filter((part: string) => {
+        const norm = normalize(part);
+
+        return !pantryNames.some(
+            (p) => norm.includes(p) || p.includes(norm)
+            );
+        });
+
+        setMissingIngredients(missing);
+    }, [recipe, pantryNames]);
+
+    const addToGroceryList = async (
+    name: string,
+    qty: number,
+    unit: string
+  ) => {
+    if (!userId || !accessToken) return;
+
+    if (isInPantry(name, pantryNames)) {
+        console.warn("Item already in pantry, skip adding:", name);
+        return;
+    }
+
+    if (addedToGrocery.has(name)) {
+        return;
+    }
+    try {
+      await fetch(API_ROUTES.ADD_UPDATE_GROCERY_ITEM, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          items: [
+            {
+              item_name: name,
+              quantity_value: qty || 1,
+              quantity_unit: unit || "pcs",
+            },
+          ],
+        }),
+      });
+
+      setAddedToGrocery((prev) => new Set(prev).add(name));
+    } catch (e) {
+      console.error("Failed to add grocery item", e);
+    }
+  };
+
     if (loading) return <div>Loading...</div>;
     if (!recipe) return <div>Recipe not found</div>;
 
@@ -137,18 +228,49 @@ const SingleRecipePage: React.FC = () => {
                                 const rawQty = recipe.RecipeIngredientQuantities?.[i];
                                 const qtyParsed = parseQuantity(rawQty);
                                 const { qty, unit } = resolveIngredientDisplay(part, qtyParsed);
+                                const isAdded = addedToGrocery.has(part);
+                                const inPantry = isInPantry(part, pantryNames);
+                                const checkboxDisabled = inPantry;
 
                                 return (
                                     <li key={i} className="recipe__ingredient">
+                                        <input
+                                            type="checkbox"
+                                            className="ingredient__checkbox"
+                                            checked={isAdded || inPantry}
+                                            disabled={checkboxDisabled}
+                                            onChange={() => {
+                                            if (!checkboxDisabled) {
+                                                addToGroceryList(part, qty, unit);
+                                            }
+                                            }}
+                                            title={
+                                            inPantry
+                                                ? "Already in pantry"
+                                                : isAdded
+                                                ? "Added to grocery list"
+                                                : "Add to grocery list"
+                                            }
+                                        />
                                         <img
                                             src={getIngredientIcon(part)}
                                             alt={part}
                                             className="recipe__ingredient__icon"
                                         />
-                                        <span className="recipe__ingredient__qty">
-                                            {qty} {unit}
-                                        </span>
+                                        <div className="ingredient__text">
+                                            {/* <span className="recipe__ingredient__qty">
+                                                {qty} {unit}
+                                            </span> */}
+                                            <span className="ingredient__amount">
+                                                <span className="ingredient__qty">{qty}</span>
+                                                <span className="ingredient__unit">{unit}</span>
+                                            </span>
+                                            
+                                        </div>
                                         <span className="recipe__ingredient__name">{part}</span>
+                                        
+                                        {inPantry && <span className="ingredient__status">In Pantry</span>}
+                                        {isAdded && <span className="ingredient__status">Added</span>}
                                     </li>
                                 );
                             })}
