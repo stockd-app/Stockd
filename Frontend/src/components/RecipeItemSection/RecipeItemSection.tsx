@@ -1,12 +1,13 @@
 import React from "react";
 import RecipeItemCard from "../RecipeItemCard/RecipeItemCard";
-import EmptyFridge from "../../assets/images/Emptyfridge.png";
+import EmptyPantry from "../../assets/images/EmptyPantry.jpg";
 
 import "./recipeitemsection.css";
 
 interface RecipeItemSectionProps {
     title: string;
     seeMore?: boolean;
+    onSeeMore?: () => void;
     items: {
         id: number;
         name: string;
@@ -14,6 +15,7 @@ interface RecipeItemSectionProps {
         rating?: number;
         time?: string;
         status?: string;
+        allergens?: string[];
     }[];
     onItemClick?: (id: number) => void;
     emptyTitle?: string;
@@ -21,18 +23,30 @@ interface RecipeItemSectionProps {
     emptyImage?: string;
 }
 
-const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = true, items, onItemClick, emptyTitle, emptySubtitle, emptyImage }) => {
+/**
+ * Renders a Recipe Item Section with a title, optional "See more" link, and a list of RecipeItemCards
+ * @param param0 
+ * @returns 
+ */
+const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = true, onSeeMore, items, onItemClick, emptyTitle, emptySubtitle, emptyImage }) => {
     return (
         <div className="recipeItemSection__container">
             <div className="recipeItemSection__header">
                 <h3> {title} </h3>
-                {seeMore && <span className="recipeItemSection__seeMore">See more</span>}
+                {seeMore && onSeeMore && (
+                    <span
+                        className="recipeItemSection__seeMore"
+                        onClick={onSeeMore}
+                    >
+                        See more
+                    </span>
+                )}
             </div>
 
             {items.length === 0 ? (
                 <div className="recipeItemSection__empty">
                     <img
-                        src={EmptyFridge}
+                        src={EmptyPantry}
                         alt="Empty Pantry"
                         className="recipeItemSection__empty_image"
                     />
@@ -54,6 +68,7 @@ const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = 
                             rating={item.rating}
                             time={item.time}
                             status={item.status}
+                            allergens={item.allergens}
                             onClick={() => onItemClick?.(item.id)}
                         />
                     ))}

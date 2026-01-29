@@ -1,20 +1,45 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getPantryRecommendations, updateUserAllergens } from "../../services/api";
-import { formatPrepTime } from "../../utils/utils";
+import { getSubsetRecipes, getIncompleteRecipes, updateUserAllergens, getRecommendLikeRecipes, getCollaborativeRecipes } from "../../services/api";
+import { applyAllergenFilter, formatRecipes } from "../../utils/utils";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import FoodCategorySection from "../../components/FoodCategoryCard/FoodCategorySection";
 import RecipeItemSection from "../../components/RecipeItemSection/RecipeItemSection";
 import ExploreSection from "../../components/Dashboard/ExploreSection";
-import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
-import image_placeholder from "../../assets/images/error_handling/image_placeholder.png"
-import DOMPurify from "dompurify";
+import AllergensModal from "../../components/AllergensModal/AllergensModal";
+import AllergenPreferenceModal from "../../components/AllergenPreferenceModal/AllergenPreferenceModal";
 
 import "./dashboard.css";
 
 interface DashboardProps {
   userId: number | null;
 }
+
+/**
+ * Represent what a recipe is
+ */
+export interface Recipe {
+  id: number;
+  name: string;
+  image: string;
+  rating?: number;
+  time?: string;     // e.g. "35m" (For UI display)
+  rawTime?: string;  // e.g. "PT35M" (For filtering purposes)
+  status?: string;
+  allergens?: string[];
+}
+
+/**
+ * Represents how the user wants to filter recipes
+ */
+export interface RecipeFilters {
+  minRating: number;
+  timeRange: {
+    min: number | null;
+    max: number | null;
+  } | null;
+}
+
 
 /**
  * Dashboard Page Component
@@ -25,14 +50,62 @@ interface DashboardProps {
  * @returns JSX.Element
  */
 const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
+  // Initial state for showing allergens modal
+  const [showAllergensModal, setShowAllergensModal] = useState(false);
+
+  // State to control showing allergen preference modal
+  const [showAllergenFilterModal, setShowAllergenFilterModal] = useState(false);
+
+
+
+  // State to hold and pass input-text down to RecipeItemSection for UI display
   const [searchQuery, setSearchQuery] = useState("");
-  const [recommendedItems, setRecommendedItems] = useState<any[]>([]);
-  const [filteredItems, setFilteredItems] = useState<any[]>([]);
+
+
+
+  // Recipes that are fully cookable with current pantry items (may be filtered by allergens, search, etc.)
+  const [subsetRecipes, setSubsetRecipes] = useState<Recipe[]>([]);
+
+  // Recipes with possible missing ingredients (may be filtered by allergens, search, etc.)
+  const [incompleteRecipes, setIncompleteRecipes] = useState<Recipe[]>([]);
+
+
+
+  // Recipes currently displayed in the UI after applying transient UI filters (e.g. search)
+  // Derived from subsetRecipes and reset when UI filters are cleared
+  const [filteredSubsetRecipes, setFilteredSubsetRecipes] = useState<Recipe[]>([]);
+
+  // Recipes currently displayed in the UI after applying transient UI filters (e.g. search)
+  // Derived from incompleteRecipes and reset when UI filters are cleared
+  const [filteredIncompleteRecipes, setFilteredIncompleteRecipes] = useState<Recipe[]>([]);
+
+  // Recipes recommended based on user's liked recipes
+  const [likedRecommendedRecipes, setLikedRecommendedRecipes] = useState<Recipe[]>([]);
+  const [filteredLikedRecommendedRecipes, setFilteredLikedRecommendedRecipes] = useState<Recipe[]>([]);
+
+  // Collaborative filtering
+  const [collaborativeRecipes, setCollaborativeRecipes] = useState<Recipe[]>([]);
+  const [filteredCollaborativeRecipes, setFilteredCollaborativeRecipes] = useState<Recipe[]>([]);
+
+
 
   const navigate = useNavigate();
 
+  /**
+   * Check if user has completed allergens onboarding
+   */
   useEffect(() => {
-    console.log("Dashboard useEffect mounted");
+    const onboarded = localStorage.getItem("allergens_onboarded");
+
+    if (!onboarded) {
+      setShowAllergensModal(true);
+    }
+  }, []);
+
+  /**
+   * Fetch recipe recommendations
+   */
+  useEffect(() => {
     if (!userId) {
       navigate("/");
       return;
@@ -42,27 +115,52 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     const fetchRecommendations = async () => {
       try {
         console.log("Attempt fetch recommendation pantry")
-        const pantryData = await getPantryRecommendations(userId, 5);
+        const [subsetData, incompleteData, likedData, collaborativeData] = await Promise.all([
+          getSubsetRecipes(userId, 5),
+          getIncompleteRecipes(userId, 5),
+          getRecommendLikeRecipes(userId, 5),
+          getCollaborativeRecipes(userId, 5),
+        ]);
+        console.log("Cookable subset pantry recommendations:", subsetData.content_based);
+        console.log("Incomplete ingredient pantry recommendations:", incompleteData.content_based);
+        console.log("Liked recipe recommendations:", likedData.content_based);
+        console.log("Collaborative recommendations:", collaborativeData.recommendations);
 
-        console.log("FULL pantryData response:", pantryData);
-        console.log("Pantry-based recommendations:", pantryData.content_based);
+        const formattedSubset = formatRecipes(subsetData.content_based);
+        const formattedIncompleteIngredient = formatRecipes(incompleteData.content_based);
+        const formattedLiked = formatRecipes(likedData.content_based ?? []);
+        const formattedCollaborative = formatRecipes(collaborativeData.recommendations ?? []);
+        const mode = localStorage.getItem("allergen_visibility");
 
-        const formatted = pantryData.content_based.map((recipe: any, index: number) => {
-          const hasImages = Array.isArray(recipe.Images) && recipe.Images.length > 0;
-          const imageUrl = hasImages ? recipe.Images[0] : image_placeholder;
+        // Apply allergen filter if set
+        const visibleSubsetRecipe =
+          mode === "hide"
+            ? applyAllergenFilter(formattedSubset)
+            : formattedSubset;
 
-          return {
-            id: Number(recipe.RecipeId) || index + 1,
-            name: DOMPurify.sanitize(recipe.Name || "Unnamed Recipe"),
-            image: imageUrl,
-            rating: Number(recipe.AggregatedRating) || 4.0,
-            time: formatPrepTime(recipe.PrepTime),
-            // status: "Available",
-          };
-        });
+        const visibleIncmpltIngrdRecipe =
+          mode === "hide"
+            ? applyAllergenFilter(formattedIncompleteIngredient)
+            : formattedIncompleteIngredient;
 
-        setRecommendedItems(formatted);
-        setFilteredItems(formatted);
+        const visibleLikedRecipes =
+          mode === "hide"
+            ? applyAllergenFilter(formattedLiked)
+            : formattedLiked;
+
+        const visibleCollaborative =
+          mode === "hide"
+            ? applyAllergenFilter(formattedCollaborative)
+            : formattedCollaborative;
+
+        setSubsetRecipes(visibleSubsetRecipe);
+        setIncompleteRecipes(visibleIncmpltIngrdRecipe);
+        setLikedRecommendedRecipes(visibleLikedRecipes);
+        setFilteredSubsetRecipes(visibleSubsetRecipe);
+        setFilteredIncompleteRecipes(visibleIncmpltIngrdRecipe);
+        setFilteredLikedRecommendedRecipes(visibleLikedRecipes);
+        setCollaborativeRecipes(visibleCollaborative);
+        setFilteredCollaborativeRecipes(visibleCollaborative);
       } catch (err) {
         console.error("Error fetching recommendations:", err);
       }
@@ -72,68 +170,154 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
   }, [userId]);
 
   useEffect(() => {
-    const query = searchQuery.trim().toLowerCase();
-
-    if (!query) {
-      setFilteredItems(recommendedItems);
+    if (!searchQuery.trim()) {
+      setFilteredSubsetRecipes(subsetRecipes);
+      setFilteredIncompleteRecipes(incompleteRecipes);
+      setFilteredLikedRecommendedRecipes(likedRecommendedRecipes);
+      setFilteredCollaborativeRecipes(collaborativeRecipes);
       return;
     }
 
-    const filtered = recommendedItems.filter(recipe =>
-      recipe.name.toLowerCase().includes(query)
+    const q = searchQuery.toLowerCase();
+    setFilteredSubsetRecipes(
+      subsetRecipes.filter(r =>
+        r.name.toLowerCase().includes(q)
+      )
     );
+    setFilteredIncompleteRecipes(
+      incompleteRecipes.filter(r =>
+        r.name.toLowerCase().includes(q)
+      )
+    );
+    setFilteredLikedRecommendedRecipes(
+      likedRecommendedRecipes.filter(r => r.name.toLowerCase().includes(q))
+    );
+    setFilteredCollaborativeRecipes(
+      collaborativeRecipes.filter(r => r.name.toLowerCase().includes(q))
+    );
+  }, [searchQuery, subsetRecipes, incompleteRecipes, likedRecommendedRecipes, collaborativeRecipes]);
 
-    setFilteredItems(filtered);
-  }, [searchQuery, recommendedItems]);
 
-  const aiRecommended = [
-    {
-      id: 3,
-      name: "Shepherd’s Pie",
-      image: "https://www.thewholesomedish.com/wp-content/uploads/2019/02/The-Best-Classic-Shepherds-Pie-550.jpg",
-      rating: 4.0,
-      time: "35m",
-      status: "Missing 1 item",
-    },
-    {
-      id: 4,
-      name: "Scrambled Eggs",
-      image: "https://recipeteacher.com/wp-content/uploads/2016/08/Restaurant-Style-Scrambled-Eggs-20-scaled.jpg",
-      rating: 4.5,
-      time: "10m",
-      status: "Available",
-    },
-  ];
+  /**
+   * Handle confirmation of selected allergens from the modal
+   * @param selected 
+   */
+  const handleAllergensConfirm = async (selected: string[]) => {
+    try {
+      await updateUserAllergens(selected);
+      localStorage.setItem("user_allergens", JSON.stringify(selected));
+      localStorage.setItem("allergens_onboarded", "true");
+      setShowAllergensModal(false);
 
+      // Show second modal for allergen filtering if not dismissed before
+      const dismissed = localStorage.getItem("allergen_modal_dismissed");
+      if (!dismissed) {
+        setShowAllergenFilterModal(true);
+      }
+    } catch (err) {
+      console.error("Failed to update allergens", err);
+    }
+  };
 
   return (
 
     <div className="dashboard__container">
-      <SearchBar value={searchQuery} onChange={setSearchQuery} />
-      <FoodCategorySection />
+      {showAllergensModal && (
+        <AllergensModal
+          initial={JSON.parse(localStorage.getItem("user_allergens") || "[]")}
+          onConfirm={handleAllergensConfirm}
+        />
+      )}
+      {showAllergenFilterModal && (
+        <AllergenPreferenceModal
+          onConfirm={(mode) => {
+            setSubsetRecipes(prev => mode === "hide" ? applyAllergenFilter(prev) : prev);
+            setIncompleteRecipes(prev => mode === "hide" ? applyAllergenFilter(prev) : prev);
+            setShowAllergenFilterModal(false);
+          }}
+          onCancel={() => {
+            setShowAllergenFilterModal(false);
+          }}
+        />
+      )}
+      <div className="dashboard__searchRow">
+        <SearchBar value={searchQuery} onChange={setSearchQuery} />
+      </div>
 
-      <RecipeItemSection title="Recommended Based on Your Pantry"
-        items={filteredItems}
+      {/* <FoodCategorySection /> */}
+
+      <RecipeItemSection
+        title="Based On Your Pantry"
+        items={filteredSubsetRecipes}
         onItemClick={(recipeId: number) => {
           navigate(`/recipes/${recipeId}`);
         }}
+        onSeeMore={() => navigate("/pantry-subset-recipes")}
         emptyTitle={
           searchQuery
-            ? "No recipes found"
-            : "Let’s stock your pantry!"
+            ? "No Recipes Found!"
+            : "Nothing Cookable Yet!"
         }
         emptySubtitle={
           searchQuery
             ? `No results for "${searchQuery}"`
-            : "Add ingredients by uploading a receipt or other methods."
+            : "Add More Ingredients To Your Pantry To Unlock New Recipes!"
         }
       />
 
-      <RecipeItemSection title="AI - Recommended Recipes For You"
-        items={aiRecommended} // mock data for now
+      <RecipeItemSection title="You May Not Have All The Ingredients"
+        items={filteredIncompleteRecipes}
+        onItemClick={(recipeId: number) => {
+          navigate(`/recipes/${recipeId}`);
+        }}
+        onSeeMore={() => navigate("/pantry-incomplete-recipes")}
+        emptyTitle={
+          searchQuery
+            ? "No Recipes Found!"
+            : "Let’s Stock Your Pantry!"
+        }
+        emptySubtitle={
+          searchQuery
+            ? `No results for "${searchQuery}"`
+            : "Add ingredients by uploading a receipt or other methods!"
+        }
+      />
+
+      <RecipeItemSection title="Based On Your Liked Recipes"
+        items={filteredLikedRecommendedRecipes}
+        onItemClick={(recipeId: number) => {
+          navigate(`/recipes/${recipeId}`);
+        }}
+        onSeeMore={() => navigate("/pantry-recommend-liked-recipes")}
+        emptyTitle={
+          searchQuery
+            ? "No Recipes Found!"
+            : "No Liked Recipe Recommendations Yet!"
+        }
+        emptySubtitle={
+          searchQuery
+            ? `No results for "${searchQuery}"`
+            : "Like A Few Recipes To Get Personalized Recommendations!"
+        }
+      />
+      <RecipeItemSection title="Collaborative Recipes Recommended"
+        items={filteredCollaborativeRecipes}
+        onItemClick={(recipeId: number) => {
+          navigate(`/recipes/${recipeId}`);
+        }}
+        onSeeMore={() => navigate("/pantry-collaborative-recipes")}
+        emptyTitle={
+          searchQuery
+            ? "No Recipes Found!"
+            : "No Collaborative Recommendations Yet!"
+        }
+        emptySubtitle={
+          searchQuery
+            ? `No results for "${searchQuery}"`
+            : "Cook And Like More Recipes To Improve Recommendations!"
+        }
       />
       <ExploreSection />
-      <BottomNavBar />
     </div>
   );
 };

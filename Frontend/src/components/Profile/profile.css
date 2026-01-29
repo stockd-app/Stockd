@@ -1,0 +1,40 @@
+@import "@/styles/variable.css";
+
+.profile__button {
+    background: var(--color-white);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: var(--color-dark-blue);
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.profile__button:hover {
+    background-color: var(--color-light);
+    color: var(--color-primary);
+    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
+    transform: scale(1.05);
+}
+
+.profile__button:active {
+    transform: scale(0.95);
+}
+
+/* Desktop */
+@media (min-width: 1025px) {
+    .profile__button {
+        width: 48px;
+        height: 48px;
+    }
+}

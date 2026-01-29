@@ -1,7 +1,7 @@
 @import "@/styles/variable.css";
 
-.recipeitemcarditemcard {
-    width: 150px;
+.recipeitemcard {
+    /* width: 150px; */
     flex-shrink: 0;
 }
 
@@ -11,15 +11,13 @@
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 .recipeitemcard__image {
-    width: 170px;
-    height: 170px;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
+    display: block;
 }
 
 .recipeitemcard__info {
@@ -42,6 +40,20 @@
     text-overflow: ellipsis;
     width: 100%;
     max-width: 150px;
+}
+
+.recipeitemcard__allergens {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.recipeitemcard__allergen {
+    background: var(--color-light-red);
+    color: var(--color-red);
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 500;
 }
 
 .status--available {

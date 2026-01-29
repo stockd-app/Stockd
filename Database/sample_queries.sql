@@ -58,3 +58,20 @@ VALUES
 INSERT INTO audit_logs (timestamp, db_user, user_id, action, table_name, record_id, changes) 
 VALUES 
 (NOW(), 'admin_user', 1, 'INSERT', 'Users', 1, JSON_OBJECT('name', 'John Doe', 'email', 'john.doe@example.com', 'role', 'admin'));
+
+-- Insert Grocery Items for User 1
+INSERT INTO GroceryItems (user_id, item_name, quantity_value, quantity_unit, is_purchased) 
+VALUES 
+(1, 'Olive Oil', 1, 'bottle', FALSE),
+(1, 'Garlic', 5, 'cloves', FALSE),
+(1, 'Pasta', 500, 'grams', FALSE),
+(1, 'Cheddar Cheese', 250, 'grams', FALSE),
+(1, 'Butter', 'Dairy', 200, 'grams', FALSE);
+
+-- Insert Grocery Items for User 2 
+INSERT INTO GroceryItems (user_id, item_name, quantity_value, quantity_unit, is_purchased) 
+VALUES 
+(2, 'Broccoli', 2, 'heads', FALSE),
+(2, 'Salmon', 500, 'grams', FALSE),
+(2, 'Lemon', 3, 'pcs', FALSE),
+(2, 'Cream', 200, 'ml', FALSE);

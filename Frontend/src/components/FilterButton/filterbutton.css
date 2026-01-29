@@ -1,0 +1,21 @@
+@import "@/styles/variable.css";
+
+.filterbutton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-light-grey);
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.filterbutton:hover {
+    background-color: var(--color-grey);
+}
+
+.filterbutton:active {
+    transform: scale(0.95);
+}
