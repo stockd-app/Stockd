@@ -782,6 +782,9 @@ async def delete_pantry_items(request: Request, request_data: PantryItemsDeleteR
     finally:
         db.close()
 
+def safe_lower(text: str | None) -> str:
+    return text.lower().strip() if isinstance(text, str) else ""
+
 @router.post("/recipes/{recipe_id}/complete", tags=["Recipes"])
 @limiter.limit("10/minute")
 async def complete_recipe(
@@ -825,12 +828,14 @@ async def complete_recipe(
 
         # ingredient → match pantry → reduce quantity
         for ingredient in ingredients:
-            ingredient_lower = ingredient.lower()
+            ingredient_lower = safe_lower(ingredient)
             print("INGREDIENT:", ingredient_lower)
             matched = False
 
             for pantry_item in pantry_items:
-                pantry_name = pantry_item.normalized_name.lower()
+                pantry_name = safe_lower(pantry_item.normalized_name)
+                if not pantry_name:
+                    continue
                 print("PANTRY:", pantry_name)
 
                 if pantry_name in ingredient_lower or ingredient_lower in pantry_name:
