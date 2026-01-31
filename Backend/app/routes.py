@@ -1,5 +1,6 @@
 import datetime
 import os
+import re
 import time
 import traceback
 from datetime import datetime as dt
@@ -782,8 +783,16 @@ async def delete_pantry_items(request: Request, request_data: PantryItemsDeleteR
     finally:
         db.close()
 
-def safe_lower(text: str | None) -> str:
-    return text.lower().strip() if isinstance(text, str) else ""
+def tokenize(text: str | None) -> str:
+    """
+    Convert text into normalized token set
+    e.g. 'Salted Butter' -> {'salted', 'butter'}
+    """
+    if not text:
+        return set()
+    text = text.lower()
+    text = re.sub(r"[^a-z\s]", "", text)
+    return set(text.split())
 
 @router.post("/recipes/{recipe_id}/complete", tags=["Recipes"])
 @limiter.limit("10/minute")
@@ -828,18 +837,20 @@ async def complete_recipe(
 
         # ingredient → match pantry → reduce quantity
         for ingredient in ingredients:
-            ingredient_lower = safe_lower(ingredient)
-            print("INGREDIENT:", ingredient_lower)
+            ingredient_tokens = tokenize(ingredient)
+            print("INGREDIENT:", ingredient_tokens)
             matched = False
 
             for pantry_item in pantry_items:
-                pantry_name = safe_lower(pantry_item.normalized_name)
-                if not pantry_name:
+                pantry_text = pantry_item.normalized_name or pantry_item.item_name
+                pantry_tokens = tokenize(pantry_text)
+                if not pantry_tokens:
                     continue
-                print("PANTRY:", pantry_name)
-
-                if pantry_name in ingredient_lower or ingredient_lower in pantry_name:
-                    print("--------- MATCH ---------")
+                print("PANTRY:", pantry_tokens)
+               
+                overlap = ingredient_tokens & pantry_tokens
+                if overlap:
+                    print("--------- “”MATCH“” ---------")
                     pantry_item.quantity_value -= 1
                     matched = True
                     consumed.append({
