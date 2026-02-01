@@ -74,6 +74,35 @@ class ItemClassification(Base):
 class PantryItemsDeleteRequest(BaseModel):
     pantry_item_ids: List[int]
 
+class GroceryItem(Base):
+    __tablename__ = "GroceryItems"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("Users.id", ondelete="CASCADE"))
+    item_name = Column(String(255), nullable=False)
+    quantity_value = Column(Float, default=0)
+    quantity_unit = Column(String(100))
+    is_purchased = Column(Boolean, default=False)
+    added_on = Column(DateTime, default=datetime.utcnow)
+    updated_on = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    owner = relationship("User", foreign_keys=[user_id])
+
+class GroceryItemInput(BaseModel):
+    id: Optional[int] = None
+    item_name: str
+    quantity_value: Optional[float] = 0
+    quantity_unit: Optional[str] = "pcs"
+
+class GroceryItemsRequest(BaseModel):
+    user_id: int
+    items: List[GroceryItemInput]
+
+class GroceryItemsDeleteRequest(BaseModel):
+    grocery_item_ids: List[int]
+
+class GroceryItemMarkRequest(BaseModel):
+    grocery_item_ids: List[int]
+
 class Recipe(Base):
     __tablename__ = "Recipes"
     id = Column(Integer, primary_key=True, index=True)

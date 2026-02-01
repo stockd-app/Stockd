@@ -1,3 +1,7 @@
+import type { Recipe } from "../pages/Dashboard/Dashboard";
+import image_placeholder from "../assets/images/error_handling/image_placeholder.png"
+import DOMPurify from "dompurify";
+
 /**
  * Format Prep time for ItemCard component
  * Convert "PT45M" to "45m" for example
@@ -52,3 +56,44 @@ export const isSameRange = (
     if (!a || !b) return false;
     return a.min === b.min && a.max === b.max;
 };
+
+/**
+ * Apply allergen filter to recipes based on user preferences
+ * @param recipes 
+ * @returns 
+ */
+export const applyAllergenFilter = (recipes: Recipe[]) => {
+    const mode = localStorage.getItem("allergen_visibility");
+    if (mode !== "hide") return recipes;
+
+    const userAllergens = JSON.parse(
+        localStorage.getItem("user_allergens") || "[]"
+    );
+
+    if (!userAllergens.length) return recipes;
+
+    return recipes.filter(recipe =>
+        !recipe.allergens?.some(a => userAllergens.includes(a))
+    );
+};
+
+/**
+ * Format recipes from backend to frontend structure
+ * @param recipes 
+ * @returns 
+ */
+export const formatRecipes = (recipes: any[]) =>
+    recipes.map((recipe: any, index: number) => {
+        const hasImages = Array.isArray(recipe.Images) && recipe.Images.length > 0;
+        const imageUrl = hasImages ? recipe.Images[0] : image_placeholder;
+
+        return {
+            id: Number(recipe.RecipeId) || index + 1,
+            name: DOMPurify.sanitize(recipe.Name || "Unnamed Recipe"),
+            image: imageUrl,
+            rating: Number(recipe.AggregatedRating) || 0.0,
+            rawTime: recipe.PrepTime,
+            time: formatPrepTime(recipe.PrepTime),
+            allergens: recipe.Allergens ?? [],
+        };
+    });

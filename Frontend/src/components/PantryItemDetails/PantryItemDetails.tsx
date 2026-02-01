@@ -1,8 +1,12 @@
 import React, { useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import type { PantryItem } from "../PantryItemSection/PantryItemSection";
-import { addOrUpdatePantryItem } from "../../services/api";
+import { addOrUpdatePantryItem, deletePantryItems } from "../../services/api";
+import { useNotification } from "../Notification/NotificationContext";
+import { CONFIRM_DELETE_PANTRY_ITEM, NOTIFICATION_MESSAGES, NOTIFICATION_TYPES } from "../../config/consts";
 
 import "./pantryitemdetails.css";
+import ConfirmModal from "../ConfirmModal/ConfirmModal";
 
 interface PantryItemDetailProps extends PantryItem {
     onClose: () => void;
@@ -22,16 +26,17 @@ const PantryItemDetails: React.FC<PantryItemDetailProps> = ({
     onSaved,
 }) => {
     const user = JSON.parse(localStorage.getItem("user")!);
+    const notify = useNotification();
 
     const [productName, setProductName] = useState(name);
-    const [quantity, setQuantity] = useState(Number(qty.replace("x", "")));
+    const [quantity, setQuantity] = useState(Number(qty?.replace("x", "")) || 1);
     const [quantityUnit, setQuantityUnit] = useState(unit);
     const [itemCategory, setItemCategory] = useState(category);
     const [itemLocation, setItemLocation] = useState(storage);
     const [dateAdded, setDateAdded] = useState(added_on);
+    const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
     const handleSave = async () => {
-
         const payload = {
             id: id,
             item_name: productName,
@@ -45,10 +50,28 @@ const PantryItemDetails: React.FC<PantryItemDetailProps> = ({
 
         try {
             await addOrUpdatePantryItem(user.id, [payload]);
+            notify(
+                id === 0 ? NOTIFICATION_MESSAGES.ADDED : NOTIFICATION_MESSAGES.UPDATED,
+                id === 0 ? NOTIFICATION_TYPES.ADDED : NOTIFICATION_TYPES.UPDATED
+            );
             onSaved();
             onClose();
         } catch (err) {
             console.error("Error updating pantry item:", err);
+        }
+    };
+
+    const handleDeleteConfirmed = async () => {
+        try {
+            await deletePantryItems([id]);
+            notify(
+                NOTIFICATION_MESSAGES.DELETED,
+                NOTIFICATION_TYPES.DELETED
+            );
+            onSaved();
+            onClose();
+        } catch (err) {
+            console.error("Error deleting pantry item:", err);
         }
     };
 
@@ -57,8 +80,20 @@ const PantryItemDetails: React.FC<PantryItemDetailProps> = ({
             <div className="pid__modal">
 
                 <div className="pid__header">
-                    <button className="pid__back" onClick={onClose}>←</button>
-                    <h2>Pantry Item</h2>
+                    <button
+                        className="pid__back"
+                        onClick={onClose}
+                        aria-label="Go back"
+                    >
+                        <ArrowLeft size={22} />
+                    </button>
+
+                    <h2 className="pid__title">
+                        {id === 0 ? "Add Pantry Item" : "Pantry Item"}
+                    </h2>
+
+                    {/* Right-side spacer to mirror back button */}
+                    <div className="pid__spacer" />
                 </div>
 
                 <div className="pid__body">
@@ -140,8 +175,23 @@ const PantryItemDetails: React.FC<PantryItemDetailProps> = ({
                 </div>
 
                 <div className="pid__footer">
+                    {id !== 0 && (
+                        <button className="pid__delete" onClick={() => setShowConfirmDelete(true)}> Delete </button>
+                    )}
+
                     <button className="pid__save" onClick={handleSave}>Done</button>
                 </div>
+
+                {showConfirmDelete && (
+                    <ConfirmModal
+                        text={CONFIRM_DELETE_PANTRY_ITEM}
+                        onConfirm={() => {
+                            setShowConfirmDelete(false);
+                            handleDeleteConfirmed();
+                        }}
+                        onCancel={() => setShowConfirmDelete(false)}
+                    />
+                )}
 
             </div>
         </div>

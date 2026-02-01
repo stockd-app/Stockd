@@ -173,6 +173,50 @@ export const addOrUpdatePantryItem = async (userId: number, items: any) => {
   }
 };
 
+
+
+/**
+ * Delete pantry items by their IDs
+ * @param itemIds 
+ * @returns 
+ */
+export const deletePantryItems = async (itemIds: number[]) => {
+  let idToken = localStorage.getItem("google_id_token");
+
+  try {
+    const res = await axios.delete(API_ROUTES.DELETE_PANTRY_ITEMS, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+      data: {
+        pantry_item_ids: itemIds,
+      },
+    });
+
+    return res.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        idToken = localStorage.getItem("google_id_token");
+        const retry = await axios.delete(API_ROUTES.DELETE_PANTRY_ITEMS, {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+          data: {
+            pantry_item_ids: itemIds,
+          },
+        });
+        return retry.data;
+      }
+      throw error;
+    }
+    throw error;
+  }
+};
+
+
+
 /**
  * Get single recipe by recipe ID
  * @param recipeId
@@ -245,14 +289,34 @@ export const loginWithGoogle = async (authCode: string) => {
 };
 
 /**
- * Fetch recipe recommendations based on the user's pantry
+ * Fetch subset recipes based on the user's pantry
+ * Recipes WILL NOT contain missing ingredients
+ * @param userId 
+ * @param topN 
+ */
+export const getSubsetRecipes = async (userId: number, topN: number = 10) => {
+  try {
+    const url = `${API_ROUTES.GET_SUBSET_PANTRY_RECIPES}/${userId}?top_n=${topN}`;
+
+    const res = await axios.get(url);
+
+    return res.data;
+  } catch (err: any) {
+    console.error("Failed to fetch cookable pantry recipes: ", err);
+    throw err;
+  }
+}
+
+/**
+ * Fetch incomplete ingredient recipe based on the user's pantry
+ * Recipes MAY contain missing ingredients
  * @param userId 
  * @param topN 
  * @returns
  */
-export const getPantryRecommendations = async (userId: number, topN: number = 10) => {
+export const getIncompleteRecipes = async (userId: number, topN: number = 10) => {
   try {
-    const url = `${API_ROUTES.GET_PANTRY_RECOMMENDATIONS}/${userId}?top_n=${topN}`;
+    const url = `${API_ROUTES.GET_INCOMPLETE_PANTRY_RECIPES}/${userId}?top_n=${topN}`;
 
     const res = await axios.get(url);
 
@@ -262,6 +326,40 @@ export const getPantryRecommendations = async (userId: number, topN: number = 10
     throw err;
   }
 };
+
+/**
+ * Fetch recipe recommendation based on user's liked recipes
+ * @param userId 
+ * @param topN 
+ * @returns
+ */
+export const getRecommendLikeRecipes = async (userId: number, topN: number = 10) => {
+  try {
+    const url = `${API_ROUTES.GET_RECOMMEND_LIKED_RECIPES}/${userId}?top_n=${topN}`;
+
+    const res = await axios.get(url);
+
+    return res.data;
+  } catch (err: any) {
+    console.error("Failed to fetch liked recipes recommendations:", err);
+    throw err;
+  }
+};
+
+
+export const getCollaborativeRecipes = async (userId: number, topN: number = 10) =>{
+  try {
+    const url = `${API_ROUTES.GET_COLLABORATIVE_RECIPES}/${userId}?top_n=${topN}`;
+
+    const res = await axios.get(url);
+    
+    return res.data;
+  } catch (err: any) {
+    console.error("Failed to fetch collaborative recipes recommendations:", err);
+    throw err;
+  }
+};
+
 
 
 /**

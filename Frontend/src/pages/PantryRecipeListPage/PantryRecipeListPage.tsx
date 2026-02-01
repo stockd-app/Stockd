@@ -1,27 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, ArrowLeft } from "lucide-react";
 import type { Recipe } from "../Dashboard/Dashboard";
-import { getPantryRecommendations } from "../../services/api";
-import { formatPrepTime, isoDurationToMinutes, isSameRange } from "../../utils/utils";
+import { applyAllergenFilter, formatRecipes, isoDurationToMinutes, isSameRange } from "../../utils/utils";
 import { TIME_RANGES } from "../../config/consts";
 import FilterDrawer from "../../components/FilterDrawer/FilterDrawer";
 import FilterChip from "../../components/FilterChip/FilterChip";
 import RecipeItemCard from "../../components/RecipeItemCard/RecipeItemCard";
-import image_placeholder from "../../assets/images/error_handling/image_placeholder.png";
-import DOMPurify from "dompurify";
 
-import "./pantryreciperecommendationpage.css";
+import "./pantryrecipelistpage.css";
+
+interface PantryRecipeListPageProps {
+    title: string;
+    fetchRecipes: (userId: number) => Promise<any>;
+}
 
 /**
- * Pantry Recipe Recommendation Page Component
+ * Reusable Pantry Recipe List Recommendation Page Component
  * @returns 
  */
-const PantryRecipeRecommendationPage: React.FC = () => {
+const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetchRecipes }) => {
     const navigate = useNavigate();
 
+    // Recipes visible to the user after applying allergen preferences
     const [recipes, setRecipes] = useState<Recipe[]>([]);
+
+    // Recipes displayed after applying UI-level filters (rating, time, etc.)
     const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
+
     const [showFilters, setShowFilters] = useState(false);
 
     const [filters, setFilters] = useState({
@@ -37,23 +43,19 @@ const PantryRecipeRecommendationPage: React.FC = () => {
             return;
         }
 
-        const fetchRecipes = async () => {
-            const data = await getPantryRecommendations(user.id, 50);
+        const load = async () => {
+            const data = await fetchRecipes(user.id);
+            console.log("Fetched pantry recipes:", data);
+            const formatted = formatRecipes(data.content_based || data.recommendations || []);
 
-            const formatted = data.content_based.map((r: any, i: number) => ({
-                id: r.RecipeId || i,
-                name: DOMPurify.sanitize(r.Name),
-                image: r.Images?.[0] || image_placeholder,
-                rating: Number(r.AggregatedRating) || 0,
-                rawTime: r.PrepTime,               // ISO string
-                time: formatPrepTime(r.PrepTime),  // UI string
-            }));
+            const mode = localStorage.getItem("allergen_visibility");
+            const visible =
+                mode === "hide" ? applyAllergenFilter(formatted) : formatted;
 
-            setRecipes(formatted);
-            setFilteredRecipes(formatted);
+            setRecipes(visible);
+            setFilteredRecipes(visible);
         };
-
-        fetchRecipes();
+        load();
     }, []);
 
     useEffect(() => {
@@ -76,8 +78,6 @@ const PantryRecipeRecommendationPage: React.FC = () => {
                 return true;
             });
         }
-
-
         setFilteredRecipes(result);
     }, [filters, recipes]);
 
@@ -85,11 +85,20 @@ const PantryRecipeRecommendationPage: React.FC = () => {
         <div className="pantryRecipes__container">
             {/* Header */}
             <div className="pantryRecipes__header">
-                <button onClick={() => navigate(-1)} className="backBtn">←</button>
-                <h2>Discover Recipes</h2>
+                <button
+                    onClick={() => navigate(-1)}
+                    className="backBtn"
+                    aria-label="Go back"
+                >
+                    <ArrowLeft size={22} />
+                </button>
+
+                <h2 className="pantryRecipes__title">{title}</h2>
+
                 <button
                     className="filterIcon"
                     onClick={() => setShowFilters(true)}
+                    aria-label="Open filters"
                 >
                     <SlidersHorizontal size={20} />
                 </button>
@@ -104,6 +113,9 @@ const PantryRecipeRecommendationPage: React.FC = () => {
                         image={recipe.image}
                         rating={recipe.rating}
                         time={recipe.time}
+                        status={recipe.status}
+                        allergens={recipe.allergens}
+                        onClick={() => navigate(`/recipes/${recipe.id}`)}
                     />
                 ))}
             </div>
@@ -171,4 +183,4 @@ const PantryRecipeRecommendationPage: React.FC = () => {
     );
 };
 
-export default PantryRecipeRecommendationPage;
+export default PantryRecipeListPage;

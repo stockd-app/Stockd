@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import StockdLogo from "../../../assets/images/StockdLogo.svg";
-import { SEARCH, TOP_NAV_BAR } from "../../../config/consts";
+// import { SEARCH, TOP_NAV_BAR } from "../../../config/consts";
+import Profile from "../../Profile/Profile";
 
 import "./topnavbar.css";
 
@@ -11,18 +12,23 @@ import "./topnavbar.css";
  * @returns JSX.Element
  */
 const TopNavBar: React.FC = () => {
-    const [activeCategory, setActiveCategory] = useState("All");
+    // const [activeCategory, setActiveCategory] = useState("All");
 
-    const categories = ["All", "Food", "Drink"];
+    // const categories = ["All", "Food", "Drink"];
 
     return (
         <div className="topnav__container">
             <div className="topnav__logo-search">
                 <img src={StockdLogo} alt="Stockd Logo" className="topnav__logo" />
-                <input type="text" placeholder={SEARCH} className="topnav__search" />
+                {/* <input type="text" placeholder={SEARCH} className="topnav__search" /> */}
+
+                <div className="topnav__profile">
+                    <Profile />
+                </div>
             </div>
 
-            <p className="category__title">{TOP_NAV_BAR.CATEGORY}</p>
+
+            {/* <p className="category__title">{TOP_NAV_BAR.CATEGORY}</p>
 
             <div className="category__filters">
                 {categories.map((category) => (
@@ -35,7 +41,7 @@ const TopNavBar: React.FC = () => {
                         {category}
                     </button>
                 ))}
-            </div>
+            </div> */}
 
             {/* Separator line */}
             <hr className="topnav__separator" />
