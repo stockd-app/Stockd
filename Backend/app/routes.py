@@ -787,12 +787,30 @@ def tokenize(text: str | None) -> str:
     """
     Convert text into normalized token set
     e.g. 'Salted Butter' -> {'salted', 'butter'}
+    Handles plural forms: s, es, ies
     """
     if not text:
         return set()
     text = text.lower()
     text = re.sub(r"[^a-z\s]", "", text)
-    return set(text.split())
+    
+    tokens = set()
+    for word in text.split():
+        # berries -> berry
+        if word.endswith("ies") and len(word) > 3:
+            word = word[:-3] + "y"
+
+        # tomatoes -> tomato, boxes -> box
+        elif word.endswith("es") and len(word) > 3:
+            word = word[:-2]
+
+        # eggs -> egg (but not 'glass')
+        elif word.endswith("s") and len(word) > 3 and not word.endswith("ss"):
+            word = word[:-1]
+
+        tokens.add(word)
+
+    return tokens
 
 @router.post("/recipes/{recipe_id}/complete", tags=["Recipes"])
 @limiter.limit("10/minute")
