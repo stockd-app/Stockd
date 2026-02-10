@@ -1,3 +1,5 @@
+@import "@/styles/variable.css";
+
 .recipe__page {
   width: 100%;
 }
@@ -37,7 +39,7 @@
   border: none;
   border-radius: 999px;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--color-white);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
   font-size: 0;
 }
@@ -71,12 +73,13 @@
   font-weight: 800;
 }
 
-.recipe__meta {
+/* .recipe__meta {
   display: flex;
   gap: 14px;
   align-items: center;
   flex-wrap: wrap;
   color: #6b7280;
+  color: var(--color-red);
   font-size: 14px;
   margin-bottom: 14px;
 }
@@ -85,7 +88,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-}
+} */
 
 .recipe__meta__cards {
   display: flex;
@@ -207,4 +210,51 @@
 .recipe__instructions li {
   margin: 0 0 10px;
   line-height: 1.7;
+}
+
+/* ===== Complete Recipe Button ===== */
+.recipe__complete {
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+}
+
+.complete__button {
+  padding: 14px 36px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  color: var(--color-white);
+  box-shadow: 0 10px 24px rgba(239, 68, 68, 0.35);
+  transition: all 0.25s ease;
+}
+
+.complete__button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(239, 68, 68, 0.45);
+}
+
+.complete__button:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+}
+
+@media (max-width: 600px) {
+  .recipe__container {
+    width: calc(100% - 28px);
+    padding-top: 16px;
+  }
+
+  .recipe__content {
+    padding: 18px 2px 0;
+    width: 100%;
+  }
+
+  .complete__button {
+    width: 100%;
+    max-width: 320px;
+  }
 }

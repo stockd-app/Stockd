@@ -604,3 +604,48 @@ export const getLikedRecipes = async () => {
   }
 };
 
+/**
+ * Complete a recipe and update pantry items
+ */
+export const completeRecipe = async (recipeId: number) => {
+  let idToken = localStorage.getItem("google_id_token");
+
+  try {
+    const res = await axios.post(
+      API_ROUTES.COMPLETE_RECIPE.replace(":recipeId", String(recipeId)),
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      }
+    );
+
+    return res.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        idToken = localStorage.getItem("google_id_token");
+
+        const retryRes = await axios.post(
+          API_ROUTES.COMPLETE_RECIPE.replace(":recipeId", String(recipeId)),
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
+
+        return retryRes.data;
+      } else {
+        localStorage.clear();
+        window.location.href = "/";
+        throw new Error("Session expired. Please log in again.");
+      }
+    }
+
+    throw error;
+  }
+};

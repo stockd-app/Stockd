@@ -1,4 +1,4 @@
-import { Check, Pencil, Trash2, Heart, HeartOff } from "lucide-react";
+import { Check, Pencil, Trash2, Heart, HeartOff, CircleCheckBig,CircleAlert } from "lucide-react";
 
 // Backend API base URL
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
@@ -19,6 +19,7 @@ export const API_ROUTES = {
   // TOGGLE_LIKE_RECIPE: (recipeId: number) => `${API_BASE_URL}/recipes/${recipeId}/like`,
   TOGGLE_LIKE_RECIPE: `${API_BASE_URL}/recipes/:recipeId/like`,
   GET_LIKED_RECIPES: `${API_BASE_URL}/users/current/liked-recipes`,
+  COMPLETE_RECIPE:`${API_BASE_URL}/recipes/:recipeId/complete`,
   LOGOUT_GOOGLE: `${API_BASE_URL}/auth/google/logout`,
   DELETE_USER: `${API_BASE_URL}/delete_user`,
   GET_USER_ALLERGENS: `${API_BASE_URL}/user/get-allergens`,
@@ -60,6 +61,8 @@ export const NOTIFICATION_MESSAGES = {
   DELETED: "Pantry item has been deleted!",
   LIKED: "Recipe added to liked",
   UNLIKED: "Recipe removed from liked",
+  RECIPE_COMPLETED: "Recipe completed! Pantry has been updated.",
+  ERROR:"Failed to complete recipe. Please try again.",
 } as const;
 
 export const NOTIFICATION_TYPES = {
@@ -68,6 +71,8 @@ export const NOTIFICATION_TYPES = {
   DELETED: "deleted",
   LIKED: "liked",
   UNLIKED: "unliked",
+  RECIPE_COMPLETED: "recipe_completed",
+  ERROR: "error",
 } as const;
 
 export type NotificationType =
@@ -79,6 +84,8 @@ export const NOTIFICATION_ICONS = {
   deleted: Trash2,
   liked: Heart,
   unliked: HeartOff,
+  recipe_completed: CircleCheckBig,
+  error: CircleAlert,
 } as const;
 
 export const NOTIFICATION_UI = {

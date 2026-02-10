@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getRecipeById, getLikedRecipes,getPantryItems } from "../../services/api";
+import { getRecipeById, getLikedRecipes,getPantryItems,completeRecipe } from "../../services/api";
 import { getIngredientIcon } from "../../utils/ingredientIconMap";
 import { Clock, Star, ArrowLeft } from "lucide-react";
 import image_placeholder from "../../assets/images/error_handling/image_placeholder.png";
@@ -8,6 +8,8 @@ import { formatPrepTime } from "../../utils/utils";
 import { parseQuantity, resolveIngredientDisplay } from "../../utils/ingredientUnit";
 import LikeButton from "../../components/LikeButton/LikeButton";
 import { API_ROUTES } from "../../config/consts";
+import { useNotification } from "../../components/Notification/NotificationContext";
+import { NOTIFICATION_MESSAGES, NOTIFICATION_TYPES } from "../../config/consts";
 
 
 import "./singlerecipepage.css";
@@ -37,6 +39,7 @@ const SingleRecipePage: React.FC = () => {
             (p) => normIng.includes(p) || p.includes(normIng)
         );
     };
+    const notify = useNotification();
 
     useEffect(() => {
         if (!id) return;
@@ -97,6 +100,18 @@ const SingleRecipePage: React.FC = () => {
         };
         run();
     }, [recipe?.RecipeId]);
+    
+    const handleCompleteRecipe = async () => {
+        try {
+            const result = await completeRecipe(recipe.RecipeId);
+            console.log("Recipe completed:", result);
+            notify( NOTIFICATION_MESSAGES.RECIPE_COMPLETED,NOTIFICATION_TYPES.RECIPE_COMPLETED);
+            setTimeout(() => { navigate("/dashboard");}, 2000); 
+        } catch (err) {
+            console.error("Failed to complete recipe", err);
+            notify( NOTIFICATION_MESSAGES.ERROR,NOTIFICATION_TYPES.ERROR);
+        }
+        };
 
     useEffect(() => {
     if (!userId) return;
@@ -289,6 +304,11 @@ const SingleRecipePage: React.FC = () => {
                             )}
                         </ol>
                     </section>
+                    <div className="recipe__complete">
+                        <button className="complete__button" onClick={handleCompleteRecipe}>
+                            Complete Recipe
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,5 +1,6 @@
 import datetime
 import os
+import re
 import time
 import traceback
 from datetime import datetime as dt
@@ -782,6 +783,133 @@ async def delete_pantry_items(request: Request, request_data: PantryItemsDeleteR
     finally:
         db.close()
 
+def tokenize(text: str | None) -> str:
+    """
+    Convert text into normalized token set
+    e.g. 'Salted Butter' -> {'salted', 'butter'}
+    Handles plural forms: s, es, ies
+    """
+    if not text:
+        return set()
+    text = text.lower()
+    text = re.sub(r"[^a-z\s]", "", text)
+    
+    tokens = set()
+    for word in text.split():
+        # berries -> berry
+        if word.endswith("ies") and len(word) > 3:
+            word = word[:-3] + "y"
+
+        # tomatoes -> tomato, boxes -> box
+        elif word.endswith("es") and len(word) > 3:
+            word = word[:-2]
+
+        # eggs -> egg (but not 'glass')
+        elif word.endswith("s") and len(word) > 3 and not word.endswith("ss"):
+            word = word[:-1]
+
+        tokens.add(word)
+
+    return tokens
+
+@router.post("/recipes/{recipe_id}/complete", tags=["Recipes"])
+@limiter.limit("10/minute")
+async def complete_recipe(
+    request: Request,
+    recipe_id: int,  # dataset_recipe_id
+    user=Depends(require_google_token),
+):
+    """
+    Mark a recipe as completed.
+    Ingredients are fetched from dataset (RecipeIngredientParts),
+    and matched against user's PantryItems.
+    """
+
+    db = SessionLocal()
+    consumed = []
+    unmatched = []
+
+    try:
+        # Fetch recipe from dataset 
+        recipe_data = await fetch_recipe_from_ai(recipe_id)
+        recipe_obj = recipe_data.get("recipe", {})
+
+        if not recipe_obj:
+            raise HTTPException(status_code=404, detail="Recipe not found in dataset")
+
+        recipe_name = recipe_obj.get("Name", "Unknown Recipe")
+        ingredients = recipe_obj.get("RecipeIngredientParts", [])
+
+        if not ingredients:
+            raise HTTPException(
+                status_code=404,
+                detail="No ingredients found for this recipe (dataset)"
+            )
+
+        # Get user pantry
+        pantry_items = (
+            db.query(PantryItem)
+            .filter(PantryItem.user_id == user.id)
+            .all()
+        )
+
+        # ingredient → match pantry → reduce quantity
+        for ingredient in ingredients:
+            ingredient_tokens = tokenize(ingredient)
+            print("INGREDIENT:", ingredient_tokens)
+            matched = False
+
+            for pantry_item in pantry_items:
+                pantry_text = pantry_item.normalized_name or pantry_item.item_name
+                pantry_tokens = tokenize(pantry_text)
+                if not pantry_tokens:
+                    continue
+                print("PANTRY:", pantry_tokens)
+               
+                overlap = ingredient_tokens & pantry_tokens
+                if overlap:
+                    print("--------- “”MATCH“” ---------")
+                    pantry_item.quantity_value -= 1
+                    matched = True
+                    consumed.append({
+                        "ingredient": ingredient,
+                        "pantry_item": pantry_item.item_name,
+                        "remaining": pantry_item.quantity_value,
+                    })
+                    if pantry_item.quantity_value <= 0:
+                        db.delete(pantry_item)
+
+                    break
+
+            if not matched:
+                unmatched.append(ingredient)
+
+        db.commit()
+
+        return {
+            "status": "success",
+            "message": "Recipe completed and pantry updated",
+            "dataset_recipe_id": recipe_id,
+            "recipe_name": recipe_name,
+            "total_ingredients": len(ingredients),
+            "consumed_count": len(consumed),
+            "unmatched_ingredients": unmatched,
+            "consumed_items": consumed,
+        }
+
+    except HTTPException:
+        db.rollback()
+        raise
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to complete recipe: {str(e)}"
+        )
+
+    finally:
+        db.close()
 
 async def fetch_recipe_from_ai(recipe_id: int) -> dict:
     """
@@ -851,9 +979,9 @@ async def toggle_like_recipe(
                     dataset_recipe_id=recipe_id,
                     recipe_name=recipe_obj.get("Name", "Unknown Recipe"),
                     recipe_image=recipe_obj.get("Images", [None])[0] if recipe_obj.get("Images") else None,
-                    steps=steps_text,
-                    prep_time=parse_duration(recipe_obj.get("PrepTime")),
-                    cook_time=parse_duration(recipe_obj.get("CookTime")),
+                    steps=recipe_obj.get("Description", ""),
+                    prep_time=int(recipe_obj.get("PrepTime", "0").replace("PT", "").replace("M", "").replace("H", "")) if recipe_obj.get("PrepTime") else None,
+                    cook_time=int(recipe_obj.get("CookTime", "0").replace("PT", "").replace("M", "").replace("H", "")) if recipe_obj.get("CookTime") else None,
                 )
                 db.add(recipe)
                 db.commit()
