@@ -63,6 +63,7 @@ AI_SERVER_URL_RECIPE_RECOMMENDER = os.getenv("RECIPE_RECOMMENDER_MODEL_URL")
 @router.post("/upload-receipt", tags=["OCR"])
 @limiter.limit("5/minute")
 async def upload_receipt(
+    request: Request,
     files: list[UploadFile] = File(...),
 ):
     """
@@ -214,7 +215,9 @@ async def upload_receipt(
         db.close()
 
 @router.post("/confirm-receipt-items", tags=["OCR"])
+@limiter.limit("5/minute")
 async def confirm_receipt_items(
+    request: Request,
     items: list[dict],
     background_tasks: BackgroundTasks,
     user=Depends(require_google_token),
