@@ -63,23 +63,20 @@ AI_SERVER_URL_RECIPE_RECOMMENDER = os.getenv("RECIPE_RECOMMENDER_MODEL_URL")
 @router.post("/upload-receipt", tags=["OCR"])
 @limiter.limit("5/minute")
 async def upload_receipt(
-    request: Request,
-    background_tasks: BackgroundTasks,
     files: list[UploadFile] = File(...),
-    user=Depends(require_google_token),
 ):
     """
     Upload an image of a receipt and:
     1. Send it to Asprise OCR API
     2. Fetch existing items from DB classifications
     3. Classify missing items using the AI model, if no missing items, skip this step
-    4. Store items in the database
-    5. Return the processed items to frontend
-    6. Start background task to fetch images from OpenFoodFacts
+    4. Return the processed items to frontend
+    5. Start background task to fetch images from OpenFoodFacts
     """
     db = SessionLocal()
     try:
-        print("Recieved receipt image: ", time.strftime("%Y-%m-%d %H:%M:%S"))
+        print("Received receipt image: ", time.strftime("%Y-%m-%d %H:%M:%S"))
+        all_detected_items = []
 
         for file in files:
             image_bytes = await file.read()
@@ -182,62 +179,101 @@ async def upload_receipt(
                 if not classification or not classification.is_food:
                     continue
 
-                # Check if item already exists for this user
-                existing_item = (
-                    db.query(PantryItem)
-                    .filter(PantryItem.user_id == user.id)
-                    .filter(PantryItem.normalized_name == norm_name)
-                    .first()
-                )
-                if existing_item:
-                    existing_item.quantity_value += parsed["items"].get(raw_name, 1)
-                    processed_items.append(existing_item)
-                    continue
+                detected_item = {
+                    "item_name": sanitize_text(raw_name),
+                    "normalized_name": norm_name,
+                    "category": classification.category or "Uncategorized",
+                    "storage": classification.storage or "Pantry",
+                    "quantity_value": sanitize_quantity(
+                        parsed["items"].get(raw_name, 1)
+                    ),
+                }
 
-                # Create new PantryItem
-                new_item = PantryItem(
-                    user_id=user.id,
-                    item_name=sanitize_text(raw_name),
-                    normalized_name=norm_name,
-                    category=classification.category or "non-food",
-                    storage=classification.storage or "non-food",
-                    quantity_value=parsed["items"].get(raw_name, 1),
-                    quantity_unit="",
-                )
-                db.add(new_item)
-                db.flush()
-                processed_items.append(new_item)
+                all_detected_items.append(detected_item)
                 
         print("Processed all items: ", time.strftime("%Y-%m-%d %H:%M:%S"))
         db.commit()
 
-        # Group items by storage for frontend
-        grouped_items = {}
-        for item in processed_items:
-            storage = item.storage or "Pantry"
-            grouped_items.setdefault(storage, []).append(
-                {
-                    "id": item.id,
-                    "name": item.item_name,
-                    "qty": item.quantity_value,
-                    "image": item.item_image,
-                }
-            )
+        print("Returning detected items for confirmation:",
+              time.strftime("%Y-%m-%d %H:%M:%S"))
 
-        print(
-            "Background task to resolve images started: ",
-            time.strftime("%Y-%m-%d %H:%M:%S"),
-        )
-        # Background task to fetch images from OpenFoodFacts
-        background_tasks.add_task(fetch_food_images, user.id)
         print("End of /upload-receipt: ", time.strftime("%Y-%m-%d %H:%M:%S"))
         return {
             "status": "success",
+            "items": all_detected_items,
+            "total_items": len(all_detected_items),
         }
 
     except HTTPException:
         db.rollback()
         raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+@router.post("/confirm-receipt-items", tags=["OCR"])
+async def confirm_receipt_items(
+    items: list[dict],
+    background_tasks: BackgroundTasks,
+    user=Depends(require_google_token),
+):
+    """
+    After the user confirms the detected receipt items, this endpoint will:
+    1. Add or update the confirmed items in the user's pantry
+    2. Start background task to fetch images for these items from OpenFoodFacts
+    3. Return success response with count of saved items
+    4. Handle errors gracefully and rollback DB if needed
+    5. Possible errors:
+        - 400 Bad Request (e.g. invalid item data)
+        - 404 Not Found (e.g. user not found)
+        - 500 Internal Server Error (e.g. DB errors)
+    """
+    db = SessionLocal()
+    try:
+        saved_items = []
+
+        for item in items:
+            norm_name = item["normalized_name"]
+            quantity = sanitize_quantity(item["quantity_value"])
+
+            existing_item = (
+                db.query(PantryItem)
+                .filter(PantryItem.user_id == user.id)
+                .filter(PantryItem.normalized_name == norm_name)
+                .first()
+            )
+            if existing_item:
+                existing_item.quantity_value += quantity
+                saved_items.append(existing_item)
+                continue
+
+            # Create new PantryItem
+            new_item = PantryItem(
+                user_id=user.id,
+                item_name=sanitize_text(item["item_name"]),
+                normalized_name=norm_name,
+                category=sanitize_text(item.get("category", "Uncategorized")),
+                storage=sanitize_text(item.get("storage", "Pantry")),
+                quantity_value=quantity,
+                quantity_unit="",
+            )
+            db.add(new_item)
+            db.flush()
+            saved_items.append(new_item)
+
+        print("Processed all items: ", time.strftime("%Y-%m-%d %H:%M:%S"))
+        db.commit()
+
+        # Background task to fetch images from OpenFoodFacts
+        background_tasks.add_task(fetch_food_images, user.id)
+        print("End of /confirm_receipt_items: ", time.strftime("%Y-%m-%d %H:%M:%S"))
+        return {
+            "status": "success",
+            "saved_count": len(saved_items),
+        }
+
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))

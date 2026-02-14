@@ -1,4 +1,4 @@
-import { Check, Pencil, Trash2, Heart, HeartOff, CircleCheckBig,CircleAlert } from "lucide-react";
+import { Check, Pencil, Trash2, Heart, HeartOff, CircleCheckBig, CircleAlert } from "lucide-react";
 
 // Backend API base URL
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
@@ -7,6 +7,7 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 export const API_ROUTES = {
   REFRESH_TOKEN: `${API_BASE_URL}/auth/refresh`,
   UPLOAD_RECEIPT: `${API_BASE_URL}/upload-receipt`,
+  CONFIRM_RECEIPT_ITEMS: `${API_BASE_URL}/confirm-receipt-items`,
   VERIFY_GOOGLE: `${API_BASE_URL}/auth/google`,
   GET_PANTRY: `${API_BASE_URL}/pantry_items`,
   ADD_UPDATE_PANTRY_ITEM: `${API_BASE_URL}/add_update_pantry_items`,
@@ -19,7 +20,7 @@ export const API_ROUTES = {
   // TOGGLE_LIKE_RECIPE: (recipeId: number) => `${API_BASE_URL}/recipes/${recipeId}/like`,
   TOGGLE_LIKE_RECIPE: `${API_BASE_URL}/recipes/:recipeId/like`,
   GET_LIKED_RECIPES: `${API_BASE_URL}/users/current/liked-recipes`,
-  COMPLETE_RECIPE:`${API_BASE_URL}/recipes/:recipeId/complete`,
+  COMPLETE_RECIPE: `${API_BASE_URL}/recipes/:recipeId/complete`,
   LOGOUT_GOOGLE: `${API_BASE_URL}/auth/google/logout`,
   DELETE_USER: `${API_BASE_URL}/delete_user`,
   GET_USER_ALLERGENS: `${API_BASE_URL}/user/get-allergens`,
@@ -62,7 +63,7 @@ export const NOTIFICATION_MESSAGES = {
   LIKED: "Recipe added to liked",
   UNLIKED: "Recipe removed from liked",
   RECIPE_COMPLETED: "Recipe completed! Pantry has been updated.",
-  ERROR:"Failed to complete recipe. Please try again.",
+  ERROR: "Failed to complete recipe. Please try again.",
 } as const;
 
 export const NOTIFICATION_TYPES = {
