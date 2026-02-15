@@ -1,27 +1,20 @@
 import React, { useState } from "react";
-import "./AllergensModal.css";
+import { X } from "lucide-react";
+import { COMMON_ALLERGENS } from "../../config/consts";
 
-const COMMON_ALLERGENS = [
-  "celery",
-  "crustacean",
-  "egg",
-  "fish, sea food",
-  "gluten",
-  "lupine",
-  "milk",
-  "mustard",
-  "peanut",
-  "sesame",
-  "soy",
-  "tree-nut"
-];
+import "./AllergensModal.css";
 
 interface Props {
   onConfirm: (selected: string[]) => void;
+  onClose: () => void;
   initial?: string[];
 }
 
-const AllergensModal: React.FC<Props> = ({ onConfirm, initial = [] }) => {
+const AllergensModal: React.FC<Props> = ({
+  onConfirm,
+  onClose,
+  initial = []
+}) => {
   const [selected, setSelected] = useState<string[]>(initial);
 
   const toggle = (allergen: string) => {
@@ -35,18 +28,28 @@ const AllergensModal: React.FC<Props> = ({ onConfirm, initial = [] }) => {
   return (
     <div className="modal__overlay">
       <div className="modal__content">
-        <h2>Food Allergies</h2>
+        <div className="modal__header">
+          <h2>Food Allergies</h2>
+          <button className="modal__close" onClick={onClose}>
+            <X size={20} />
+          </button>
+        </div>
+
         <p>Select any allergens you want us to avoid.</p>
 
         <div className="modal__list">
-          {COMMON_ALLERGENS.map((allergen) => (
-            <label key={allergen} className="modal__item">
+          {COMMON_ALLERGENS.map(({ label, value, icon: Icon }) => (
+            <label key={value} className="modal__item">
               <input
                 type="checkbox"
-                checked={selected.includes(allergen)}
-                onChange={() => toggle(allergen)}
+                checked={selected.includes(value)}
+                onChange={() => toggle(value)}
               />
-              {allergen}
+
+              <div className="modal__item-content">
+                <Icon size={18} />
+                <span>{label}</span>
+              </div>
             </label>
           ))}
         </div>
