@@ -217,6 +217,7 @@
   margin-top: 32px;
   display: flex;
   justify-content: center;
+  margin-bottom: 15px;
 }
 
 .complete__button {
@@ -255,6 +256,6 @@
 
   .complete__button {
     width: 100%;
-    max-width: 320px;
+    max-width: 360px;
   }
 }
