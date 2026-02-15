@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getSubsetRecipes, getIncompleteRecipes, updateUserAllergens, getRecommendLikeRecipes, getCollaborativeRecipes } from "../../services/api";
+import { getSubsetRecipes, getIncompleteRecipes, updateUserAllergens, getRecommendLikeRecipes, getCollaborativeRecipes, searchRecipes } from "../../services/api";
 import { applyAllergenFilter, formatRecipes } from "../../utils/utils";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import FoodCategorySection from "../../components/FoodCategoryCard/FoodCategorySection";
@@ -168,9 +168,16 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
 
     fetchRecommendations();
   }, [userId]);
+  
+  const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedQuery(searchQuery), 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
   useEffect(() => {
-    if (!searchQuery.trim()) {
+  const fetchSearchResults = async () => {
+    if (!debouncedQuery.trim()) {
       setFilteredSubsetRecipes(subsetRecipes);
       setFilteredIncompleteRecipes(incompleteRecipes);
       setFilteredLikedRecommendedRecipes(likedRecommendedRecipes);
@@ -178,24 +185,31 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
       return;
     }
 
-    const q = searchQuery.toLowerCase();
-    setFilteredSubsetRecipes(
-      subsetRecipes.filter(r =>
-        r.name.toLowerCase().includes(q)
-      )
-    );
-    setFilteredIncompleteRecipes(
-      incompleteRecipes.filter(r =>
-        r.name.toLowerCase().includes(q)
-      )
-    );
-    setFilteredLikedRecommendedRecipes(
-      likedRecommendedRecipes.filter(r => r.name.toLowerCase().includes(q))
-    );
-    setFilteredCollaborativeRecipes(
-      collaborativeRecipes.filter(r => r.name.toLowerCase().includes(q))
-    );
-  }, [searchQuery, subsetRecipes, incompleteRecipes, likedRecommendedRecipes, collaborativeRecipes]);
+    try {
+      const results = await searchRecipes(debouncedQuery, 20);
+
+      const formatted = results.map((r: any) => ({
+        id: r.RecipeId,
+        name: r.Name,
+        image: r.Images?.[0] || "",
+        rating: r.AggregatedRating,
+        time: r.TotalTime,
+        rawTime: r.TotalTime,
+        allergens: r.Allergens ?? [],
+      }));
+
+      setFilteredSubsetRecipes(formatted);
+      setFilteredIncompleteRecipes(formatted);
+      setFilteredLikedRecommendedRecipes(formatted);
+      setFilteredCollaborativeRecipes(formatted);
+
+    } catch (err) {
+      console.error("Error fetching search results:", err);
+    }
+  };
+
+  fetchSearchResults();
+}, [searchQuery]);
 
 
   /**

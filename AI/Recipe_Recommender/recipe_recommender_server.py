@@ -57,6 +57,11 @@ class SearchRequest(BaseModel):
     query: str
     limit: int = 20
 
+class SearchResponse(BaseModel):
+    status: str
+    count: int
+    results: List[RecipeObject]
+
 class RecipeByIdRequest(BaseModel):
     recipe_id: int
 
@@ -169,15 +174,22 @@ def recommend_ai(req: RecommendationRequest):
     except Exception as e:
         raise HTTPException(500, str(e))
 
-@app.post("/search-recipes")
+@app.post("/search-recipes", response_model=SearchResponse)
 async def search_recipes_endpoint(req: SearchRequest):
     try:
-        results = search_recipes(req.query, req.limit)
-        return {
-            "status": "success",
-            "count": len(results),
-            "results": results
-        }
+        raw_results = search_recipes(req.query, req.limit)
+
+        formatted = []
+        for row in raw_results:
+            row = sanitize_row_for_pydantic(row)
+            formatted.append(RecipeObject(**row))
+
+        return SearchResponse(
+            status="success",
+            count=len(formatted),
+            results=formatted
+        )
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

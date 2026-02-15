@@ -649,3 +649,41 @@ export const completeRecipe = async (recipeId: number) => {
     throw error;
   }
 };
+
+/**
+ * Search recipes by name substring
+ * @param query - search string
+ * @param limit - maximum number of results (default 20)
+ */
+export const searchRecipes = async (query: string, limit: number = 20) => {
+  if (!query.trim()) return [];
+
+  let idToken = localStorage.getItem("google_id_token");
+
+  try {
+    const res = await axios.get(`/recipes/search`, {
+      headers: {
+        Authorization: idToken ? `Bearer ${idToken}` : undefined,
+      },
+      params: { query, limit },
+    });
+
+    return res.data.results ?? [];
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        idToken = localStorage.getItem("google_id_token");
+        const retryRes = await axios.get(`/recipes/search`, {
+          headers: {
+            Authorization: idToken ? `Bearer ${idToken}` : undefined,
+          },
+          params: { query, limit },
+        });
+        return retryRes.data.results ?? [];
+      }
+    }
+    console.error("Error searching recipes:", error);
+    return [];
+  }
+};

@@ -1179,28 +1179,49 @@ async def search_recipes_route(request: Request, query: str, limit: int = 20):
     Example:
         GET /recipes/search?query=chicken&limit=10
     """
-    if not query or query.strip() == "":
+    if not query or not query.strip():
         raise HTTPException(status_code=400, detail="Query string cannot be empty.")
-    
+
     safe_query = sanitize_text(query)
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=10.0) as client:
         try:
             ai_response = await client.post(
                 f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/search-recipes",
-                json={"query": safe_query, "limit": limit}
+                json={
+                    "query": safe_query,
+                    "limit": limit
+                }
             )
-            ai_response.raise_for_status()
-            return ai_response.json()
 
-        except httpx.HTTPStatusError:
+            ai_response.raise_for_status()
+
+            try:
+                return ai_response.json()
+            except ValueError:
+                raise HTTPException(
+                    status_code=502,
+                    detail="Invalid JSON response from recipe AI service"
+                )
+
+        except httpx.HTTPStatusError as e:
             raise HTTPException(
-                status_code=ai_response.status_code, detail=ai_response.text
+                status_code=e.response.status_code,
+                detail=e.response.text
+            )
+
+        except httpx.RequestError as e:
+            raise HTTPException(
+                status_code=503,
+                detail=f"Recipe AI service unavailable: {str(e)}"
             )
 
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error contacting recipe AI service: {str(e)}")
-        
+            raise HTTPException(
+                status_code=500,
+                detail=f"Unexpected error contacting recipe AI service: {str(e)}"
+            )
+    
 @router.get("/recipes/{recipe_id}", tags=["Recipes"])
 async def get_recipe_by_id_route(recipe_id: int):
     """
