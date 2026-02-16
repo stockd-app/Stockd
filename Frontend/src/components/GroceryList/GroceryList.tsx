@@ -29,6 +29,7 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [selectedItemIds, setSelectedItemIds] = useState<number[]>([]);
   const [formData, setFormData] = useState<GroceryItemInput>({
     item_name: "",
     quantity_value: 0,
@@ -63,7 +64,7 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
-      setGroceryItems({});
+      setGroceryItems([]);
     } finally {
       setIsLoading(false);
     }
@@ -134,50 +135,34 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
     }
   };
 
-  // Mark item as purchased
-  const handleMarkPurchased = async (itemId: number) => {
-    try {
-      const response = await fetch(
-        `${API_ROUTES.MARK_GROCERY_PURCHASED}/${itemId}/mark-purchased`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
-
-      if (!response.ok) throw new Error("Failed to mark as purchased");
-
-      setSuccess("Item moved to pantry!");
-      fetchGroceryItems();
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    }
-  };
-
   // Mark all items as purchased
-  const handleMarkAllPurchased = async () => {
-    if (!confirm("Move all items to pantry?")) return;
+  const handleMarkSelectedPurchased = async () => {
+    if (selectedItemIds.length === 0) return;
+    if (!confirm("Move selected items to pantry?")) return;
 
     try {
-      const response = await fetch(
-        `${API_ROUTES.MARK_ALL_GROCERY_PURCHASED}?user_id=${userId}`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        },
+      const results = await Promise.all(
+        selectedItemIds.map((itemId) =>
+          fetch(
+            `${API_ROUTES.MARK_GROCERY_PURCHASED}/${itemId}/mark-purchased`,
+            {
+              method: "PATCH",
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+              },
+            },
+          ),
+        ),
       );
 
-      if (!response.ok) throw new Error("Failed to move items");
+      if (results.some((response) => !response.ok)) {
+        throw new Error("Failed to move items");
+      }
 
-      setSuccess("All items moved to pantry!");
+      setSuccess("Selected items moved to pantry!");
       fetchGroceryItems();
+      setSelectedItemIds([]);
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -189,7 +174,15 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
     fetchGroceryItems();
   }, [userId]);
 
+  useEffect(() => {
+    setSelectedItemIds((prev) =>
+      prev.filter((id) => groceryItems.some((item) => item.id === id)),
+    );
+  }, [groceryItems]);
+
   const totalItems = groceryItems.length;
+  const selectedCount = selectedItemIds.length;
+  const allSelected = totalItems > 0 && selectedCount === totalItems;
 
   // Handle edit item click
   const handleEditItem = (item: GroceryItem) => {
@@ -230,10 +223,11 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
         {totalItems > 0 && (
           <button
             className="grocery-list__btn grocery-list__btn--success"
-            onClick={handleMarkAllPurchased}
+            onClick={handleMarkSelectedPurchased}
+            disabled={selectedCount === 0}
           >
             <Check size={20} />
-            Move All to Pantry
+            Add to Pantry
           </button>
         )}
       </div>
@@ -330,14 +324,35 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
         </div>
       ) : (
         <div className="grocery-list__items">
+          <div className="grocery-list__select-all">
+            <label className="grocery-list__select-all-label">
+              <input
+                type="checkbox"
+                checked={allSelected}
+                onChange={(e) =>
+                  setSelectedItemIds(
+                    e.target.checked ? groceryItems.map((item) => item.id) : [],
+                  )
+                }
+                title="Select all items"
+              />
+              Select all
+            </label>
+          </div>
           {groceryItems.map((item) => (
             <div key={item.id} className="grocery-list__item">
               <div className="grocery-list__item-checkbox">
                 <input
                   type="checkbox"
-                  checked={item.is_purchased}
-                  onChange={() => handleMarkPurchased(item.id)}
-                  title="Mark as purchased"
+                  checked={selectedItemIds.includes(item.id)}
+                  onChange={() =>
+                    setSelectedItemIds((prev) =>
+                      prev.includes(item.id)
+                        ? prev.filter((id) => id !== item.id)
+                        : [...prev, item.id],
+                    )
+                  }
+                  title="Select item"
                 />
               </div>
 
