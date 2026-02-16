@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Plus, MoreVertical, Check } from "lucide-react";
 import { API_ROUTES } from "../../config/consts";
+import ConfirmModal from "../ConfirmModal/ConfirmModal";
 import "./grocery-list.css";
 
 interface GroceryItem {
@@ -30,6 +31,7 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [selectedItemIds, setSelectedItemIds] = useState<number[]>([]);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [formData, setFormData] = useState<GroceryItemInput>({
     item_name: "",
     quantity_value: null,
@@ -143,7 +145,6 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
   // Mark all items as purchased
   const handleMarkSelectedPurchased = async () => {
     if (selectedItemIds.length === 0) return;
-    if (!confirm("Move selected items to pantry?")) return;
 
     try {
       const results = await Promise.all(
@@ -201,6 +202,11 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
     setShowAddForm(true);
   };
 
+  const handleConfirmPurchase = async () => {
+    setShowConfirmModal(false);
+    await handleMarkSelectedPurchased();
+  };
+
   return (
     <div className="grocery-list__container">
       {/* Header */}
@@ -228,7 +234,7 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
         {totalItems > 0 && (
           <button
             className="grocery-list__btn grocery-list__btn--success"
-            onClick={handleMarkSelectedPurchased}
+            onClick={() => setShowConfirmModal(true)}
             disabled={selectedCount === 0}
           >
             <Check size={20} />
@@ -419,6 +425,18 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
             </div>
           ))}
         </div>
+      )}
+
+      {showConfirmModal && (
+        <ConfirmModal
+          text={
+            "Bought selected grocery items? These items will now be added to your virtual pantry."
+          }
+          confirmLabel="Yes"
+          cancelLabel="No"
+          onConfirm={handleConfirmPurchase}
+          onCancel={() => setShowConfirmModal(false)}
+        />
       )}
     </div>
   );
