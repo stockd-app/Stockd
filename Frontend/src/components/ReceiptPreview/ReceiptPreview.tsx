@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { uploadReceipt } from "../../services/api";
+import { addOrUpdatePantryItem, confirmReceiptItems, uploadReceipt } from "../../services/api";
 import { Trash2, Upload, Camera, ChevronLeft } from "lucide-react";
 import CameraModal from "../../components/CameraModal/CameraModal";
+import type { ConfirmPantryItem } from "../PantryItemConfirmationModal/PantryItemConfirmationModal";
+import PantryItemConfirmationModal from "../PantryItemConfirmationModal/PantryItemConfirmationModal";
 
 import "./receiptpreview.css";
 
@@ -19,6 +21,9 @@ const ReceiptPreview: React.FC = () => {
 
     const [showCamera, setShowCamera] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+
+    const [showConfirmation, setShowConfirmation] = useState(false);
+    const [detectedItems, setDetectedItems] = useState<ConfirmPantryItem[]>([]);
 
     const initialImages = useMemo<ReceiptImage[]>(() => {
         return (location.state?.images as ReceiptImage[]) ?? [];
@@ -74,14 +79,32 @@ const ReceiptPreview: React.FC = () => {
             console.log("Uploading:", files);
             setIsUploading(true);
 
-            await uploadReceipt(files);
+            const response = await uploadReceipt(files);
 
-            navigate("/pantry");
+            if (!response.items || response.items.length === 0) {
+                alert("No items detected.");
+                return;
+            }
+
+            setDetectedItems(response.items);
+            setShowConfirmation(true);
         } catch (err) {
             console.error("Recognition failed:", err);
             alert("Failed to recognize receipt. Please try again.");
         } finally {
             setIsUploading(false);
+        }
+    };
+
+    // Confirm receipt items and update pantry
+    const handleConfirmItems = async (updatedItems: ConfirmPantryItem[]) => {
+        try {
+            await confirmReceiptItems(updatedItems);
+            setShowConfirmation(false);
+            navigate("/pantry");
+        } catch (err) {
+            console.error(err);
+            alert("Failed to save items.");
         }
     };
 
@@ -183,6 +206,14 @@ const ReceiptPreview: React.FC = () => {
                     <div className="spinner"></div>
                     <p className="loading__text">AI is scanning your receipt…</p>
                 </div>
+            )}
+
+            {showConfirmation && (
+                <PantryItemConfirmationModal
+                    items={detectedItems}
+                    onClose={() => setShowConfirmation(false)}
+                    onConfirm={handleConfirmItems}
+                />
             )}
 
         </div>

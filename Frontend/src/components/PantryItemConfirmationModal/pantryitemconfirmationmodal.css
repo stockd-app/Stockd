@@ -1,0 +1,79 @@
+@import "@/styles/variable.css";
+
+.pcm__overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.pcm__modal {
+    background: var(--color-white);
+    width: 95%;
+    max-width: 480px;
+    border-radius: 16px;
+    padding: 24px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.pcm__list {
+    margin-top: 16px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.pcm__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-grey);
+}
+
+.pcm__name {
+    font-weight: 500;
+}
+
+.pcm__qtyControls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pcm__qtyControls button {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: none;
+    background: var(--color-grey);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pcm__actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.pcm__cancel {
+    background: var(--color-grey);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+}
+
+.pcm__confirm {
+    background: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+}

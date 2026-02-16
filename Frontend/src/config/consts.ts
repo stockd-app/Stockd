@@ -20,6 +20,7 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 export const API_ROUTES = {
   REFRESH_TOKEN: `${API_BASE_URL}/auth/refresh`,
   UPLOAD_RECEIPT: `${API_BASE_URL}/upload-receipt`,
+  CONFIRM_RECEIPT_ITEMS: `${API_BASE_URL}/confirm-receipt-items`,
   VERIFY_GOOGLE: `${API_BASE_URL}/auth/google`,
   GET_PANTRY: `${API_BASE_URL}/pantry_items`,
   ADD_UPDATE_PANTRY_ITEM: `${API_BASE_URL}/add_update_pantry_items`,

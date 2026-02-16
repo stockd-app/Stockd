@@ -85,6 +85,28 @@ export const uploadReceipt = async (files: File[]) => {
 };
 
 /**
+ * Send the confirmed receipt items to Backend to be stored in the database and update user's pantry
+ * @param items 
+ * @returns 
+ */
+export const confirmReceiptItems = async (items: any[]) => {
+  let idToken = localStorage.getItem("google_id_token");
+
+  const res = await axios.post(
+    API_ROUTES.CONFIRM_RECEIPT_ITEMS,
+    items,
+    {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+    }
+  );
+
+  return res.data;
+};
+
+
+/**
  * Get pantry items for a user
  * @param userId
  * @returns
@@ -347,12 +369,12 @@ export const getRecommendLikeRecipes = async (userId: number, topN: number = 10)
 };
 
 
-export const getCollaborativeRecipes = async (userId: number, topN: number = 10) =>{
+export const getCollaborativeRecipes = async (userId: number, topN: number = 10) => {
   try {
     const url = `${API_ROUTES.GET_COLLABORATIVE_RECIPES}/${userId}?top_n=${topN}`;
 
     const res = await axios.get(url);
-    
+
     return res.data;
   } catch (err: any) {
     console.error("Failed to fetch collaborative recipes recommendations:", err);
