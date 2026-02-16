@@ -12,11 +12,54 @@
 
 .modal__content {
   background: var(--color-white);
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 24px;
-  width: 90%;
+  width: 60%;
   max-width: 400px;
   color: var(--color-black);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.modal__header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.modal__close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.modal__close:hover {
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .modal__list {
@@ -24,21 +67,51 @@
   flex-direction: column;
   gap: 10px;
   margin: 16px 0;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .modal__item {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
   font-size: 14px;
+  cursor: pointer;
+  padding: 6px 4px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.modal__item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.modal__item input {
+  cursor: pointer;
+}
+
+.modal__item-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .modal__confirm {
   width: 100%;
-  padding: 10px;
-  border-radius: 8px;
+  padding: 12px;
+  border-radius: 10px;
   border: none;
   background: var(--color-primary);
   color: var(--color-white);
   font-weight: bold;
   cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.modal__confirm:hover {
+  opacity: 0.9;
+}
+
+.modal__confirm:active {
+  transform: scale(0.98);
 }

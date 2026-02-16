@@ -1,5 +1,18 @@
 import { Check, Pencil, Trash2, Heart, HeartOff, CircleCheckBig, CircleAlert } from "lucide-react";
 
+// Common Allergens Icons (Separation for readability)
+import {
+  Wheat,
+  Milk,
+  Fish,
+  Egg,
+  Nut,
+  Bean,
+  Leaf,
+  Shell,
+  AlertTriangle,
+} from "lucide-react";
+
 // Backend API base URL
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
@@ -115,3 +128,18 @@ export const TIME_RANGES = [
   { label: "15–30 mins", value: { min: 15, max: 30 } },
   { label: "30–60 mins", value: { min: 30, max: 60 } },
 ];
+
+export const COMMON_ALLERGENS = [
+  { label: "Celery", value: "celery", icon: Leaf },
+  { label: "Crustacean", value: "crustacean", icon: Shell },
+  { label: "Egg", value: "egg", icon: Egg },
+  { label: "Fish & Seafood", value: "fish, sea food", icon: Fish },
+  { label: "Gluten", value: "gluten", icon: Wheat },
+  { label: "Lupine", value: "lupine", icon: Bean },
+  { label: "Milk", value: "milk", icon: Milk },
+  { label: "Mustard", value: "mustard", icon: AlertTriangle },
+  { label: "Peanut", value: "peanut", icon: Nut },
+  { label: "Sesame", value: "sesame", icon: Bean },
+  { label: "Soy", value: "soy", icon: Bean },
+  { label: "Tree Nut", value: "tree-nut", icon: Nut },
+] as const;

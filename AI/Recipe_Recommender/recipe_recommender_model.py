@@ -279,16 +279,20 @@ def recommend_from_similar_users(
 
 def search_recipes(query: str, limit: int = 20):
     """
-    Simple substring search for recipes by name.
-    Case-insensitive.
+    Search recipes by name (case-insensitive substring match)
+    and return full recipe objects.
     """
+    if not query:
+        return []
+
     q = query.lower().strip()
 
-    matches = df[df['Name'].str.lower().str.contains(q, na=False)]
+    matches = df[
+        df["Name"].str.lower().str.contains(q, na=False)
+    ].head(limit)
+    
+    return matches.to_dict(orient="records")
 
-    matches = matches.head(limit)
-
-    return matches[['Name']].to_dict(orient="records")
 
 def get_recipe_by_id(recipe_id: int):
     """
