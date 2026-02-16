@@ -14,7 +14,7 @@ interface GroceryItem {
 interface GroceryItemInput {
   id?: number;
   item_name: string;
-  quantity_value: number;
+  quantity_value: number | null;
   quantity_unit: string;
 }
 
@@ -32,7 +32,7 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
   const [selectedItemIds, setSelectedItemIds] = useState<number[]>([]);
   const [formData, setFormData] = useState<GroceryItemInput>({
     item_name: "",
-    quantity_value: 0,
+    quantity_value: null,
     quantity_unit: "pcs",
   });
   const [error, setError] = useState<string | null>(null);
@@ -88,7 +88,12 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
         },
         body: JSON.stringify({
           user_id: userId,
-          items: [formData],
+          items: [
+            {
+              ...formData,
+              quantity_value: formData.quantity_value ?? 0,
+            },
+          ],
         }),
       });
 
@@ -97,7 +102,7 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
       setSuccess(editingItemId ? "Item updated!" : "Item added!");
       setFormData({
         item_name: "",
-        quantity_value: 0,
+        quantity_value: null,
         quantity_unit: "pcs",
       });
       setShowAddForm(false);
@@ -258,13 +263,21 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
                 <input
                   type="number"
                   placeholder="0"
-                  value={formData.quantity_value}
+                  value={formData.quantity_value ?? ""}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      quantity_value: parseFloat(e.target.value) || 0,
+                      quantity_value:
+                        e.target.value === ""
+                          ? null
+                          : parseFloat(e.target.value),
                     })
                   }
+                  onFocus={(e) => {
+                    if (e.target.value === "0") {
+                      setFormData({ ...formData, quantity_value: null });
+                    }
+                  }}
                 />
               </div>
 
@@ -302,7 +315,7 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
                   setEditingItemId(null);
                   setFormData({
                     item_name: "",
-                    quantity_value: 0,
+                    quantity_value: null,
                     quantity_unit: "pcs",
                   });
                 }}
