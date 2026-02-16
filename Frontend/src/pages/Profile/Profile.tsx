@@ -7,7 +7,6 @@ import { CONFIRM_DELETE_TEXT, CONFIRM_LOGOUT_TEXT } from "../../config/consts";
 import DOMPurify from "dompurify";
 import AllergensModal from "../../components/AllergensModal/AllergensModal";
 
-
 import "./profile.css";
 
 interface ProfileProps {
@@ -102,6 +101,7 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
                 <AllergensModal
                     initial={initialAllergens}
                     onConfirm={handleAllergensConfirm}
+                    onClose={() => setShowAllergensModal(false)}
                 />
             )}
 

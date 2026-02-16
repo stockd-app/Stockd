@@ -304,11 +304,13 @@ const SingleRecipePage: React.FC = () => {
                             )}
                         </ol>
                     </section>
-                    <div className="recipe__complete">
-                        <button className="complete__button" onClick={handleCompleteRecipe}>
+                    {missingIngredients.length === 0 && (
+                        <div className="recipe__complete">
+                            <button className="complete__button" onClick={handleCompleteRecipe}>
                             Complete Recipe
-                        </button>
-                    </div>
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

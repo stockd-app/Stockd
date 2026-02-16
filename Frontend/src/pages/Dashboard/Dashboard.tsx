@@ -240,6 +240,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         <AllergensModal
           initial={JSON.parse(localStorage.getItem("user_allergens") || "[]")}
           onConfirm={handleAllergensConfirm}
+          onClose={() => setShowAllergensModal(false)}
         />
       )}
       {showAllergenFilterModal && (
