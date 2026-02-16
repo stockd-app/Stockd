@@ -305,7 +305,7 @@ To test stockd on your mobile browser:
 3. The new url needs to be added to google console for authentication under
    - Authorized JavaScript origins
    - Authorized redirect URIs
-
+   - Also remember to add the `/api` prefix to your `VITE_API_BASE_URL` within your Frontend's `.env`.
 4. Access stockd using the url given by ngrok
 
 ---

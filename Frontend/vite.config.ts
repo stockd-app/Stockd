@@ -24,6 +24,9 @@ export default defineConfig({
       "*.ngrok-free.dev",
       "*.ngrok.io",
       "unclawed-dot-interequinoctial.ngrok-free.dev",
+      "terrance-neonatal-abeyantly.ngrok-free.dev",
+      "parental-thwartly-averi.ngrok-free.dev",
+      "cytoarchitecturally-unfiring-criselda.ngrok-free.dev",
     ],
     proxy: {
       "/api": {
