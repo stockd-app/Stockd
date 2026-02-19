@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import PantryItemCard from "../PantryItemCard/PantryItemCard";
 import PantryItemDetails from "../PantryItemDetails/PantryItemDetails";
+import { deletePantryItems } from "../../services/api";
+import { CheckSquare2, X, Square, Trash2 } from "lucide-react";
 
 import "./pantryitemsection.css";
 
@@ -25,11 +27,54 @@ interface PantryItemSectionProps {
 const PantryItemSection: React.FC<PantryItemSectionProps> = ({ section, items, onRefresh, onSeeMore }) => {
     const [selectedItem, setSelectedItem] = useState<any | null>(null);
     console.log("Rendering ItemSection for section:", section);
+    const [isSelecting, setIsSelecting] = useState(false);
+    const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
     const handleItemClick = (item: PantryItem) => {
-        setSelectedItem(item);
+        if (isSelecting) {
+            toggleSelect(item.id); // Toggle selection state
+        } else {
+            setSelectedItem(item);
+        }
     };
 
+    const toggleSelect = (id: number) => {
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            next.has(id) ? next.delete(id) : next.add(id);
+            return next;
+        });
+    };
+
+    const clearSelection = () => setSelectedIds(new Set());
+
+    const handleDeleteSelected = async () => {
+        const ids = Array.from(selectedIds);
+        if (ids.length === 0) return;
+
+        const ok = window.confirm(`Delete ${ids.length} item(s) from ${section}?`);
+        if (!ok) return;
+
+        try {
+            await deletePantryItems(ids);
+            setIsSelecting(false);
+            clearSelection();
+            onRefresh();
+        } catch (e) {
+            console.error("Failed to delete pantry items:", e);
+            alert("Failed to delete items. Please try again.");
+        }
+    };
+
+    const enterSelectMode = (id: number) => {
+        setIsSelecting(true);
+        setSelectedIds(new Set([id]));
+    };
+
+    const exitSelectMode = () => {
+        setIsSelecting(false);
+        clearSelection();
+    };
     return (
         <>
             <div className="pantryitemsection__container">
@@ -39,6 +84,51 @@ const PantryItemSection: React.FC<PantryItemSectionProps> = ({ section, items, o
                         <p className="see__more" onClick={() => onSeeMore(section)} > See more </p>
                     )}
                 </div>
+                {isSelecting && (
+                    <div className="pantryItemSection__bulkActions">
+                        <div className="pantryItemSection__bulkActionsTrack">
+                            <button
+                                type="button"
+                                className="pantryItemSection__bulkActionBtn"
+                                onClick={() => setSelectedIds(new Set(items.map(i => i.id)))}
+                            >
+                                <CheckSquare2 className="pantryItemSection__bulkActionIcon" />
+                                <span className="pantryItemSection__bulkActionText">Select all</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                className="pantryItemSection__bulkActionBtn"
+                                onClick={clearSelection}
+                            >
+                                <Square className="pantryItemSection__bulkActionIcon" />
+                                <span className="pantryItemSection__bulkActionText">Unselect all</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                className="pantryItemSection__bulkActionBtn"
+                                onClick={exitSelectMode}
+                            >
+                                <X className="pantryItemSection__bulkActionIcon" />
+                                <span className="pantryItemSection__bulkActionText">Cancel</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                className="pantryItemSection__bulkActionBtn pantryItemSection__bulkActionDeleteBtn"
+                                disabled={selectedIds.size === 0}
+                                onClick={handleDeleteSelected}
+                            >
+                                <Trash2 className="pantryItemSection__bulkActionIcon" />
+                                <span className="pantryItemSection__bulkActionText">
+                                    Delete ({selectedIds.size})
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                )}
+
 
                 <div className="pantryitemsection__items">
                     {items.map((item) => (
@@ -47,7 +137,15 @@ const PantryItemSection: React.FC<PantryItemSectionProps> = ({ section, items, o
                             name={item.name}
                             qty={item.qty}
                             image={item.image}
-                            onClick={() => handleItemClick(item)}
+                            isSelecting={isSelecting}
+                            selected={selectedIds.has(item.id)}
+                            onClick={() => {
+                                if (isSelecting) toggleSelect(item.id);
+                                else handleItemClick(item);
+                            }}
+                            onLongPress={() => {
+                                if (!isSelecting) enterSelectMode(item.id);
+                            }}
                         />
                     ))}
                 </div>
