@@ -10,7 +10,7 @@ import "./pantrysectionlistpage.css";
 
 interface PantrySectionListPageProps {
     title: string;
-    storage: "Pantry" | "Fridge" | "Freezer";
+    storage: "Pantry" | "Refrigerator" | "Freezer";
 }
 
 const PantrySectionListPage: React.FC<PantrySectionListPageProps> = ({
