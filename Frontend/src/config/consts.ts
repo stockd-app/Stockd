@@ -30,7 +30,6 @@ export const API_ROUTES = {
   GET_RECOMMEND_LIKED_RECIPES: `${API_BASE_URL}/recommendations/liked-categories`,   // Caller will append `user_id`
   GET_COLLABORATIVE_RECIPES: `${API_BASE_URL}/recommendations/collaborative`, // Caller will append `user_id`
   GET_RECIPE_BY_ID: `${API_BASE_URL}/recipes`,
-  // TOGGLE_LIKE_RECIPE: (recipeId: number) => `${API_BASE_URL}/recipes/${recipeId}/like`,
   TOGGLE_LIKE_RECIPE: `${API_BASE_URL}/recipes/:recipeId/like`,
   GET_LIKED_RECIPES: `${API_BASE_URL}/users/current/liked-recipes`,
   COMPLETE_RECIPE: `${API_BASE_URL}/recipes/:recipeId/complete`,
