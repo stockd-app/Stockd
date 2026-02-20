@@ -3,6 +3,8 @@ import PantryItemCard from "../PantryItemCard/PantryItemCard";
 import PantryItemDetails from "../PantryItemDetails/PantryItemDetails";
 import { deletePantryItems } from "../../services/api";
 import { CheckSquare2, X, Square, Trash2 } from "lucide-react";
+import ConfirmModal from "../ConfirmModal/ConfirmModal";
+import { CONFIRM_DELETE_PANTRY_ITEM } from "../../config/consts";
 
 import "./pantryitemsection.css";
 
@@ -29,6 +31,8 @@ const PantryItemSection: React.FC<PantryItemSectionProps> = ({ section, items, o
     console.log("Rendering ItemSection for section:", section);
     const [isSelecting, setIsSelecting] = useState(false);
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+    const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const handleItemClick = (item: PantryItem) => {
         if (isSelecting) {
@@ -48,24 +52,32 @@ const PantryItemSection: React.FC<PantryItemSectionProps> = ({ section, items, o
 
     const clearSelection = () => setSelectedIds(new Set());
 
-    const handleDeleteSelected = async () => {
-        const ids = Array.from(selectedIds);
-        if (ids.length === 0) return;
+    const handleDeleteSelected = () => {
+        if (selectedIds.size === 0) return;
+        setShowConfirmDelete(true);
+    };
 
-        const ok = window.confirm(`Delete ${ids.length} item(s) from ${section}?`);
-        if (!ok) return;
+    const handleConfirmDeleteSelected = async () => {
+        const ids = Array.from(selectedIds);
+        if (ids.length === 0) {
+            setShowConfirmDelete(false);
+            return;
+        }
 
         try {
+            setIsDeleting(true);
             await deletePantryItems(ids);
             setIsSelecting(false);
             clearSelection();
+            setShowConfirmDelete(false);
             onRefresh();
         } catch (e) {
             console.error("Failed to delete pantry items:", e);
             alert("Failed to delete items. Please try again.");
+        } finally {
+            setIsDeleting(false);
         }
     };
-
     const enterSelectMode = (id: number) => {
         setIsSelecting(true);
         setSelectedIds(new Set([id]));
@@ -163,6 +175,19 @@ const PantryItemSection: React.FC<PantryItemSectionProps> = ({ section, items, o
                     image={selectedItem.image}
                     onClose={() => setSelectedItem(null)}
                     onSaved={onRefresh}
+                />
+            )}
+            {showConfirmDelete && (
+                <ConfirmModal
+                    text={
+                        <>
+                            {CONFIRM_DELETE_PANTRY_ITEM}
+                            <br />
+                            Delete {selectedIds.size} item(s) from {section}?
+                        </>
+                    }
+                    onConfirm={handleConfirmDeleteSelected}
+                    onCancel={() => setShowConfirmDelete(false)}
                 />
             )}
         </>
