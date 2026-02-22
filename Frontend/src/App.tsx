@@ -21,6 +21,7 @@ import SubsetRecipeRecPage from "./pages/PantryRecipeListPage/SubsetRecipeRecPag
 import IncompleteRecipeRecPage from "./pages/PantryRecipeListPage/IncompleteRecipeRecPage";
 import LikedRecipeRecPage from "./pages/PantryRecipeListPage/LikeRecipeRecPage";
 import CollaborativeRecipeRecPage from "./pages/PantryRecipeListPage/CollaborativeRecipeRecPage";
+import SearchRecipePage from "./pages/SearchRecipePage/SearchRecipePage";
 
 const App: React.FC = () => {
   const [user, setUser] = useState<string | null>(localStorage.getItem("user"));
@@ -99,6 +100,10 @@ const App: React.FC = () => {
         <Route
           path="/saved"
           element={user ? <SavedRecipes /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/search"
+          element={user ? <SearchRecipePage /> : <Navigate to="/" replace />}
         />
         <Route
           path="/receipt_preview"
