@@ -18,7 +18,7 @@ const SearchRecipePage = () => {
         const results = await searchRecipes(query, 50);
 
         return {
-          content_based: formatRecipes(results),
+          content_based: results,
         };
       }}
     />

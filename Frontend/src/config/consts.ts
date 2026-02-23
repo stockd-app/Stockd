@@ -42,6 +42,7 @@ export const API_ROUTES = {
   DELETE_GROCERY_ITEM: `${API_BASE_URL}/grocery_items/delete`,
   MARK_GROCERY_PURCHASED: `${API_BASE_URL}/grocery_items`,
   MARK_ALL_GROCERY_PURCHASED: `${API_BASE_URL}/grocery_items/mark-all-purchased`,
+  SEARCH_RECIPES: `${API_BASE_URL}/recipes/search`,
 };
 
 // Google OAuth related constants
@@ -52,7 +53,7 @@ export const GOOGLE_CONSTS = {
   GOOGLE_ICON_SIZE: 18,
 };
 
-export const SEARCH = "Search recommended recipes";
+export const SEARCH = "Search any recipe";
 export const LANDING_PAGE = {
   STOCKD: "Stockd",
   WELCOME_TEXT: "Let's join our community to cook better food!",

@@ -652,38 +652,26 @@ export const completeRecipe = async (recipeId: number) => {
 
 /**
  * Search recipes by name substring
- * @param query - search string
- * @param limit - maximum number of results (default 20)
+ * @param query
+ * @param limit
  */
 export const searchRecipes = async (query: string, limit: number = 20) => {
   if (!query.trim()) return [];
 
-  let idToken = localStorage.getItem("google_id_token");
-
   try {
-    const res = await axios.get(`/recipes/search`, {
+    const url = `${API_ROUTES.SEARCH_RECIPES}?query=${encodeURIComponent(query)}&limit=${limit}`;
+    
+    const idToken = localStorage.getItem("google_id_token");
+
+    const res = await axios.get(url, {
       headers: {
         Authorization: idToken ? `Bearer ${idToken}` : undefined,
       },
-      params: { query, limit },
     });
 
-    return res.data.results ?? [];
-  } catch (error: any) {
-    if (error.response?.status === 401) {
-      const refreshed = await refreshToken();
-      if (refreshed) {
-        idToken = localStorage.getItem("google_id_token");
-        const retryRes = await axios.get(`/recipes/search`, {
-          headers: {
-            Authorization: idToken ? `Bearer ${idToken}` : undefined,
-          },
-          params: { query, limit },
-        });
-        return retryRes.data.results ?? [];
-      }
-    }
-    console.error("Error searching recipes:", error);
+    return res.data.content_based ?? res.data.results ?? [];
+  } catch (err: any) {
+    console.error("Error searching recipes:", err);
     return [];
   }
 };
