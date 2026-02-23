@@ -15,7 +15,7 @@ interface PantrySection {
 }
 
 const PantryPage: React.FC = () => {
-    const SECTION_ORDER = ["Pantry", "Fridge", "Freezer"];
+    const SECTION_ORDER = ["Pantry", "Refrigerator", "Freezer"];
     const [pantryData, setPantryData] = useState<PantrySection[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

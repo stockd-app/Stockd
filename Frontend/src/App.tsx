@@ -89,7 +89,7 @@ const App: React.FC = () => {
           element={user ? <PantryPantryPage /> : <Navigate to="/" replace />}
         />
         <Route
-          path="/pantry-fridge"
+          path="/pantry-Refrigerator"
           element={user ? <PantryFridgePage /> : <Navigate to="/" replace />}
         />
         <Route

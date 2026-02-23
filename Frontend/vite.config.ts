@@ -27,6 +27,7 @@ export default defineConfig({
       "terrance-neonatal-abeyantly.ngrok-free.dev",
       "parental-thwartly-averi.ngrok-free.dev",
       "cytoarchitecturally-unfiring-criselda.ngrok-free.dev",
+      "brashy-winterless-jacque.ngrok-free.dev"
     ],
     proxy: {
       "/api": {
