@@ -1,7 +1,6 @@
 import { useSearchParams } from "react-router-dom";
 import PantryRecipeListPage from "../PantryRecipeListPage/PantryRecipeListPage";
 import { searchRecipes } from "../../services/api";
-import { formatRecipes } from "../../utils/utils";
 
 const SearchRecipePage = () => {
   const [params] = useSearchParams();

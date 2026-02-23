@@ -1,7 +1,5 @@
 import React from "react";
 import { Search as SearchIcon } from "lucide-react";
-import { SEARCH } from "../../config/consts";
-
 import "./searchbar.css";
 
 interface SearchBarProps {
@@ -10,18 +8,29 @@ interface SearchBarProps {
   onSubmit: () => void;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ value, onChange, onSubmit }) => {
+const SearchBar: React.FC<SearchBarProps> = ({
+  value,
+  onChange,
+  onSubmit,
+}) => {
   return (
-    <input
-      value={value}
-      placeholder="Search recipes..."
-      onChange={(e) => onChange(e.target.value)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          onSubmit();
-        }
-      }}
-    />
+    <div className="searchbar__container">
+      <div className="searchbar__wrapper">
+        <SearchIcon className="searchbar__icon" size={20} />
+
+        <input
+          className="searchbar__input"
+          value={value}
+          placeholder="Search for any recipe..."
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              onSubmit();
+            }
+          }}
+        />
+      </div>
+    </div>
   );
 };
 
