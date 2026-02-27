@@ -2,7 +2,7 @@
 
 .rp__page {
     min-height: 120vh;
-    background: var(--color-white);
+    background: var(--color-dark-bg);
 }
 
 .rp__header {
@@ -16,6 +16,7 @@
     background: none;
     border: none;
     cursor: pointer;
+    color: var(--color-light);
 }
 
 .rp__spacer {
@@ -54,7 +55,7 @@
     gap: 8px;
     padding: 10px 12px;
     border-radius: 12px;
-    border: 1px solid var(--color-white);
+    border: 1px solid var(--color-dark-bg);
     background: rgba(255, 255, 255, 0.92);
     cursor: pointer;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -146,7 +147,7 @@
     border-radius: 12px;
     border: none;
     background: var(--color-primary);
-    color: var(--color-white);
+    color: var(--color-dark-bg);
     font-weight: 700;
     cursor: pointer;
     transition: transform 0.15s ease, opacity 0.15s ease;

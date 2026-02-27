@@ -4,7 +4,7 @@
 .pid__overlay {
     position: fixed;
     inset: 0;
-    background: var(--color-white);
+    background: var(--color-dark-bg);
     display: flex;
     justify-content: center;
     z-index: 999;
@@ -14,7 +14,7 @@
 .pid__modal {
     width: 100%;
     max-width: 430px;
-    background: var(--color-white);
+    background: var(--color-dark-bg);
     padding: 2em;
 }
 
@@ -35,6 +35,7 @@
     font-size: 18px;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+    color: var(--color-light)
 }
 
 
@@ -45,7 +46,7 @@
     margin: 0;
     font-size: 20px;
     font-weight: 800;
-    color: var(--color-dark);
+    color: var(--color-light);
     text-align: center;
     pointer-events: none;
 }
@@ -80,6 +81,7 @@
     outline: none;
     text-align: center;
     background: none;
+    color: var(--color-light);
 }
 
 
@@ -129,7 +131,7 @@
 
 .pid__save {
     background: var(--color-primary);
-    color: var(--color-white);
+    color: var(--color-dark-bg);
     padding: 10px 30px;
     border-radius: 10px;
     border: none;
@@ -139,7 +141,7 @@
 
 .pid__delete {
     background: var(--color-red);
-    color: var(--color-white);
+    color: var(--color-dark-bg);
     padding: 10px 30px;
     border-radius: 10px;
     font-size: 16px;

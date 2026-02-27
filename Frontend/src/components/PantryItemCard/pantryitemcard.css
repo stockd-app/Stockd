@@ -11,8 +11,9 @@
 
 .pantryitemcard:hover {
     transform: translateY(-12px);
-    background-color: var(--color-primary);
-    color: var(--color-white);
+    /* background-color: var(--color-primary); */
+    border: var(--color-primary) 2px solid;
+    color: var(--color-light);
     box-shadow: 0 3px rgba(0, 0, 0, 0.5);
 }
 
@@ -24,11 +25,11 @@
     align-items: center;
     border-radius: 1em;
     overflow: hidden;
-    background-color: var(--color-white);
+    background-color: var(--color-dark-bg);
 }
 
 .pantryitemcard:hover .pantryitemcard__container {
-    background-color: var(--color-white);
+    background-color: var(--color-light);
     box-shadow: 0 0;
 }
 
@@ -56,5 +57,5 @@
 }
 
 .pantryitemcard:hover .pantryitemcard__qty {
-    color: var(--color-white);
+    color: var(--color-light);
 }

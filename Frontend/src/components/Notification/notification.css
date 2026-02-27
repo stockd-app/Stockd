@@ -14,8 +14,8 @@
 /* Individual notification */
 .notification__container {
     padding: 12px 20px;
-    background: var(--color-dark);
-    color: var(--color-white);
+    background: var(--color-light);
+    color: var(--color-dark-bg);
     border-radius: 12px;
     display: flex;
     align-items: center;

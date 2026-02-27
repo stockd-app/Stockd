@@ -3,7 +3,7 @@
 /*  Top Navigation */
 .topnav__container {
   padding: 1rem 1rem 0 1rem;
-  background-color: var(--color-white);
+  background-color: var(--color-dark-bg);
 }
 
 .topnav__logo-search {
@@ -30,7 +30,7 @@
 
 .topnav__search:focus {
   box-shadow: 0 0 0 2px var(--color-secondary);
-  background-color: var(--color-white);
+  background-color: var(--color-dark-bg);
 }
 
 .topnav__profile {

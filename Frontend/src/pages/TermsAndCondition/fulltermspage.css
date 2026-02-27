@@ -2,7 +2,7 @@
 
 /* Entire page is white like Figma */
 .fullterms__container {
-    background: white;
+    background: var(--color-dark-bg);
     min-height: 100dvh;
     padding: 24px;
     text-align: justify;
@@ -15,7 +15,9 @@
     font-size: 1rem;
     cursor: pointer;
     margin-bottom: 12px;
-    color: var(--color-dark);
+    margin-left: -20px;
+    margin-top: -20px;
+    color: var(--color-light);
 }
 
 /* Header */
@@ -27,7 +29,7 @@
 .fullterms__title {
     font-size: 1.2rem;
     font-weight: 600;
-    color: var(--color-dark);
+    color: var(--color-light);
     margin: 16px 0;
 }
 
@@ -55,7 +57,7 @@
 
 /* Content */
 .fullterms__content h4 {
-    color: var(--color-dark);
+    color: var(--color-light);
     font-size: 1.05rem;
     margin-top: 22px;
     font-weight: 600;

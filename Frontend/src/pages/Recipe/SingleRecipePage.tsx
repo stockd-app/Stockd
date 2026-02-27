@@ -195,8 +195,7 @@ const SingleRecipePage: React.FC = () => {
 
     return (
         <div className="recipe__page">
-            <div className="recipe__container">
-                <div className="recipe__hero">
+            <div className="recipe__hero">
                     <button
                         className="recipe__back recipe__back__overlay"
                         onClick={() => navigate(-1)}
@@ -205,6 +204,7 @@ const SingleRecipePage: React.FC = () => {
                     </button>
                     <img className="recipe__hero-img" src={imageUrl} alt={recipe.Name} />
                 </div>
+            <div className="recipe__container">                
                 <div className="recipe__content">
                     <div className="recipe__titleRow">
                         <h1 className="recipe__title">{recipe.Name}</h1>

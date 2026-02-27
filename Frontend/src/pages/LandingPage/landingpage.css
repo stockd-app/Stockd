@@ -8,11 +8,12 @@
   justify-content: center;
   height: 100dvh;
   width: 100dvw;
-  background-color: var(--color-white);
+  background-color: var(--color-dark-bg);
   color: var(--color-dark);
   font-family: "Segoe UI", sans-serif;
   text-align: center;
   transition: all 0.3s ease-in-out;
+  background-image: url("../../assets/images/login_page/login_bg.jpg"); 
 }
 
 /* Stockd Title */

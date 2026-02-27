@@ -11,7 +11,7 @@
 }
 
 .modal__content {
-  background: var(--color-white);
+  background: var(--color-dark-bg);
   border-radius: 16px;
   padding: 24px;
   width: 60%;
@@ -48,6 +48,7 @@
 
 .modal__close {
   background: transparent;
+  color: var(--color-light);
   border: none;
   cursor: pointer;
   display: flex;
@@ -102,7 +103,7 @@
   border-radius: 10px;
   border: none;
   background: var(--color-primary);
-  color: var(--color-white);
+  color: var(--color-dark-bg);
   font-weight: bold;
   cursor: pointer;
   transition: opacity 0.2s ease, transform 0.1s ease;

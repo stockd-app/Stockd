@@ -34,7 +34,7 @@ body {
   display: block;
   width: 100%;
   min-height: 100vh;
-  background-color: #ffffff;
+  background-color: #242020;
   box-sizing: border-box;
 }
 
@@ -67,8 +67,8 @@ button:focus-visible {
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    color: #d8d8d8;
+    background-color: #242020;
   }
 
   a:hover {

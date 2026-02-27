@@ -1,5 +1,5 @@
 :root {
-    --color-primary: #4BC7A7;
+    --color-primary: #FF6857;
     --color-secondary: #b5e3d9;
     --color-tertiary: #ababab;
     --color-cyan: #3cb98c;
@@ -7,10 +7,11 @@
     --color-deep-blue: #3E5481;
     --color-dark-blue: #005a4c;
     --color-white: #ffffff;
+    --color-dark-bg: #242020;
     --color-light: #f1f3f4;
     --color-grey: #e0e0e0;
-    --color-dark-grey: #888;
-    --color-dark: #333;
+    --color-dark-grey: #d8d8d8;
+    --color-dark: #645d5d;
     --color-red: #ff5a5f;
     --color-light-red: #ffeaea;
     --color-green: #4caf50;

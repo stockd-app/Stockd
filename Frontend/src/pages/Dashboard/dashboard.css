@@ -5,7 +5,7 @@
   flex-direction: column;
   min-height: 100vh;
   padding-bottom: 90px;
-  background-color: var(--color-white);
+  background-color: var(--color-dark-bg);
   font-family: "Poppins", "Segoe UI", sans-serif;
 }
 
@@ -43,7 +43,7 @@
   position: absolute;
   bottom: 0;
   height: 2px;
-  background-color: var(--color-cyan);
+  background-color: var(--color-primary);
   border-radius: 2px;
   transition: all 0.3s ease;
 }
@@ -182,7 +182,7 @@
 
 .filter__apply {
   background: var(--color-primary);
-  color: var(--color-white);
+  color: var(--color-dark-bg);
   border: none;
   padding: 10px 18px;
   border-radius: 8px;

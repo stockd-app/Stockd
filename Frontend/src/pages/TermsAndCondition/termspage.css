@@ -5,13 +5,13 @@
     justify-content: center;
     align-items: center;
     height: 100dvh;
-    background: var(--color-light);
+    background: var(--color-dark);
 }
 
 .terms__card {
     width: 70dvw;
     max-width: 380px;
-    background: var(--color-white);
+    background: var(--color-dark-bg);
     padding: 24px;
     border-radius: 16px;
     box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.08);
@@ -28,13 +28,14 @@
     border: none;
     font-size: 20px;
     cursor: pointer;
+    color: var(--color-light);
 }
 
 .terms__title {
     font-size: 1.4rem;
     font-weight: 600;
     margin-bottom: 12px;
-    color: var(--color-dark);
+    color: var(--color-light);
 }
 
 /* Logo styling */
@@ -81,7 +82,7 @@
     border: none;
     border-radius: 8px;
     background: var(--color-tertiary);
-    color: var(--color-white);
+    color: var(--color-dark-bg);
     cursor: not-allowed;
     transition: 0.3s;
 }

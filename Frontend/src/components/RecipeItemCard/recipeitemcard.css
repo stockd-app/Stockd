@@ -33,7 +33,7 @@
 .recipeitemcard__name {
     font-size: 15px;
     font-weight: 700;
-    color: var(--color-dark);
+    color: var(--color-light);
     line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
