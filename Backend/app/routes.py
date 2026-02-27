@@ -1184,7 +1184,7 @@ async def search_recipes_route(request: Request, query: str, limit: int = 20):
 
     safe_query = sanitize_text(query)
 
-    async with httpx.AsyncClient(timeout=10.0) as client:
+    async with httpx.AsyncClient(timeout=httpx.Timeout(10.0, read=10.0)) as client:
         try:
             ai_response = await client.post(
                 f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/search-recipes",
@@ -1195,32 +1195,32 @@ async def search_recipes_route(request: Request, query: str, limit: int = 20):
             )
 
             ai_response.raise_for_status()
+            data = ai_response.json()
 
-            try:
-                return ai_response.json()
-            except ValueError:
-                raise HTTPException(
-                    status_code=502,
-                    detail="Invalid JSON response from recipe AI service"
-                )
+             # 🔑 HANDLE ALL VALID SHAPES
+            if isinstance(data, list):
+                return { "content_based": data }
 
-        except httpx.HTTPStatusError as e:
-            raise HTTPException(
-                status_code=e.response.status_code,
-                detail=e.response.text
-            )
+            if isinstance(data, dict):
+                if "content_based" in data:
+                    return { "content_based": data["content_based"] }
+                if "results" in data:
+                    return { "content_based": data["results"] }
 
-        except httpx.RequestError as e:
-            raise HTTPException(
-                status_code=503,
-                detail=f"Recipe AI service unavailable: {str(e)}"
-            )
+            # No results, but not an error
+            return { "content_based": [] }
 
-        except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Unexpected error contacting recipe AI service: {str(e)}"
-            )
+        except httpx.ReadTimeout:
+            return { "content_based": [] }
+
+        except httpx.RequestError:
+            return { "content_based": [] }
+
+        except httpx.HTTPStatusError:
+            return { "content_based": [] }
+
+        except Exception:
+            return { "content_based": [] }
     
 @router.get("/recipes/{recipe_id}", tags=["Recipes"])
 async def get_recipe_by_id_route(recipe_id: int):
