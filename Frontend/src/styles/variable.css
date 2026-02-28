@@ -1,20 +1,29 @@
 :root {
+    /* Default = Dark Mode */
     --color-primary: #FF6857;
     --color-secondary: #b5e3d9;
     --color-tertiary: #ababab;
-    --color-cyan: #3cb98c;
+
     --color-light-blue: #dcefea;
     --color-deep-blue: #3E5481;
     --color-dark-blue: #005a4c;
-    --color-white: #ffffff;
+
     --color-dark-bg: #242020;
-    --color-light: #f1f3f4;
     --color-grey: #e0e0e0;
-    --color-dark-grey: #d8d8d8;
-    --color-dark: #645d5d;
     --color-red: #ff5a5f;
     --color-light-red: #ffeaea;
     --color-green: #4caf50;
-    --color-light-red: #fff1f1;
-    --color-dark-red: #FF5A60;
+
+    --color-dark-text: #312b2b;
+    --color-main-text: #ffffff;
+    --color-grey-text: #d8d8d8;
+    --color-light: #f1f3f4;
+    --color-light-recipe: #f1f3f4;
+}
+
+body[data-theme="light"] {
+    --color-dark-bg: #F7F7F7;
+    --color-dark-text: #000000;
+    --color-main-text: #000000;
+    --color-grey-text: #272727;
 }

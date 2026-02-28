@@ -39,7 +39,7 @@
 /* Text */
 .modal__text {
     font-size: 1rem;
-    color: var(--color-light);
+    color: var(--color-main-text);
     margin-bottom: 18px;
     font-family: "Poppins", "Segoe UI", sans-serif;
 }
@@ -63,12 +63,12 @@
 
 .modal__yes {
     background: var(--color-red);
-    color: var(--color-dark-bg);
+    color: var(--color-main-text);
 }
 
 .modal__no {
     background: var(--color-light);
-    color: var(--color-dark);
+    color: var(--color-dark-text);
 }
 
 /* Opening animations */

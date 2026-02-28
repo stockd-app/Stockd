@@ -72,7 +72,7 @@
 
 .pcm__confirm {
     background: var(--color-primary);
-    color: var(--color-dark-bg);
+    color: var(--color-dark-text);
     border: none;
     padding: 8px 16px;
     border-radius: 8px;

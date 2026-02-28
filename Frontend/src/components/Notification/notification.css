@@ -15,7 +15,7 @@
 .notification__container {
     padding: 12px 20px;
     background: var(--color-light);
-    color: var(--color-dark-bg);
+    color: #000;
     border-radius: 12px;
     display: flex;
     align-items: center;

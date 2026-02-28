@@ -6,6 +6,7 @@
     min-height: 100dvh;
     padding: 24px;
     text-align: justify;
+    margin-bottom: 5em;
 }
 
 /* Back button */
@@ -17,7 +18,7 @@
     margin-bottom: 12px;
     margin-left: -20px;
     margin-top: -20px;
-    color: var(--color-light);
+    color: var(--color-main-text);
 }
 
 /* Header */
@@ -29,7 +30,7 @@
 .fullterms__title {
     font-size: 1.2rem;
     font-weight: 600;
-    color: var(--color-light);
+    color: var(--color-main-text);
     margin: 16px 0;
 }
 
@@ -57,14 +58,14 @@
 
 /* Content */
 .fullterms__content h4 {
-    color: var(--color-light);
+    color: var(--color-main-text);
     font-size: 1.05rem;
     margin-top: 22px;
     font-weight: 600;
 }
 
 .fullterms__content p {
-    color: var(--color-dark-grey);
+    color: var(--color-grey-text);
     line-height: 1.6;
     margin-top: 8px;
     font-size: 0.95rem;
@@ -76,7 +77,7 @@
 }
 
 .fullterms__content ul li {
-    color: var(--color-dark-grey);
+    color: var(--color-grey-text);
     margin-bottom: 8px;
     line-height: 1.5;
 }

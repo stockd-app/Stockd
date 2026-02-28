@@ -33,7 +33,7 @@
 
 .error__message {
     font-size: 1rem;
-    color: var(--color-dark);
+    color: var(--color-dark-text);
     max-width: 320px;
     line-height: 1.4;
     margin: 0 0 2% 0;
@@ -41,7 +41,7 @@
 
 .error__subtext {
     font-size: 0.95rem;
-    color: var(--color-dark-grey);
+    color: var(--color-grey-text);
     max-width: 300px;
     line-height: 1.45;
     margin: 0 0 2% 0;
@@ -49,7 +49,7 @@
 
 .error__retry-btn {
     background: var(--color-primary);
-    color: var(--color-dark-bg);
+    color: var(--color-dark-text);
     border: none;
     padding: 12px 32px;
     border-radius: 8px;

@@ -1,4 +1,5 @@
 @import "@/styles/variable.css";
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
 
 /* Container for the entire landing page */
 .landingPage__container {
@@ -8,9 +9,10 @@
   justify-content: center;
   height: 100dvh;
   width: 100dvw;
+  padding-top: 3em;
   background-color: var(--color-dark-bg);
-  color: var(--color-dark);
-  font-family: "Segoe UI", sans-serif;
+  color: var(--color-dark-text);
+  font-family: 'Righteous', cursive;
   text-align: center;
   transition: all 0.3s ease-in-out;
   background-image: url("../../assets/images/login_page/login_bg.jpg"); 
@@ -34,7 +36,7 @@
 
 /* Text container to manage width */
 .landingPage__text-container {
-  width: 24dvh;
+  width: 28dvh;
 }
 
 /*Small screens (mobile) */

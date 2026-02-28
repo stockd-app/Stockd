@@ -5,7 +5,7 @@
     justify-content: center;
     align-items: center;
     height: 100dvh;
-    background: var(--color-dark);
+    background: var(--color-dark-bg);
 }
 
 .terms__card {
@@ -28,14 +28,14 @@
     border: none;
     font-size: 20px;
     cursor: pointer;
-    color: var(--color-light);
+    color: var(--color-main-text);
 }
 
 .terms__title {
     font-size: 1.4rem;
     font-weight: 600;
     margin-bottom: 12px;
-    color: var(--color-light);
+    color: var(--color-main-text);
 }
 
 /* Logo styling */
@@ -55,7 +55,7 @@
 .terms__text {
     text-align: left;
     font-size: 0.95rem;
-    color: var(--color-dark-grey);
+    color: var(--color-grey-text);
     margin-top: 12px;
 }
 
@@ -82,7 +82,7 @@
     border: none;
     border-radius: 8px;
     background: var(--color-tertiary);
-    color: var(--color-dark-bg);
+    color: var(--color-dark-text);
     cursor: not-allowed;
     transition: 0.3s;
 }

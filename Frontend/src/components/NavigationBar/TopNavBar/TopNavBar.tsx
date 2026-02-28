@@ -4,6 +4,7 @@ import StockdLogo from "../../../assets/images/StockdLogo.svg";
 import Profile from "../../Profile/Profile";
 
 import "./topnavbar.css";
+import ChangeMode from "../../ChangeMode/ChangeMode";
 
 /**
  * Top Navigation Bar Component
@@ -23,6 +24,7 @@ const TopNavBar: React.FC = () => {
                 {/* <input type="text" placeholder={SEARCH} className="topnav__search" /> */}
 
                 <div className="topnav__profile">
+                    <ChangeMode />
                     <Profile />
                 </div>
             </div>
@@ -44,7 +46,7 @@ const TopNavBar: React.FC = () => {
             </div> */}
 
             {/* Separator line */}
-            <hr className="topnav__separator" />
+            {/* <hr className="topnav__separator" /> */}
         </div>
     );
 };

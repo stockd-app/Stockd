@@ -10,14 +10,14 @@
     margin: 0;
     font-size: 18px;
     font-weight: 600;
-    color: var(--color-light);
+    color: var(--color-main-text);
 }
 
 .allergenPref__description {
     margin: 0;
     font-size: 14px;
     line-height: 1.4;
-    color: var(--color-light);
+    color: var(--color-main-text);
 }
 
 .allergenPref__checkbox {
@@ -26,5 +26,5 @@
     gap: 8px;
     font-size: 13px;
     cursor: pointer;
-    color: var(--color-grey);
+    color: var(--color-grey-text);
 }

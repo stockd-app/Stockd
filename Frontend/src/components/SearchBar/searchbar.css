@@ -32,12 +32,12 @@
   outline: none;
   width: 100%;
   font-size: 17px;
-  color: var(--color-dark-bg);
+  color: var(--color-dark-text);
   background: transparent;
 }
 
 .searchbar__profile-button:hover {
-  background-color: var(--color-light);
+  background-color: var(--color-grey);
   color: var(--color-primary);
   box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
   transform: scale(1.05);
@@ -48,7 +48,7 @@
 }
 
 .searchbar__input::placeholder {
-  color: var(--color-dark);
+  color: var(--color-dark-text);
 }
 
 /* Small screens (mobile) */

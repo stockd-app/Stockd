@@ -245,7 +245,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         <SearchBar value={searchQuery} onChange={setSearchQuery} />
       </div>
 
-      {/* <FoodCategorySection /> */}
+      <FoodCategorySection />
 
       <RecipeItemSection
         title="Based On Your Pantry"
@@ -266,7 +266,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         }
       />
 
-      <RecipeItemSection title="You May Not Have All The Ingredients"
+      <RecipeItemSection title="Some Ingredients Needed"
         items={filteredIncompleteRecipes}
         onItemClick={(recipeId: number) => {
           navigate(`/recipes/${recipeId}`);
@@ -301,7 +301,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
             : "Like A Few Recipes To Get Personalized Recommendations!"
         }
       />
-      <RecipeItemSection title="Collaborative Recipes Recommended"
+      <RecipeItemSection title="Other Users Have Tried These"
         items={filteredCollaborativeRecipes}
         onItemClick={(recipeId: number) => {
           navigate(`/recipes/${recipeId}`);

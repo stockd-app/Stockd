@@ -13,7 +13,7 @@
     transform: translateY(-12px);
     /* background-color: var(--color-primary); */
     border: var(--color-primary) 2px solid;
-    color: var(--color-light);
+    color: var(--color-main-text);
     box-shadow: 0 3px rgba(0, 0, 0, 0.5);
 }
 
@@ -29,7 +29,7 @@
 }
 
 .pantryitemcard:hover .pantryitemcard__container {
-    background-color: var(--color-light);
+    background-color: var(--color-grey);
     box-shadow: 0 0;
 }
 
@@ -52,10 +52,10 @@
 }
 
 .pantryitemcard__qty {
-    color: var(--color-dark-grey);
+    color: var(--color-grey-text);
     font-size: 14px;
 }
 
 .pantryitemcard:hover .pantryitemcard__qty {
-    color: var(--color-light);
+    color: var(--color-main-text);
 }

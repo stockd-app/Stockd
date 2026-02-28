@@ -28,12 +28,13 @@
     margin-bottom: 20px;
     align-items: center;
     text-align: center;
+    color: var(--color-main-text);
 }
 
 .recipeitemcard__name {
     font-size: 15px;
     font-weight: 700;
-    color: var(--color-light);
+    color: var(--color-main-text);
     line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;

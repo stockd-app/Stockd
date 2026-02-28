@@ -22,7 +22,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: var(--color-tertiary);
+  color: var(--color-main-text);
   font-size: 0.7rem;
   text-align: center;
   transition: color 0.2s ease;
@@ -41,7 +41,7 @@
   /*  lifts it halfway above the bar */
   top: -2px;
   background-color: var(--color-primary);
-  color: var(--color-dark-bg);
+  color: var(--color-dark-text);
   padding: 14px;
   border-radius: 50%;
   margin-top: -25px;
@@ -110,6 +110,7 @@
 
 .creation__modal {
   background: var(--color-dark-bg);
+  color: var(--color-main-text);
   width: 100%;
   padding: 22px;
   border-radius: 20px 20px 0 0;
@@ -142,13 +143,13 @@
   border: none;
   font-size: 20px;
   cursor: pointer;
-  color: var(--color-light);
+  color: var(--color-main-text);
 }
 
 .creation__button {
   width: 48%;
   padding: 14px;
-  background: #f4f4f4;
+  background: var(--color-light);
   border-radius: 12px;
   border: none;
   font-size: 16px;

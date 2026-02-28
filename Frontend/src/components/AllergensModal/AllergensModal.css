@@ -12,6 +12,7 @@
 
 .modal__content {
   background: var(--color-dark-bg);
+  color: var(--color-main-text);
   border-radius: 16px;
   padding: 24px;
   width: 60%;
@@ -38,6 +39,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+  color: var(--color-main-text);
 }
 
 .modal__header h2 {
@@ -48,7 +50,7 @@
 
 .modal__close {
   background: transparent;
-  color: var(--color-light);
+  color: var(--color-main-text);
   border: none;
   cursor: pointer;
   display: flex;
@@ -63,6 +65,10 @@
   background: rgba(0, 0, 0, 0.05);
 }
 
+.modal__content p {
+  color: var(--color-main-text);
+}
+
 .modal__list {
   display: flex;
   flex-direction: column;
@@ -70,6 +76,7 @@
   margin: 16px 0;
   max-height: 300px;
   overflow-y: auto;
+  color: var(--color-main-text);
 }
 
 .modal__item {
@@ -103,7 +110,7 @@
   border-radius: 10px;
   border: none;
   background: var(--color-primary);
-  color: var(--color-dark-bg);
+  color: var(--color-dark-text);
   font-weight: bold;
   cursor: pointer;
   transition: opacity 0.2s ease, transform 0.1s ease;

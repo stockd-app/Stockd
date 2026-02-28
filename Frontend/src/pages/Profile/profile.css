@@ -34,13 +34,13 @@
 .profile__name {
     font-size: 1.3rem;
     font-weight: 600;
-    color: var(--color-light);
+    color: var(--color-main-text);
     margin-top: 5px;
 }
 
 .profile__email {
     font-size: 0.9rem;
-    color: var(--color-dark-grey);
+    color: var(--color-grey-text);
 }
 
 /* Options List */
@@ -66,7 +66,7 @@
 
 .profile__item span {
     margin-left: 12px;
-    color: var(--color-light);
+    color: var(--color-main-text);
 }
 
 .profile__icon {

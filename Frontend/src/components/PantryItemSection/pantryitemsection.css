@@ -39,9 +39,9 @@
 }
 
 .pantryItemSection__bulkActionDeleteBtn:hover{
-  background: var(--color-dark-red);
+  background: var(--color-red);
   border-color: var(--color-red);
-  color: var(--color-dark-bg);
+  color: var(--color-dark-text);
   transition: background 270ms ease,
               border-color 270ms ease,
               color 300ms ease;

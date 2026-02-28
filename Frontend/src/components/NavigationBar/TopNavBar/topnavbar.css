@@ -4,6 +4,8 @@
 .topnav__container {
   padding: 1rem 1rem 0 1rem;
   background-color: var(--color-dark-bg);
+  padding-bottom: 1.5rem;
+  border-bottom: #000 3px solid;
 }
 
 .topnav__logo-search {
@@ -15,12 +17,13 @@
 
 .topnav__logo {
   width: 50px;
+  padding-top: 8px;
 }
 
 .topnav__search {
   flex: 1;
   border: none;
-  background-color: var(--color-light);
+  background-color: var(--color-grey);
   padding: 10px 15px;
   border-radius: 18px;
   font-size: 0.95rem;
@@ -37,8 +40,8 @@
   margin-left: auto;
   display: flex;
   align-items: center;
+  gap: 10px;
 }
-
 
 .topnav__profile-button {
   background: none;
@@ -54,7 +57,7 @@
 }
 
 .topnav__profile-button:hover {
-  background-color: var(--color-light);
+  background-color: var(--color-grey);
   color: var(--color-primary);
 }
 
@@ -95,8 +98,8 @@
   padding: 6px 16px;
   border-radius: 20px;
   font-size: 0.9rem;
-  background-color: var(--color-light);
-  color: var(--color-dark);
+  background-color: var(--color-grey);
+  color: var(--color-dark-text);
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: inset 0 0 0 1px transparent;

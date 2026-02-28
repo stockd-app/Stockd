@@ -8,6 +8,7 @@
     width: 80%;
     max-width: 360px;
     background: var(--color-dark-bg);
+    color: var(--color-main-text);
     z-index: 1000;
     transform: translateX(100%);
     transition: transform 0.3s ease;
