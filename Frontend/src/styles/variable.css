@@ -10,6 +10,7 @@
 
     --color-dark-bg: #242020;
     --color-grey: #e0e0e0;
+    --color-dark-grey: #2C2626;
     --color-red: #ff5a5f;
     --color-light-red: #ffeaea;
     --color-green: #4caf50;
@@ -19,11 +20,14 @@
     --color-grey-text: #d8d8d8;
     --color-light: #f1f3f4;
     --color-light-recipe: #f1f3f4;
+    --color-overlay: rgba(51, 51, 51, 0.6);
 }
 
 body[data-theme="light"] {
     --color-dark-bg: #F7F7F7;
+    --color-dark-grey: #EFEFEF;
     --color-dark-text: #000000;
     --color-main-text: #000000;
     --color-grey-text: #272727;
+    --color-overlay: rgba(255, 255, 255, 0.6);
 }

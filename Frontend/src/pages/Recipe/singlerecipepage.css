@@ -8,13 +8,20 @@
 .recipe__container {
   max-width: 960px;
   background-color: var(--color-dark-bg);
-  margin: -20px auto 0 auto;
+  margin: -3em auto 0 auto;
   padding: 10px 25px 110px 25px;
   width: 100%;
   box-sizing: border-box;
   position: relative;
   z-index: 2;
   border-radius: 45px;
+  background: linear-gradient(to bottom,
+      rgba(255, 255, 255, 0) 0%,
+      var(--color-overlay) 25%,
+      var(--color-dark-bg) 100%
+    );
+  box-shadow: inset 0 4px 8px -4px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .recipe__hero {
@@ -29,6 +36,12 @@
   width: 100%;
   height: 100%;
   display: block;
+  object-fit: cover;
+  filter: blur(0px);
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, rgb(60, 60, 60) 60%, transparent 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
 
 .recipe__back__overlay {
@@ -69,7 +82,8 @@
 .recipe__titleRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-around;
+  text-align: center;
 }
 
 .recipe__title {
@@ -77,7 +91,22 @@
   font-size: clamp(26px, 2.6vw, 34px);
   line-height: 1.15;
   font-weight: 800;
-  color: var(--color-main-text)
+  color: var(--color-main-text);
+  text-align: center;
+}
+
+.recipe__rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.rating-number {
+  margin-left: 6px;
+  font-weight: bold;
+  color: var(--color-main-text);
+  font-size: 0.9rem;
 }
 
 /* .recipe__meta {

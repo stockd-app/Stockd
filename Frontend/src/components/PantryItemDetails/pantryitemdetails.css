@@ -57,60 +57,6 @@
 }
 
 
-.pid__row {
-    padding: 1.3em 0;
-    border-bottom: 1px solid var(--color-grey);
-
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.pid__label {
-    flex: 1;
-    font-weight: 600;
-    font-size: 18px;
-    color: var(--color-grey-text);
-}
-
-
-.pid__input {
-    width: 160px;
-    font-size: 16px;
-    border: none;
-    outline: none;
-    text-align: center;
-    background: none;
-    color: var(--color-main-text);
-}
-
-
-.pid__input.select {
-    appearance: none;
-    -webkit-appearance: none;
-    text-align: center;
-    text-align-last: center;
-}
-
-
-
-.pid__qtybox {
-    display: flex;
-    align-items: center;
-    gap: 2em;
-}
-
-.pid__qty_input {
-    width: 4em;
-    text-align: center;
-    font-size: 1rem;
-    border: 1px solid var(--color-grey);
-    border-radius: 6px;
-    padding: 0.25em;
-}
-
-
-
 .pid__qtybox button {
     width: 1em;
     height: 1em;
@@ -137,6 +83,7 @@
     border: none;
     font-size: 16px;
     font-weight: 600;
+    width: 100%;
 }
 
 .pid__delete {
@@ -147,4 +94,72 @@
     font-size: 16px;
     font-weight: 600;
     margin-right: 10px;
+    width: 100%;
+}
+
+.pid__row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 1em 0;
+    border-bottom: 1px solid var(--color-grey);
+}
+
+.pid__label {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-grey-text);
+}
+
+.pid__input,
+.pid__qty_box,
+.pid__input.select {
+    width: 100%;
+    text-align: center;
+}
+
+.pid__input{
+    text-align: left;
+}
+
+.pid__qty_box {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+}
+
+.pid__qty_input {
+    flex: 1;
+    text-align: center;
+}
+
+.pid__body {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.pid__input,
+.pid__input.select,
+.pid__qty_input {
+    padding: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease;
+    width: stretch;
+    background-color: #fff;
+    color: #000;
+}
+
+.pid__input:focus,
+.pid__input.select:focus,
+.pid__qty_input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 5px var(--color-primary);
 }

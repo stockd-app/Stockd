@@ -136,6 +136,9 @@ const PantryItemDetails: React.FC<PantryItemDetailProps> = ({
                             <option value="kg">kg</option>
                             <option value="g">g</option>
                             <option value="L">L</option>
+                            <option value="ml">ml</option>
+                            <option value="box">box</option>
+                            <option value="bottle">bottle</option>
                         </select>
                     </div>
                     <div className="pid__row editable">

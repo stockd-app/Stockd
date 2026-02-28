@@ -2,7 +2,7 @@
   position: relative;
   width: 74px;
   height: 36px;
-  background: #d4d4d4d7;
+  background: var(--color-dark-grey);
   border-radius: 50px;
   cursor: pointer;
   display: flex;
