@@ -1218,28 +1218,49 @@ async def search_recipes_route(request: Request, query: str, limit: int = 20):
     Example:
         GET /recipes/search?query=chicken&limit=10
     """
-    if not query or query.strip() == "":
+    if not query or not query.strip():
         raise HTTPException(status_code=400, detail="Query string cannot be empty.")
-    
+
     safe_query = sanitize_text(query)
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=httpx.Timeout(10.0, read=10.0)) as client:
         try:
             ai_response = await client.post(
                 f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/search-recipes",
-                json={"query": safe_query, "limit": limit}
+                json={
+                    "query": safe_query,
+                    "limit": limit
+                }
             )
+
             ai_response.raise_for_status()
-            return ai_response.json()
+            data = ai_response.json()
+
+             # 🔑 HANDLE ALL VALID SHAPES
+            if isinstance(data, list):
+                return { "content_based": data }
+
+            if isinstance(data, dict):
+                if "content_based" in data:
+                    return { "content_based": data["content_based"] }
+                if "results" in data:
+                    return { "content_based": data["results"] }
+
+            # No results, but not an error
+            return { "content_based": [] }
+
+        except httpx.ReadTimeout:
+            return { "content_based": [] }
+
+        except httpx.RequestError:
+            return { "content_based": [] }
 
         except httpx.HTTPStatusError:
-            raise HTTPException(
-                status_code=ai_response.status_code, detail=ai_response.text
-            )
+            return { "content_based": [] }
 
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error contacting recipe AI service: {str(e)}")
-        
+        except Exception:
+            return { "content_based": [] }
+    
 @router.get("/recipes/{recipe_id}", tags=["Recipes"])
 async def get_recipe_by_id_route(recipe_id: int):
     """

@@ -91,6 +91,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
 
   const navigate = useNavigate();
 
+  const handleSearchSubmit = () => {
+    if (!searchQuery.trim()) return;
+    navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+  };
+
   /**
    * Check if user has completed allergens onboarding
    */
@@ -168,36 +173,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
 
     fetchRecommendations();
   }, [userId]);
-
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredSubsetRecipes(subsetRecipes);
-      setFilteredIncompleteRecipes(incompleteRecipes);
-      setFilteredLikedRecommendedRecipes(likedRecommendedRecipes);
-      setFilteredCollaborativeRecipes(collaborativeRecipes);
-      return;
-    }
-
-    const q = searchQuery.toLowerCase();
-    setFilteredSubsetRecipes(
-      subsetRecipes.filter(r =>
-        r.name.toLowerCase().includes(q)
-      )
-    );
-    setFilteredIncompleteRecipes(
-      incompleteRecipes.filter(r =>
-        r.name.toLowerCase().includes(q)
-      )
-    );
-    setFilteredLikedRecommendedRecipes(
-      likedRecommendedRecipes.filter(r => r.name.toLowerCase().includes(q))
-    );
-    setFilteredCollaborativeRecipes(
-      collaborativeRecipes.filter(r => r.name.toLowerCase().includes(q))
-    );
-  }, [searchQuery, subsetRecipes, incompleteRecipes, likedRecommendedRecipes, collaborativeRecipes]);
-
-
+  
   /**
    * Handle confirmation of selected allergens from the modal
    * @param selected 
@@ -242,7 +218,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         />
       )}
       <div className="dashboard__searchRow">
-        <SearchBar value={searchQuery} onChange={setSearchQuery} />
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onSubmit={handleSearchSubmit}
+        />
       </div>
 
       {/* <FoodCategorySection /> */}
@@ -254,16 +234,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
           navigate(`/recipes/${recipeId}`);
         }}
         onSeeMore={() => navigate("/pantry-subset-recipes")}
-        emptyTitle={
-          searchQuery
-            ? "No Recipes Found!"
-            : "Nothing Cookable Yet!"
-        }
-        emptySubtitle={
-          searchQuery
-            ? `No results for "${searchQuery}"`
-            : "Add More Ingredients To Your Pantry To Unlock New Recipes!"
-        }
+        emptyTitle={"Nothing Cookable Yet!"}
+        emptySubtitle={"Add More Ingredients To Your Pantry To Unlock New Recipes!"}
       />
 
       <RecipeItemSection title="You May Not Have All The Ingredients"
@@ -272,16 +244,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
           navigate(`/recipes/${recipeId}`);
         }}
         onSeeMore={() => navigate("/pantry-incomplete-recipes")}
-        emptyTitle={
-          searchQuery
-            ? "No Recipes Found!"
-            : "Let’s Stock Your Pantry!"
-        }
-        emptySubtitle={
-          searchQuery
-            ? `No results for "${searchQuery}"`
-            : "Add ingredients by uploading a receipt or other methods!"
-        }
+        emptyTitle={"Let’s Stock Your Pantry!"}
+        emptySubtitle={"Add ingredients by uploading a receipt or other methods!"}
       />
 
       <RecipeItemSection title="Based On Your Liked Recipes"
@@ -290,16 +254,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
           navigate(`/recipes/${recipeId}`);
         }}
         onSeeMore={() => navigate("/pantry-recommend-liked-recipes")}
-        emptyTitle={
-          searchQuery
-            ? "No Recipes Found!"
-            : "No Liked Recipe Recommendations Yet!"
-        }
-        emptySubtitle={
-          searchQuery
-            ? `No results for "${searchQuery}"`
-            : "Like A Few Recipes To Get Personalized Recommendations!"
-        }
+        emptyTitle={"No Liked Recipe Recommendations Yet!"}
+        emptySubtitle={"Like A Few Recipes To Get Personalized Recommendations!"}
       />
       <RecipeItemSection title="Collaborative Recipes Recommended"
         items={filteredCollaborativeRecipes}
@@ -307,15 +263,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
           navigate(`/recipes/${recipeId}`);
         }}
         onSeeMore={() => navigate("/pantry-collaborative-recipes")}
-        emptyTitle={
-          searchQuery
-            ? "No Recipes Found!"
-            : "No Collaborative Recommendations Yet!"
-        }
-        emptySubtitle={
-          searchQuery
-            ? `No results for "${searchQuery}"`
-            : "Cook And Like More Recipes To Improve Recommendations!"
+        emptyTitle={"No Collaborative Recommendations Yet!"}
+        emptySubtitle={"Cook And Like More Recipes To Improve Recommendations!"
         }
       />
       <ExploreSection />

@@ -106,7 +106,12 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
 
             {/* Grid */}
             <div className="pantryRecipes__grid">
-                {filteredRecipes.map(recipe => (
+                {filteredRecipes.length === 0 ? (
+                    <p className="no-results">
+                    Sorry, we couldn't find the recipe you searched.
+                    </p>
+                ) : (
+                    filteredRecipes.map(recipe => (
                     <RecipeItemCard
                         key={recipe.id}
                         name={recipe.name}
@@ -117,7 +122,8 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
                         allergens={recipe.allergens}
                         onClick={() => navigate(`/recipes/${recipe.id}`)}
                     />
-                ))}
+                    ))
+                )}
             </div>
 
             {/* Filter Drawer */}
