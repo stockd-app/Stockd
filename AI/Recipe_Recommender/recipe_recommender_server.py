@@ -40,6 +40,12 @@ class RecipeObject(BaseModel):
     ReviewCount: int | None = None
     Calories: float | None = None
     FatContent: float | None = None
+    SaturatedFatContent: float | None = None
+    CholesterolContent: float | None = None
+    SodiumContent: float | None = None
+    CarbohydrateContent: float | None = None
+    FiberContent: float | None = None
+    SugarContent: float | None = None
     ProteinContent: float | None = None
     similarity: float | None = None
 
@@ -80,8 +86,17 @@ def sanitize_row_for_pydantic(row_dict):
     Ensure all values in row_dict conform to RecipeObject types
     """
     numeric_fields = [
-        "AggregatedRating", "Calories", "FatContent",
-        "ProteinContent", "ReviewCount"
+        "AggregatedRating",
+        "Calories",
+        "FatContent",
+        "SaturatedFatContent",
+        "CholesterolContent",
+        "SodiumContent",
+        "CarbohydrateContent",
+        "FiberContent",
+        "SugarContent",
+        "ProteinContent",
+        "ReviewCount"
     ]
     datetime_fields = ["DatePublished"]
     list_fields = [
@@ -97,7 +112,7 @@ def sanitize_row_for_pydantic(row_dict):
     for f in numeric_fields:
         value = row_dict.get(f)
         if value is None or (isinstance(value, float) and np.isnan(value)):
-            row_dict[f] = 0.0
+            row_dict[f] = None
 
     for f in datetime_fields:
         value = row_dict.get(f)
