@@ -25,6 +25,7 @@ export interface Recipe {
   rating?: number;
   time?: string;     // e.g. "35m" (For UI display)
   rawTime?: string;  // e.g. "PT35M" (For filtering purposes)
+  category?: string; // e.g. "Beverages" (For filtering purposes)
   status?: string;
   allergens?: string[];
 }
@@ -38,6 +39,7 @@ export interface RecipeFilters {
     min: number | null;
     max: number | null;
   } | null;
+  categories: string;
 }
 
 
@@ -173,7 +175,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
 
     fetchRecommendations();
   }, [userId]);
-  
+
   /**
    * Handle confirmation of selected allergens from the modal
    * @param selected 
