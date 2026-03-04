@@ -92,10 +92,10 @@
 
 
 
-.pid__qtybox {
+.pid__qty_box {
     display: flex;
     align-items: center;
-    gap: 2em;
+    gap: 1em;
 }
 
 .pid__qty_input {
@@ -145,4 +145,50 @@
     font-size: 16px;
     font-weight: 600;
     margin-right: 10px;
+}
+
+@media (min-width: 768px) {
+    .pid__overlay {
+        padding: 40px;
+    }
+
+    .pid__modal {
+        max-width: 720px;
+        padding: 2.5em 3em;
+        border-radius: 24px;
+    }
+
+    .pid__title {
+        font-size: 28px;
+    }
+    
+    .pid__body {
+        margin-top: 28px;
+    }
+
+    .pid__row {
+        padding: 1.4em 0;
+        gap: 24px;
+    }
+
+    .pid__label {
+        font-size: 20px;
+        min-width: 180px;
+    }
+
+    .pid__input {
+        width: 220px;
+        font-size: 18px;
+    }
+
+    .pid__qty_box {
+        gap: 18px;
+    }
+
+    .pid__save,
+    .pid__delete {
+        min-width: 140px;
+        padding: 14px 30px;
+        font-size: 17px;
+    }
 }
