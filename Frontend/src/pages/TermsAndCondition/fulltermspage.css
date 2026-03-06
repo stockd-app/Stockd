@@ -1,4 +1,5 @@
 @import "@/styles/variable.css";
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
 
 /* Entire page is white like Figma */
 .fullterms__container {
@@ -43,6 +44,7 @@
 /* Stockd title under logo */
 .fullterms__stockd {
     font-size: 1.4rem;
+    font-family: 'Righteous', cursive;
     font-weight: 600;
     color: var(--color-primary);
     margin-bottom: 4px;
