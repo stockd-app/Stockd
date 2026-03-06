@@ -1,16 +1,19 @@
 :root {
     /* Default = Dark Mode */
-    --color-primary: #FF6857;
+    /* --color-primary: #8ad348; */
+    /* --color-primary: #F28C28; */
+    --color-primary: #ff6a1a;
     --color-secondary: #b5e3d9;
-    --color-tertiary: #ababab;
+    --color-tertiary: #626262;
 
     --color-light-blue: #dcefea;
     --color-deep-blue: #3E5481;
-    --color-dark-blue: #005a4c;
+    --color-dark-blue: #3977d3;
 
     --color-dark-bg: #242020;
     --color-grey: #e0e0e0;
     --color-dark-grey: #2C2626;
+    --color-change-mode: #221e1e;
     --color-red: #ff5a5f;
     --color-light-red: #ffeaea;
     --color-green: #4caf50;
@@ -25,6 +28,7 @@
 
 body[data-theme="light"] {
     --color-dark-bg: #F7F7F7;
+    --color-light: #d6d8d9;
     --color-dark-grey: #EFEFEF;
     --color-dark-text: #000000;
     --color-main-text: #000000;

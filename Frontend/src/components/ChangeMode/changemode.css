@@ -18,7 +18,7 @@
   left: 3.5px;
   width: 30px;
   height: 28px;
-  background: var(--color-primary);
+  background: var(--color-dark-bg);
   border-radius: 50px;
   transition: transform 0.3s ease;
 }

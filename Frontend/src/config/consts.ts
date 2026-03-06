@@ -54,7 +54,7 @@ export const GOOGLE_CONSTS = {
 
 export const SEARCH = "Search recommended recipes";
 export const LANDING_PAGE = {
-  STOCKD: "Stockd",
+  STOCKD: "STOCKD",
   WELCOME_TEXT: "Thousands of recipes all cookable with your pantry!",
 };
 

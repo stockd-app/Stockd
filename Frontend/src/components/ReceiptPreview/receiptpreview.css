@@ -57,7 +57,8 @@
     gap: 8px;
     padding: 10px 12px;
     border-radius: 12px;
-    border: 1px solid var(--color-dark-bg);
+    border: 1px solid var(--color-dark-text);
+    color: var(--color-dark-text);
     background: rgba(255, 255, 255, 0.92);
     cursor: pointer;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -85,7 +86,7 @@
 
 .rp__addMore {
     margin-top: 18px;
-    border: 2px dashed var(--color-primary);
+    border: 2px dashed var(--color-main-text);
     border-radius: 14px;
     padding: 16px;
     text-align: center;
@@ -148,7 +149,7 @@
     height: 44px;
     border-radius: 12px;
     border: none;
-    background: var(--color-primary);
+    background: var(--color-grey);
     color: var(--color-dark-text);
     font-weight: 700;
     cursor: pointer;

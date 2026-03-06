@@ -152,8 +152,8 @@
     outline: none;
     transition: border-color 0.2s ease;
     width: stretch;
-    background-color: #fff;
-    color: #000;
+    background-color: var(--color-overlay);
+    color: var(--color-main-text);
 }
 
 .pid__input:focus,
