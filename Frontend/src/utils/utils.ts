@@ -93,6 +93,7 @@ export const formatRecipes = (recipes: any[]) =>
             image: imageUrl,
             rating: Number(recipe.AggregatedRating) || 0.0,
             rawTime: recipe.PrepTime,
+            category: recipe.RecipeCategory || "Uncategorised",
             time: formatPrepTime(recipe.PrepTime),
             allergens: recipe.Allergens ?? [],
         };

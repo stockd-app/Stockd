@@ -672,3 +672,29 @@ export const completeRecipe = async (recipeId: number) => {
     throw error;
   }
 };
+
+/**
+ * Search recipes by name substring
+ * @param query
+ * @param limit
+ */
+export const searchRecipes = async (query: string, limit: number = 20) => {
+  if (!query.trim()) return [];
+
+  try {
+    const url = `${API_ROUTES.SEARCH_RECIPES}?query=${encodeURIComponent(query)}&limit=${limit}`;
+    
+    const idToken = localStorage.getItem("google_id_token");
+
+    const res = await axios.get(url, {
+      headers: {
+        Authorization: idToken ? `Bearer ${idToken}` : undefined,
+      },
+    });
+
+    return res.data.content_based ?? res.data.results ?? [];
+  } catch (err: any) {
+    console.error("Error searching recipes:", err);
+    return [];
+  }
+};
