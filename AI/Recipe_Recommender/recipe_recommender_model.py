@@ -149,8 +149,25 @@ df['RecipeIngredientQuantities'] = df['ingredients']
 # drop extra columns
 df = df.drop(columns=['id', 'ingredients'])
 
-# fill na with empty stings so fastapi doesn't throw an error
-df["ingredients_raw"] = df["ingredients_raw"].fillna("").astype(str)
+# convert NaN to empty list, strings to single-item list, lists stay as-is
+def ensure_list(x):
+    if x is None or (isinstance(x, float) and np.isnan(x)):
+        return []
+    if isinstance(x, list):
+        return x
+    if isinstance(x, str):
+        try:
+            # attempt to parse stringified list, e.g. "['milk','sugar']"
+            parsed = eval(x)
+            if isinstance(parsed, list):
+                return [str(i) for i in parsed]
+        except:
+            pass
+        # fallback: wrap string in a list
+        return [x]
+    return []
+
+df["ingredients_raw"] = df["ingredients_raw"].apply(ensure_list)
 
 print("Updated RecipeIngredientQuantities using units.csv")
 
