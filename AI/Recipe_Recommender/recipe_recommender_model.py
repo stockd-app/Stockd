@@ -143,8 +143,8 @@ df = df.merge(
     how='left'
 )
 
-# replace RecipeIngredientQuantities with the ingredients from units.csv
-df['RecipeIngredientQuantities'] = df['ingredients']
+# replace RecipeIngredientParts with the ingredients from units.csv
+df['RecipeIngredientParts'] = df['ingredients']
 
 # drop extra columns
 df = df.drop(columns=['id', 'ingredients'])
@@ -167,7 +167,8 @@ def ensure_list(x):
         return [x]
     return []
 
-df["ingredients_raw"] = df["ingredients_raw"].apply(ensure_list)
+df['ingredients_raw'] = df['ingredients_raw'].apply(ensure_list)
+df['RecipeIngredientParts'] = df['RecipeIngredientParts'].apply(ensure_list)
 
 print("Updated RecipeIngredientQuantities using units.csv")
 
