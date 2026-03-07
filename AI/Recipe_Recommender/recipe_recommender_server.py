@@ -41,6 +41,12 @@ class RecipeObject(BaseModel):
     ReviewCount: int | None = None
     Calories: float | None = None
     FatContent: float | None = None
+    SaturatedFatContent: float | None = None
+    CholesterolContent: float | None = None
+    SodiumContent: float | None = None
+    CarbohydrateContent: float | None = None
+    FiberContent: float | None = None
+    SugarContent: float | None = None
     ProteinContent: float | None = None
     similarity: float | None = None
 
@@ -57,6 +63,11 @@ class CollaborativeRecommendationResponse(BaseModel):
 class SearchRequest(BaseModel):
     query: str
     limit: int = 20
+
+class SearchResponse(BaseModel):
+    status: str
+    count: int
+    results: List[RecipeObject]
 
 class RecipeByIdRequest(BaseModel):
     recipe_id: int
@@ -79,6 +90,12 @@ def sanitize_row_for_pydantic(row_dict):
         "AggregatedRating",
         "Calories",
         "FatContent",
+        "SaturatedFatContent",
+        "CholesterolContent",
+        "SodiumContent",
+        "CarbohydrateContent",
+        "FiberContent",
+        "SugarContent",
         "ProteinContent",
         "ReviewCount"
     ]
@@ -104,7 +121,7 @@ def sanitize_row_for_pydantic(row_dict):
     for f in numeric_fields:
         value = row_dict.get(f)
         if value is None or (isinstance(value, float) and np.isnan(value)):
-            row_dict[f] = 0.0
+            row_dict[f] = None
 
     for f in datetime_fields:
         value = row_dict.get(f)
@@ -181,15 +198,22 @@ def recommend_ai(req: RecommendationRequest):
     except Exception as e:
         raise HTTPException(500, str(e))
 
-@app.post("/search-recipes")
+@app.post("/search-recipes", response_model=SearchResponse)
 async def search_recipes_endpoint(req: SearchRequest):
     try:
-        results = search_recipes(req.query, req.limit)
-        return {
-            "status": "success",
-            "count": len(results),
-            "results": results
-        }
+        raw_results = search_recipes(req.query, req.limit)
+
+        formatted = []
+        for row in raw_results:
+            row = sanitize_row_for_pydantic(row)
+            formatted.append(RecipeObject(**row))
+
+        return SearchResponse(
+            status="success",
+            count=len(formatted),
+            results=formatted
+        )
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
