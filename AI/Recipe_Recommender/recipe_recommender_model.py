@@ -146,9 +146,6 @@ df = df.merge(
 # replace RecipeIngredientParts with the ingredients from units.csv
 df['RecipeIngredientParts'] = df['ingredients']
 
-# drop extra columns
-df = df.drop(columns=['id', 'ingredients'])
-
 # convert NaN to empty list, strings to single-item list, lists stay as-is
 def ensure_list(x):
     if x is None or (isinstance(x, float) and np.isnan(x)):
@@ -169,6 +166,14 @@ def ensure_list(x):
 
 df['ingredients_raw'] = df['ingredients_raw'].apply(ensure_list)
 df['RecipeIngredientParts'] = df['RecipeIngredientParts'].apply(ensure_list)
+
+df["has_ingredients"] = df["RecipeIngredientParts"].str.len() > 0
+df = df.sort_values(by="has_ingredients", ascending=False)
+df = df.drop_duplicates(subset=["RecipeId"], keep="first")
+df = df.drop(columns=["has_ingredients"])
+
+# drop unused columns
+df = df.drop(columns=['id', 'ingredients'])
 
 print("Updated RecipeIngredientQuantities using units.csv")
 
