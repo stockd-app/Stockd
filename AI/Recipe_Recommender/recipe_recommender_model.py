@@ -105,6 +105,7 @@ if not os.path.exists(ALLERGENS_CSV_PATH):
 df = pd.read_parquet(DATA_PATH)
 df = df.copy()
 
+print("Starting allergen detection on recipes...")
 # create a clean list of ingredients specifically for allergen detection
 df['ingredients_list'] = df['RecipeIngredientParts'].apply(prepare_ingredients_for_allergens)
 
@@ -114,7 +115,7 @@ ingredient_to_allergen = {}
 for allergen, variants in allergen_map.items():
     for variant in variants:
         ingredient_to_allergen[variant.lower()] = allergen
-    # Also map the main allergen itself
+    # also map the main allergen itself
     ingredient_to_allergen[allergen.lower()] = allergen
 
 df['Allergens'] = df['ingredients_list'].apply(
@@ -126,8 +127,7 @@ df["RecipeId"] = df["RecipeId"].astype(int)
 
 df = df.head(5000) # limit to 5000 recipes for faster testing. full 500k dataset will probably take 1-2 hours to compute. only need to compute once before prod
 
-# === Replace RecipeIngredientQuantities with units.csv ===
-
+# === Replacing RecipeIngredientQuantities with units.csv ===
 units_path = os.path.join(BASE_DIR, "data/units.csv")
 units_df = pd.read_csv(units_path)
 
@@ -148,6 +148,9 @@ df['RecipeIngredientQuantities'] = df['ingredients']
 
 # drop extra columns
 df = df.drop(columns=['id', 'ingredients'])
+
+# fill na with empty stings so fastapi doesn't throw an error
+df["ingredients_raw"] = df["ingredients_raw"].fillna("").astype(str)
 
 print("Updated RecipeIngredientQuantities using units.csv")
 
