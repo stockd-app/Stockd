@@ -126,6 +126,31 @@ df["RecipeId"] = df["RecipeId"].astype(int)
 
 df = df.head(5000) # limit to 5000 recipes for faster testing. full 500k dataset will probably take 1-2 hours to compute. only need to compute once before prod
 
+# === Replace RecipeIngredientQuantities with units.csv ===
+
+units_path = os.path.join(BASE_DIR, "data/units.csv")
+units_df = pd.read_csv(units_path)
+
+# ensure the ID columns are the same type
+df["RecipeId"] = df["RecipeId"].astype(int)
+units_df["id"] = units_df["id"].astype(int)
+
+# merge units into recipes dataframe
+df = df.merge(
+    units_df[['id', 'ingredients', 'ingredients_raw']],  # only keep needed columns
+    left_on='RecipeId',
+    right_on='id',
+    how='left'
+)
+
+# replace RecipeIngredientQuantities with the ingredients from units.csv
+df['RecipeIngredientQuantities'] = df['ingredients']
+
+# drop extra columns
+df = df.drop(columns=['id', 'ingredients'])
+
+print("Updated RecipeIngredientQuantities using units.csv")
+
 # print("Sample RecipeIds in df:", df["RecipeId"].tolist()[:10])
 
 # join each list in recipeingredientparts into a single string
