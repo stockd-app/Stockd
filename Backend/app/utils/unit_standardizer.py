@@ -81,3 +81,53 @@ SOLID_KEYWORDS = [
     "chicken", "beef", "pork", "fish", "vegetable", "fruit", "nut",
     "chocolate", "cocoa", "powder", "spice"
 ]
+
+def parse_quantity(quantity_str: str) -> float:
+    """
+    Parse a quantity string that may contain fractions, decimals, or ranges.
+    """
+    if not quantity_str:
+        return 1.0
+    
+    quantity_str = str(quantity_str).strip()
+    
+    for frac, value in FRACTIONS.items():
+        if frac in quantity_str:
+            quantity_str = quantity_str.replace(frac, str(value))
+    
+    if "-" in quantity_str or "to" in quantity_str.lower():
+        parts = re.split(r"[-–—]|to", quantity_str, flags=re.IGNORECASE)
+        try:
+            nums = [float(p.strip()) for p in parts if p.strip()]
+            return sum(nums) / len(nums)
+        except:
+            pass
+    
+    mixed_match = re.match(r"(\d+)\s+(\d+)/(\d+)", quantity_str)
+    if mixed_match:
+        whole = float(mixed_match.group(1))
+        numerator = float(mixed_match.group(2))
+        denominator = float(mixed_match.group(3))
+        return whole + (numerator / denominator)
+    
+    frac_match = re.match(r"(\d+)/(\d+)", quantity_str)
+    if frac_match:
+        numerator = float(frac_match.group(1))
+        denominator = float(frac_match.group(2))
+        return numerator / denominator
+    
+    try:
+        return float(re.findall(r"\d+\.?\d*", quantity_str)[0])
+    except:
+        return 1.0
+
+if __name__ == "__main__":
+    test_cases = [
+        "1 cup", "2 tablespoons", "1/2 tsp", "3-4 cups", "1 to 2 tbsp",
+        "1 1/2 cups", "¼ cup", "⅓ cup", "½ cup", "⅔ cup", "¾ cup",
+        "1.5 cups", "2.5 tbsp"
+    ]
+    
+    for test in test_cases:
+        quantity = parse_quantity(test)
+        print(f"'{test}' -> {quantity}")
