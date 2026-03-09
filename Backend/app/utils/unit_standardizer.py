@@ -175,7 +175,94 @@ def standardize_unit(quantity: float, unit: str, ingredient_name: str = "") -> T
     
     return quantity, unit_lower
 
+def parse_ingredient_string(ingredient_str: str) -> Dict[str, Any]:
+    """
+    Parse a complicated ingredient string like "2 (21 ounce) cans cherry pie filling"
+    """
+    original = ingredient_str.strip()
+    
+    paren_match = re.search(r"(\d+[\d\s/.-]*)\s*\((\d+[\d\s/.-]*)\s+([a-zA-Z]+)\)", ingredient_str)
+    
+    if paren_match:
+        outer_qty = parse_quantity(paren_match.group(1))
+        inner_qty = parse_quantity(paren_match.group(2))
+        unit = paren_match.group(3)
+        name = re.sub(r"(\d+[\d\s/.-]*)\s*\((\d+[\d\s/.-]*)\s+([a-zA-Z]+)\)\s*[a-zA-Z]*\s*", "", ingredient_str).strip()
+        
+        total_qty = outer_qty * inner_qty
+        std_qty, std_unit = standardize_unit(total_qty, unit, name)
+        
+        return {
+            "quantity": std_qty,
+            "unit": std_unit,
+            "name": name,
+            "original": original
+        }
+    
+    match = re.match(r"^([\d\s/.-]+)\s+([a-zA-Z]+\.?)\s+(.+)$", ingredient_str)
+    
+    if match:
+        qty_str = match.group(1)
+        unit = match.group(2)
+        name = match.group(3).strip()
+        
+        qty = parse_quantity(qty_str)
+        std_qty, std_unit = standardize_unit(qty, unit, name)
+        
+        return {
+            "quantity": std_qty,
+            "unit": std_unit,
+            "name": name,
+            "original": original
+        }
+    
+    return {
+        "quantity": 1,
+        "unit": "piece",
+        "name": ingredient_str.strip(),
+        "original": original
+    }
+
+
+def standardize_recipe_ingredients(ingredients_raw: list) -> list:
+    standardized = []
+    
+    for ingredient in ingredients_raw:
+        if not ingredient or not ingredient.strip():
+            continue
+        
+        parsed = parse_ingredient_string(ingredient)
+        standardized.append(parsed)
+    
+    return standardized
+
 if __name__ == "__main__":
+    test_ingredients = [
+        "2 (21 ounce) cans cherry pie filling",
+        "2 eggs",
+        "1 (14 ounce) can sweetened condensed milk (not evaporated)",
+        "1/4 cup melted margarine",
+        "1/2 teaspoon cinnamon",
+        "1/4 teaspoon nutmeg",
+        "1/2 cup firmly packed light brown sugar",
+        "1/2 cup self-rising flour",
+        "1/4 cup margarine",
+        "1/2 cup chopped nuts (chef's choice)",
+        "1/2 cup quick-cooking oats",
+        "butter-flavored cooking spray",
+        "2 lbs ground beef",
+        "3 cups water",
+        "1 pint milk"
+    ]
+    
+    print("=== Testing Unit Standardization ===\n")
+    for ingredient in test_ingredients:
+        result = parse_ingredient_string(ingredient)
+        print(f"Original: {ingredient}")
+        print(f"Standardized: {result['quantity']} {result['unit']} {result['name']}")
+        print()
+
+
     test_cases = [
         ("1 1/2", "cup", "milk"),
         ("2-3", "tablespoons", "oil"),
