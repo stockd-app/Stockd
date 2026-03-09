@@ -10,6 +10,7 @@ import LikeButton from "../../components/LikeButton/LikeButton";
 import { API_ROUTES } from "../../config/consts";
 import { useNotification } from "../../components/Notification/NotificationContext";
 import { NOTIFICATION_MESSAGES, NOTIFICATION_TYPES } from "../../config/consts";
+import { formatQuantityUnit } from "../../utils/unitStandardizer";
 
 
 import "./singlerecipepage.css";
@@ -239,12 +240,23 @@ const SingleRecipePage: React.FC = () => {
                     <section className="recipe__section">
                         <h2 className="recipe__section__title">Ingredients</h2>
                         <ul className="recipe__ingredients">
-                            {recipe.RecipeIngredientParts?.map((part: string, i: number) => {
-                                const rawQty = recipe.RecipeIngredientQuantities?.[i];
-                                const qtyParsed = parseQuantity(rawQty);
-                                const { qty, unit } = resolveIngredientDisplay(part, qtyParsed);
-                                const isAdded = addedToGrocery.has(part);
-                                const inPantry = isInPantry(part, pantryNames);
+                            {/* Use standardized ingredients if available, otherwise fall back to original */}
+                            {(recipe.ingredients_standardized && recipe.ingredients_standardized.length > 0
+                                ? recipe.ingredients_standardized
+                                : recipe.RecipeIngredientParts?.map((part: string, i: number) => {
+                                    const rawQty = recipe.RecipeIngredientQuantities?.[i];
+                                    const qtyParsed = parseQuantity(rawQty);
+                                    const { qty, unit } = resolveIngredientDisplay(part, qtyParsed);
+                                    return { name: part, quantity: qty, unit: unit };
+                                  })
+                            )?.map((ingredient: any, i: number) => {
+                                const ingredientName = ingredient.name || ingredient.original || "";
+                                const qty = ingredient.quantity || 1;
+                                const unit = ingredient.unit || "piece";
+                                const displayQtyUnit = formatQuantityUnit(qty, unit);
+                                
+                                const isAdded = addedToGrocery.has(ingredientName);
+                                const inPantry = isInPantry(ingredientName, pantryNames);
                                 const checkboxDisabled = inPantry;
 
                                 return (
@@ -256,7 +268,7 @@ const SingleRecipePage: React.FC = () => {
                                             disabled={checkboxDisabled}
                                             onChange={() => {
                                             if (!checkboxDisabled) {
-                                                addToGroceryList(part, qty, unit);
+                                                addToGroceryList(ingredientName, qty, unit);
                                             }
                                             }}
                                             title={
@@ -268,21 +280,16 @@ const SingleRecipePage: React.FC = () => {
                                             }
                                         />
                                         <img
-                                            src={getIngredientIcon(part)}
-                                            alt={part}
+                                            src={getIngredientIcon(ingredientName)}
+                                            alt={ingredientName}
                                             className="recipe__ingredient__icon"
                                         />
                                         <div className="ingredient__text">
-                                            {/* <span className="recipe__ingredient__qty">
-                                                {qty} {unit}
-                                            </span> */}
                                             <span className="ingredient__amount">
-                                                <span className="ingredient__qty">{qty}</span>
-                                                <span className="ingredient__unit">{unit}</span>
+                                                {displayQtyUnit}
                                             </span>
-                                            
                                         </div>
-                                        <span className="recipe__ingredient__name">{part}</span>
+                                        <span className="recipe__ingredient__name">{ingredientName}</span>
                                         
                                         {inPantry && <span className="ingredient__status">In Pantry</span>}
                                         {isAdded && <span className="ingredient__status">Added</span>}
@@ -318,3 +325,4 @@ const SingleRecipePage: React.FC = () => {
 };
 
 export default SingleRecipePage;
+
