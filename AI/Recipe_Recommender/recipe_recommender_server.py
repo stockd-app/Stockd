@@ -139,6 +139,17 @@ def sanitize_row_for_pydantic(row_dict):
     if sim is None or (isinstance(sim, float) and np.isnan(sim)):
         row_dict["similarity"] = 0.0
 
+    ingredients_raw = row_dict.get("ingredients_raw")
+    if ingredients_raw and isinstance(ingredients_raw, list):
+        try:
+            standardized = standardize_recipe_ingredients(ingredients_raw)
+            row_dict["ingredients_standardized"] = standardized
+        except Exception as e:
+            print(f"Error standardizing ingredients: {e}")
+            row_dict["ingredients_standardized"] = []
+    else:
+        row_dict["ingredients_standardized"] = []
+
     return row_dict
 
 @app.post("/recommend")
