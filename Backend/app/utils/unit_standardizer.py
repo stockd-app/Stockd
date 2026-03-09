@@ -121,13 +121,73 @@ def parse_quantity(quantity_str: str) -> float:
     except:
         return 1.0
 
+def is_liquid_ingredient(ingredient_name: str) -> bool:
+    ingredient_lower = ingredient_name.lower()
+    return any(keyword in ingredient_lower for keyword in LIQUID_KEYWORDS)
+
+
+def standardize_unit(quantity: float, unit: str, ingredient_name: str = "") -> Tuple[float, str]:
+    if not unit:
+        return quantity, "piece"
+    
+    unit_lower = unit.lower().strip()
+    
+    if unit_lower in ["g", "gram", "grams", "kg", "kilogram", "kilograms"]:
+        if unit_lower in ["kg", "kilogram", "kilograms"]:
+            return quantity, "kg"
+        return quantity, "g"
+    
+    if unit_lower in ["ml", "milliliter", "milliliters", "millilitre", "millilitres"]:
+        return quantity, "ml"
+    
+    if unit_lower in ["l", "liter", "liters", "litre", "litres"]:
+        return quantity, "l"
+    
+    is_liquid = is_liquid_ingredient(ingredient_name)
+    
+    if unit_lower in ["cup", "cups", "tablespoon", "tablespoons", "tbsp", "teaspoon", 
+                      "teaspoons", "tsp", "fluid ounce", "fluid ounces", "fl oz", 
+                      "fl. oz", "pint", "pints", "pt", "quart", "quarts", "qt", 
+                      "gallon", "gallons", "gal"]:
+        ml_value = quantity * CONVERSIONS.get(unit_lower, 1)
+        
+        if ml_value >= 1000:
+            return round(ml_value / 1000, 2), "l"
+        return round(ml_value, 0), "ml"
+    
+    if unit_lower in ["pound", "pounds", "lb", "lbs"]:
+        grams = quantity * CONVERSIONS["pound"]
+        if grams >= 1000:
+            return round(grams / 1000, 2), "kg"
+        return round(grams, 0), "g"
+    
+    if unit_lower in ["ounce", "ounces", "oz"]:
+        if is_liquid:
+            ml_value = quantity * CONVERSIONS["oz"]
+            if ml_value >= 1000:
+                return round(ml_value / 1000, 2), "l"
+            return round(ml_value, 0), "ml"
+        else:
+            grams = quantity * CONVERSIONS["ounce_weight"]
+            if grams >= 1000:
+                return round(grams / 1000, 2), "kg"
+            return round(grams, 0), "g"
+    
+    return quantity, unit_lower
+
 if __name__ == "__main__":
     test_cases = [
-        "1 cup", "2 tablespoons", "1/2 tsp", "3-4 cups", "1 to 2 tbsp",
-        "1 1/2 cups", "¼ cup", "⅓ cup", "½ cup", "⅔ cup", "¾ cup",
-        "1.5 cups", "2.5 tbsp"
+        ("1 1/2", "cup", "milk"),
+        ("2-3", "tablespoons", "oil"),
+        ("½", "teaspoon", "salt"),
+        ("3/4", "pound", "flour"),
+        ("1.5", "kg", "chicken"),
+        ("1000", "ml", "broth"),
+        ("2", "", "egg"),
+        ("1/4", "oz", "vanilla extract"),
     ]
     
-    for test in test_cases:
-        quantity = parse_quantity(test)
-        print(f"'{test}' -> {quantity}")
+    for qty_str, unit, ingredient in test_cases:
+        qty = parse_quantity(qty_str)
+        std_qty, std_unit = standardize_unit(qty, unit, ingredient)
+        print(f"{qty_str} {unit} of {ingredient} -> {std_qty} {std_unit}")
