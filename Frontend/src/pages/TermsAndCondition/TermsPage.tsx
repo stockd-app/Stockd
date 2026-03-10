@@ -46,7 +46,7 @@ const TermsPage: React.FC = () => {
                 <img src={StockdLogo} alt="Stockd Logo" width={100} className="terms__logo" />
 
                 {/* Stockd Title */}
-                <h2 className="terms__stockd">Stockd</h2>
+                <h2 className="terms__stockd">STOCKD</h2>
 
                 {/* Text */}
                 <p className="terms__text">
@@ -83,7 +83,7 @@ const TermsPage: React.FC = () => {
                     className={`terms__continue ${checked ? "active" : ""}`}
                     onClick={() => login()}
                 >
-                    Continue →
+                    Continue
                 </button>
 
             </div>

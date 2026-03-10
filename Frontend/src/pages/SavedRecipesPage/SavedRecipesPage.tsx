@@ -46,15 +46,15 @@ const SavedRecipesPage: React.FC = () => {
   return (
     <div className="savedRecipes__container">
       <div className="savedRecipes__header">
-        <h2>Saved Recipes</h2>
+        <h2>Liked Recipes</h2>
       </div>
 
       {loading ? (
         <p>Loading...</p>
       ) : recipes.length === 0 ? (
         <div className="savedRecipes__empty">
-          <p>No saved recipes yet</p>
-          <span>Tap the bookmark icon to save recipes</span>
+          <p>No liked recipes yet</p>
+          <span>Tap the heart icon to like recipes</span>
         </div>
       ) : (
         <div className="savedRecipes__grid">
