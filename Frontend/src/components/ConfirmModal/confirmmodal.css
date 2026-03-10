@@ -21,7 +21,7 @@
 
 /* Modal box */
 .modal__box {
-    background: var(--color-white);
+    background: var(--color-dark-bg);
     padding: 20px;
     width: 280px;
     border-radius: 12px;
@@ -39,7 +39,7 @@
 /* Text */
 .modal__text {
     font-size: 1rem;
-    color: var(--color-dark);
+    color: var(--color-main-text);
     margin-bottom: 18px;
     font-family: "Poppins", "Segoe UI", sans-serif;
 }
@@ -63,12 +63,12 @@
 
 .modal__yes {
     background: var(--color-red);
-    color: var(--color-white);
+    color: var(--color-main-text);
 }
 
 .modal__no {
     background: var(--color-light);
-    color: var(--color-dark);
+    color: var(--color-dark-text);
 }
 
 /* Opening animations */

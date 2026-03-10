@@ -4,7 +4,8 @@
     padding: 8px 14px;
     border-radius: 999px;
     border: none;
-    background: var(--color-light-grey);
+    background: var(--color-light);
+    color: var(--color-dark-text);
     font-size: 13px;
     cursor: pointer;
     transition: background 0.2s ease;

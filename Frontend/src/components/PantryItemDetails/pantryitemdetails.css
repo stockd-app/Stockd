@@ -4,7 +4,7 @@
 .pid__overlay {
     position: fixed;
     inset: 0;
-    background: var(--color-white);
+    background: var(--color-dark-bg);
     display: flex;
     justify-content: center;
     z-index: 999;
@@ -14,7 +14,7 @@
 .pid__modal {
     width: 100%;
     max-width: 430px;
-    background: var(--color-white);
+    background: var(--color-dark-bg);
     padding: 2em;
 }
 
@@ -35,6 +35,7 @@
     font-size: 18px;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+    color: var(--color-main-text)
 }
 
 
@@ -45,7 +46,7 @@
     margin: 0;
     font-size: 20px;
     font-weight: 800;
-    color: var(--color-dark);
+    color: var(--color-main-text);
     text-align: center;
     pointer-events: none;
 }
@@ -129,22 +130,24 @@
 
 .pid__save {
     background: var(--color-primary);
-    color: var(--color-white);
+    color: var(--color-dark-text);
     padding: 10px 30px;
     border-radius: 10px;
     border: none;
     font-size: 16px;
     font-weight: 600;
+    width: 100%;
 }
 
 .pid__delete {
     background: var(--color-red);
-    color: var(--color-white);
+    color: var(--color-dark-text);
     padding: 10px 30px;
     border-radius: 10px;
     font-size: 16px;
     font-weight: 600;
     margin-right: 10px;
+    width: 100%;
 }
 
 @media (min-width: 768px) {
@@ -191,4 +194,71 @@
         padding: 14px 30px;
         font-size: 17px;
     }
+}
+
+.pid__row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 1em 0;
+    border-bottom: 1px solid var(--color-grey);
+}
+
+.pid__label {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-grey-text);
+}
+
+.pid__input,
+.pid__qty_box,
+.pid__input.select {
+    width: 100%;
+    text-align: center;
+}
+
+.pid__input{
+    text-align: left;
+}
+
+.pid__qty_box {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+}
+
+.pid__qty_input {
+    flex: 1;
+    text-align: center;
+}
+
+.pid__body {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.pid__input,
+.pid__input.select,
+.pid__qty_input {
+    padding: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease;
+    width: stretch;
+    background-color: var(--color-overlay);
+    color: var(--color-main-text);
+}
+
+.pid__input:focus,
+.pid__input.select:focus,
+.pid__qty_input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 5px var(--color-primary);
 }

@@ -2,7 +2,8 @@
 
 .rp__page {
     min-height: 120vh;
-    background: var(--color-white);
+    background: var(--color-dark-bg);
+    color: var(--color-main-text);
 }
 
 .rp__header {
@@ -10,6 +11,7 @@
     display: flex;
     align-items: center;
     padding: 0 16px;
+    color: var(--color-main-text);
 }
 
 .rp__back {
@@ -19,6 +21,7 @@
     padding: 8px;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+    color: var(--color-main-text);
 }
 
 .rp__spacer {
@@ -57,7 +60,8 @@
     gap: 8px;
     padding: 10px 12px;
     border-radius: 12px;
-    border: 1px solid var(--color-white);
+    border: 1px solid var(--color-dark-text);
+    color: var(--color-dark-text);
     background: rgba(255, 255, 255, 0.92);
     cursor: pointer;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -75,17 +79,17 @@
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.92);
     font-size: 12px;
-    color: var(--color-dark-grey);
+    color: var(--color-grey-text);
 }
 
 .rp__empty {
-    color: var(--color-dark-grey);
+    color: var(--color-grey-text);
     font-weight: 600;
 }
 
 .rp__addMore {
     margin-top: 18px;
-    border: 2px dashed var(--color-primary);
+    border: 2px dashed var(--color-main-text);
     border-radius: 14px;
     padding: 16px;
     text-align: center;
@@ -98,7 +102,7 @@
 
 .rp__addHint {
     font-size: 12px;
-    color: var(--color-dark-grey);
+    color: var(--color-grey-text);
     line-height: 1.35;
     margin-bottom: 14px;
 }
@@ -123,7 +127,7 @@
 
     font-weight: 600;
     font-size: 13px;
-    color: var(--color-dark);
+    color: var(--color-dark-text);
 
     cursor: pointer;
     transition: transform 0.15s ease, background 0.15s ease;
@@ -148,8 +152,8 @@
     height: 44px;
     border-radius: 12px;
     border: none;
-    background: var(--color-primary);
-    color: var(--color-white);
+    background: var(--color-grey);
+    color: var(--color-dark-text);
     font-weight: 700;
     cursor: pointer;
     transition: transform 0.15s ease, opacity 0.15s ease;

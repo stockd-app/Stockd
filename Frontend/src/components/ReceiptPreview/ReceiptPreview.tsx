@@ -188,7 +188,7 @@ const ReceiptPreview: React.FC = () => {
                     disabled={!images.length || isUploading}
                     onClick={handleRecognition}
                 >
-                    {isUploading ? "Processing..." : "Recognition"}
+                    {isUploading ? "Processing..." : "Scan Receipt(s)"}
                 </button>
             </div>
 

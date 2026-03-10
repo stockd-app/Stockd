@@ -9,6 +9,7 @@ import {
   PencilLine,
   ImagePlus,
   SquarePlus,
+  Heart,
 } from "lucide-react";
 import { BOTTOM_NAV_ICON_SIZE } from "../../../config/consts";
 import CameraModal from "../../CameraModal/CameraModal";
@@ -156,8 +157,8 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ onManualAdd }) => {
         className={`bottomnav__item ${activeItem === "saved" ? "active" : ""}`}
         onClick={() => { setActiveItem("saved"); navigate("/saved") }}
       >
-        <Bookmark size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
-        <p>Saved</p>
+        <Heart size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
+        <p>Liked</p>
       </div>
 
       <div
@@ -165,7 +166,7 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ onManualAdd }) => {
         onClick={() => { setActiveItem("cart"); navigate("/cart") }}
       >
         <List size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
-        <p>Grocery List</p>
+        <p>Grocery</p>
       </div>
 
       {/* Animated underline indicator */}

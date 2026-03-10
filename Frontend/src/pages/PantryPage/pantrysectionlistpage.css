@@ -1,6 +1,7 @@
 .pantrySection__container {
     min-height: 100vh;
-    background: var(--color-white);
+    background: var(--color-dark-bg);
+    color: var(--color-main-text);
     padding-bottom: 90px;
 }
 
@@ -19,7 +20,7 @@
     margin: 0;
     font-size: 20px;
     font-weight: 700;
-    color: var(--color-dark);
+    color: var(--color-main-text);
     text-align: center;
     pointer-events: none;
 }
@@ -39,22 +40,27 @@
   padding: 14px 22px;
   border-radius: 14px;
   border: 1px solid var(--color-grey);
-  background-color: var(--color-white);
+  background-color: var(--color-dark-bg);
   font-size: 15px;
   line-height: 1;
   cursor: pointer;
   white-space: nowrap;
 }
 
+.pantryItemSection__bulkActionText{
+  color: var(--color-main-text);  
+}
+
 .pantryItemSection__bulkActionIcon{
   width: 22px;
   height: 22px;
+  color: var(--color-main-text);  
 }
 
 .pantryItemSection__bulkActionDeleteBtn:hover{
-  background: var(--color-dark-red);
+  background: var(--color-red);
   border-color: var(--color-red);
-  color: var(--color-white);
+  color: var(--color-dark-text);
   transition: background 270ms ease,
               border-color 270ms ease,
               color 300ms ease;
@@ -72,6 +78,7 @@
     font-size: 18px;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+    color: var(--color-main-text)
 }
 
 .pantrySection__grid {
