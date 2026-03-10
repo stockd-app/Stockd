@@ -1,0 +1,46 @@
+.theme-toggle {
+  position: relative;
+  width: 74px;
+  height: 36px;
+  background: var(--color-dark-grey);
+  border-radius: 50px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  box-sizing: border-box;
+}
+
+.toggle-indicator {
+  position: absolute;
+  top: 4px;
+  left: 3.5px;
+  width: 30px;
+  height: 28px;
+  background: var(--color-dark-bg);
+  border-radius: 50px;
+  transition: transform 0.3s ease;
+}
+
+.toggle-indicator.light {
+  transform: translateX(38px);
+}
+
+.toggle-indicator.dark {
+  transform: translateX(0);
+}
+
+.toggle-icon {
+  z-index: 1;
+  margin: 0 2px;
+  color: var(--color-main-text);
+  opacity: 0.5;
+  transition: all 0.3s ease;
+  transition: all 0.3s ease;
+}
+
+.toggle-icon.active {
+  opacity: 1;
+  transform: scale(1.1);
+}

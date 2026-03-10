@@ -5,7 +5,7 @@
   flex-direction: column;
   min-height: 100vh;
   padding-bottom: 90px;
-  background-color: var(--color-white);
+  background-color: var(--color-dark-bg);
   font-family: "Poppins", "Segoe UI", sans-serif;
 }
 
@@ -43,7 +43,7 @@
   position: absolute;
   bottom: 0;
   height: 2px;
-  background-color: var(--color-cyan);
+  background-color: var(--color-primary);
   border-radius: 2px;
   transition: all 0.3s ease;
 }
@@ -75,13 +75,13 @@
 
 .dashboard__placeholder {
   text-align: center;
-  color: var(--color-dark);
+  color: var(--color-dark-text);
   font-size: 0.95rem;
   margin-top: 2rem;
 }
 
 .dashboard__card {
-  background-color: var(--color-light);
+  background-color: var(--color-grey);
   border-radius: 15px;
   overflow: hidden;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
@@ -104,18 +104,18 @@
 
 .dashboard__category {
   font-size: 0.8rem;
-  color: var(--color-dark-grey);
+  color: var(--color-grey-text);
 }
 
 .dashboard__name {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-dark);
+  color: var(--color-dark-text);
 }
 
 .dashboard__details {
   font-size: 0.75rem;
-  color: var(--color-dark-grey);
+  color: var(--color-grey-text);
 }
 
 /* Image wrapper for overlayed favorite button */
@@ -174,7 +174,7 @@
 }
 
 .filter__reset {
-  background: var(--color-grey);
+  /* background: var(--color-grey); */
   border: none;
   padding: 10px 18px;
   border-radius: 8px;
@@ -182,7 +182,7 @@
 
 .filter__apply {
   background: var(--color-primary);
-  color: var(--color-white);
+  color: var(--color-dark-text);
   border: none;
   padding: 10px 18px;
   border-radius: 8px;

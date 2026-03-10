@@ -55,8 +55,8 @@ export const GOOGLE_CONSTS = {
 
 export const SEARCH = "Search any recipe";
 export const LANDING_PAGE = {
-  STOCKD: "Stockd",
-  WELCOME_TEXT: "Let's join our community to cook better food!",
+  STOCKD: "STOCKD",
+  WELCOME_TEXT: "Thousands of recipes all cookable with your pantry!",
 };
 
 export const TOP_NAV_BAR = {

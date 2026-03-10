@@ -4,7 +4,7 @@ import { getIncompleteRecipes } from "../../services/api";
 const IncompleteRecipeRecPage = () => {
     return (
         <PantryRecipeListPage
-            title="You May Not Have All The Ingredients"
+            title="Some Ingredients Needed"
             fetchRecipes={(userId) => getIncompleteRecipes(userId, 50)}
         />
     );

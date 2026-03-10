@@ -4,7 +4,7 @@ import { getCollaborativeRecipes } from "../../services/api";
 const CollaborativeRecipeRecPage = () => {
   return (
     <PantryRecipeListPage
-      title="Collaborative Recipes Recommended"
+      title="Other Users Have Tried These"
       fetchRecipes={(userId) => getCollaborativeRecipes(userId, 50)}
     />
   );
