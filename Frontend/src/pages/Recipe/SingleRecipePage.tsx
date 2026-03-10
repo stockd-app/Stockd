@@ -9,7 +9,7 @@ import { parseQuantity, resolveIngredientDisplay } from "../../utils/ingredientU
 import LikeButton from "../../components/LikeButton/LikeButton";
 import { API_ROUTES } from "../../config/consts";
 import { useNotification } from "../../components/Notification/NotificationContext";
-import { NOTIFICATION_MESSAGES, NOTIFICATION_TYPES } from "../../config/consts";
+import { NOTIFICATION_MESSAGES, NOTIFICATION_TYPES, GetNutritionItems } from "../../config/consts";
 
 
 import "./singlerecipepage.css";
@@ -192,6 +192,7 @@ const SingleRecipePage: React.FC = () => {
     if (!recipe) return <div>Recipe not found</div>;
 
     const imageUrl = recipe.Images?.[0] || image_placeholder;
+    const nutritionItems = GetNutritionItems(recipe);
 
     return (
         <div className="recipe__page">
@@ -245,6 +246,29 @@ const SingleRecipePage: React.FC = () => {
                         </div>
                     </div>
                     <p className="recipe__description">{recipe.Description}</p>
+                    
+                    <div className="recipe__nutrition">
+                    <h2 className="recipe__NutritionTitle">Nutritional Information</h2>
+                        <div className="recipe__nutritionGrid">
+                            {nutritionItems.map((item) => (
+                                <div key={item.label} className="recipe__nutritionCard">
+                                    <div className="recipe__nutritionTop">
+                                        {item.icon && (
+                                            <img
+                                            src={item.icon}
+                                            alt={item.label}
+                                            className="recipe__nutritionIcon"
+                                            />
+                                        )}
+                                        <span className="recipe__nutritionLabel">{item.label}</span>
+                                    </div>
+                                    <span className="recipe__nutritionValue">
+                                        {item.value ?? "N/A"} {item.value != null ? item.unit : ""}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
 
                     <section className="recipe__section">
                         <h2 className="recipe__section__title">Ingredients</h2>
