@@ -143,3 +143,15 @@ export const COMMON_ALLERGENS = [
   { label: "Soy", value: "soy", icon: Bean },
   { label: "Tree Nut", value: "tree-nut", icon: Nut },
 ] as const;
+
+ export const GetNutritionItems = (recipe: any) => [
+  { label: "Calories", value: recipe.Calories, unit: "kcal",icon:"https://cdn-icons-png.flaticon.com/512/17394/17394076.png" },
+  { label: "Fat", value: recipe.FatContent, unit: "g",icon:"https://cdn-icons-png.flaticon.com/512/8131/8131971.png" },
+  { label: "Saturated Fat", value: recipe.SaturatedFatContent, unit: "g",icon:"https://cdn-icons-png.flaticon.com/512/17972/17972269.png" },
+  { label: "Cholesterol", value: recipe.CholesterolContent, unit: "mg",icon:"https://cdn-icons-png.flaticon.com/512/9957/9957003.png" },
+  { label: "Sodium", value: recipe.SodiumContent, unit: "mg",icon:"https://cdn-icons-png.flaticon.com/512/9757/9757208.png" },
+  { label: "Carbohydrates", value: recipe.CarbohydrateContent, unit: "g",icon:"https://cdn-icons-png.flaticon.com/512/11827/11827758.png" },
+  { label: "Sugar", value: recipe.SugarContent, unit: "g",icon:"https://cdn-icons-png.flaticon.com/512/5835/5835935.png" },
+  { label: "Protein", value: recipe.ProteinContent, unit: "g",icon:"https://cdn-icons-png.flaticon.com/512/3024/3024310.png" },
+  { label: "Fiber", value: recipe.FiberContent, unit: "g",icon:"https://cdn-icons-png.flaticon.com/512/18433/18433150.png" },
+];
