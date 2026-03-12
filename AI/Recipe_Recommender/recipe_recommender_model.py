@@ -105,6 +105,7 @@ if not os.path.exists(ALLERGENS_CSV_PATH):
 df = pd.read_parquet(DATA_PATH)
 df = df.copy()
 
+print("Starting allergen detection on recipes...")
 # create a clean list of ingredients specifically for allergen detection
 df['ingredients_list'] = df['RecipeIngredientParts'].apply(prepare_ingredients_for_allergens)
 
@@ -114,7 +115,7 @@ ingredient_to_allergen = {}
 for allergen, variants in allergen_map.items():
     for variant in variants:
         ingredient_to_allergen[variant.lower()] = allergen
-    # Also map the main allergen itself
+    # also map the main allergen itself
     ingredient_to_allergen[allergen.lower()] = allergen
 
 df['Allergens'] = df['ingredients_list'].apply(
@@ -125,6 +126,56 @@ df['Allergens'] = df['ingredients_list'].apply(
 df["RecipeId"] = df["RecipeId"].astype(int)
 
 df = df.head(5000) # limit to 5000 recipes for faster testing. full 500k dataset will probably take 1-2 hours to compute. only need to compute once before prod
+
+# === Replacing RecipeIngredientQuantities with units.csv ===
+units_path = os.path.join(BASE_DIR, "data/units.csv")
+units_df = pd.read_csv(units_path)
+
+# ensure the ID columns are the same type
+df["RecipeId"] = df["RecipeId"].astype(int)
+units_df["id"] = units_df["id"].astype(int)
+
+# merge units into recipes dataframe
+df = df.merge(
+    units_df[['id', 'ingredients', 'ingredients_raw']],  # only keep needed columns
+    left_on='RecipeId',
+    right_on='id',
+    how='left'
+)
+
+# replace RecipeIngredientParts with the ingredients from units.csv
+df['RecipeIngredientParts'] = df['ingredients']
+
+# convert NaN to empty list, strings to single-item list, lists stay as-is
+def ensure_list(x):
+    if x is None or (isinstance(x, float) and np.isnan(x)):
+        return []
+    if isinstance(x, list):
+        return x
+    if isinstance(x, str):
+        try:
+            # attempt to parse stringified list, e.g. "['milk','sugar']"
+            parsed = eval(x)
+            if isinstance(parsed, list):
+                return [str(i) for i in parsed]
+        except:
+            pass
+        # fallback: wrap string in a list
+        return [x]
+    return []
+
+df['ingredients_raw'] = df['ingredients_raw'].apply(ensure_list)
+df['RecipeIngredientParts'] = df['RecipeIngredientParts'].apply(ensure_list)
+
+df["has_ingredients"] = df["RecipeIngredientParts"].str.len() > 0
+df = df.sort_values(by="has_ingredients", ascending=False)
+df = df.drop_duplicates(subset=["RecipeId"], keep="first")
+df = df.drop(columns=["has_ingredients"])
+
+# drop unused columns
+df = df.drop(columns=['id', 'ingredients'])
+
+print("Updated RecipeIngredientQuantities using units.csv")
 
 # print("Sample RecipeIds in df:", df["RecipeId"].tolist()[:10])
 
