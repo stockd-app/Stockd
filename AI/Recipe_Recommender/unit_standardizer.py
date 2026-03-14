@@ -71,7 +71,7 @@ FRACTIONS = {
 
 # Ingredient categories for determining if weight or volume
 LIQUID_KEYWORDS = [
-    "water", "milk", "juice", "broth", "stock", "oil", "vinegar", 
+    "water", "milk", "juice", "broth", "stock", "oil", "vinegar",
     "wine", "beer", "cream", "sauce", "syrup", "honey", "liquid",
     "melted", "coconut milk", "soy sauce", "worcestershire"
 ]
@@ -79,7 +79,8 @@ LIQUID_KEYWORDS = [
 SOLID_KEYWORDS = [
     "flour", "sugar", "salt", "pepper", "butter", "cheese", "meat",
     "chicken", "beef", "pork", "fish", "vegetable", "fruit", "nut",
-    "chocolate", "cocoa", "powder", "spice"
+    "chocolate", "cocoa", "powder", "spice", "baking powder", "baking soda",
+    "yeast", "cornstarch", "oats", "rice", "pasta", "bread"
 ]
 
 def parse_quantity(quantity_str: str) -> float:
@@ -145,15 +146,40 @@ def standardize_unit(quantity: float, unit: str, ingredient_name: str = "") -> T
     
     is_liquid = is_liquid_ingredient(ingredient_name)
     
-    if unit_lower in ["cup", "cups", "tablespoon", "tablespoons", "tbsp", "teaspoon", 
-                      "teaspoons", "tsp", "fluid ounce", "fluid ounces", "fl oz", 
-                      "fl. oz", "pint", "pints", "pt", "quart", "quarts", "qt", 
+    # Check if ingredient is solid (for weight conversion)
+    is_solid = any(keyword in ingredient_name.lower() for keyword in SOLID_KEYWORDS)
+    
+    # Convert volume measurements - but use grams for solid ingredients
+    if unit_lower in ["cup", "cups", "tablespoon", "tablespoons", "tbsp", "teaspoon",
+                      "teaspoons", "tsp", "fluid ounce", "fluid ounces", "fl oz",
+                      "fl. oz", "pint", "pints", "pt", "quart", "quarts", "qt",
                       "gallon", "gallons", "gal"]:
-        ml_value = quantity * CONVERSIONS.get(unit_lower, 1)
         
-        if ml_value >= 1000:
-            return round(ml_value / 1000, 2), "l"
-        return round(ml_value, 0), "ml"
+        # For solid ingredients, convert cups to grams (approximate)
+        if is_solid or not is_liquid:
+            # Approximate conversions for common dry ingredients
+            # 1 cup flour ≈ 120g, 1 cup sugar ≈ 200g, average ≈ 160g
+            if unit_lower in ["cup", "cups"]:
+                grams = quantity * 160  # Average for dry ingredients
+            elif unit_lower in ["tablespoon", "tablespoons", "tbsp"]:
+                grams = quantity * 10  # Approximate for dry ingredients
+            elif unit_lower in ["teaspoon", "teaspoons", "tsp"]:
+                grams = quantity * 3.5  # Approximate for dry ingredients
+            else:
+                # For other volume units, use weight approximation
+                ml_value = quantity * CONVERSIONS.get(unit_lower, 1)
+                grams = ml_value * 0.6  # Rough density approximation
+            
+            if grams >= 1000:
+                return round(grams / 1000, 2), "kg"
+            return round(grams, 0), "g"
+        else:
+            # For liquids, convert to ml/l
+            ml_value = quantity * CONVERSIONS.get(unit_lower, 1)
+            
+            if ml_value >= 1000:
+                return round(ml_value / 1000, 2), "l"
+            return round(ml_value, 0), "ml"
     
     if unit_lower in ["pound", "pounds", "lb", "lbs"]:
         grams = quantity * CONVERSIONS["pound"]

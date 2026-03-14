@@ -302,7 +302,7 @@ const SingleRecipePage: React.FC = () => {
                                             disabled={checkboxDisabled}
                                             onChange={() => {
                                                 if (!checkboxDisabled) {
-                                                    addToGroceryList(part, qty, unit);
+                                                    addToGroceryList(ingredientName, qty, unit);
                                                 }
                                             }}
                                             title={
@@ -324,7 +324,7 @@ const SingleRecipePage: React.FC = () => {
                                             </span>
 
                                         </div>
-                                        <span className="recipe__ingredient__name">{part}</span>
+                                        <span className="recipe__ingredient__name">{ingredientName}</span>
                                         {inPantry && <span className="ingredient__status">In Pantry</span>}
                                         {isAdded && <span className="ingredient__status">Added</span>}
                                     </li>

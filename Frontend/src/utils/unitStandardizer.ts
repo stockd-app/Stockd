@@ -88,6 +88,35 @@ const LIQUID_KEYWORDS = [
   "worcestershire",
 ];
 
+const SOLID_KEYWORDS = [
+  "flour",
+  "sugar",
+  "salt",
+  "pepper",
+  "butter",
+  "cheese",
+  "meat",
+  "chicken",
+  "beef",
+  "pork",
+  "fish",
+  "vegetable",
+  "fruit",
+  "nut",
+  "chocolate",
+  "cocoa",
+  "powder",
+  "spice",
+  "baking powder",
+  "baking soda",
+  "yeast",
+  "cornstarch",
+  "oats",
+  "rice",
+  "pasta",
+  "bread",
+];
+
 export interface ParsedIngredient {
   quantity: number;
   unit: string;
@@ -197,6 +226,9 @@ export function standardizeUnit(
 
   // Determine if ingredient is liquid or solid
   const isLiquid = isLiquidIngredient(ingredientName);
+  
+  // Check if ingredient is solid (for weight conversion)
+  const isSolid = SOLID_KEYWORDS.some((keyword) => ingredientName.toLowerCase().includes(keyword));
 
   // Convert volume measurements
   const volumeUnits = [
@@ -224,13 +256,38 @@ export function standardizeUnit(
   ];
 
   if (volumeUnits.includes(unitLower)) {
-    const mlValue = quantity * (CONVERSIONS[unitLower] || 1);
+    // For solid ingredients, convert cups to grams (approximate)
+    if (isSolid || !isLiquid) {
+      let grams: number;
+      
+      // Approximate conversions for common dry ingredients
+      // 1 cup flour ≈ 120g, 1 cup sugar ≈ 200g, average ≈ 160g
+      if (["cup", "cups"].includes(unitLower)) {
+        grams = quantity * 160; // Average for dry ingredients
+      } else if (["tablespoon", "tablespoons", "tbsp"].includes(unitLower)) {
+        grams = quantity * 10; // Approximate for dry ingredients
+      } else if (["teaspoon", "teaspoons", "tsp"].includes(unitLower)) {
+        grams = quantity * 3.5; // Approximate for dry ingredients
+      } else {
+        // For other volume units, use weight approximation
+        const mlValue = quantity * (CONVERSIONS[unitLower] || 1);
+        grams = mlValue * 0.6; // Rough density approximation
+      }
+      
+      if (grams >= 1000) {
+        return { quantity: Math.round((grams / 1000) * 100) / 100, unit: "kg" };
+      }
+      return { quantity: Math.round(grams), unit: "g" };
+    } else {
+      // For liquids, convert to ml/l
+      const mlValue = quantity * (CONVERSIONS[unitLower] || 1);
 
-    // Convert to litres if >= 1000ml
-    if (mlValue >= 1000) {
-      return { quantity: Math.round((mlValue / 1000) * 100) / 100, unit: "l" };
+      // Convert to litres if >= 1000ml
+      if (mlValue >= 1000) {
+        return { quantity: Math.round((mlValue / 1000) * 100) / 100, unit: "l" };
+      }
+      return { quantity: Math.round(mlValue), unit: "ml" };
     }
-    return { quantity: Math.round(mlValue), unit: "ml" };
   }
 
   // Convert weight measurements
