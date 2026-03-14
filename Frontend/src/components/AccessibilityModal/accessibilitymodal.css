@@ -133,7 +133,6 @@
 }
 
 .accessibility__option {
-    background: var(--color-dark-grey);
     border: 2px solid transparent;
     border-radius: 12px;
     padding: 16px;
@@ -146,8 +145,8 @@
 }
 
 .accessibility__option:hover {
-    background: var(--color-grey);
     transform: translateY(-2px);
+    border-color: var(--color-primary);
 }
 
 .accessibility__option.active {
