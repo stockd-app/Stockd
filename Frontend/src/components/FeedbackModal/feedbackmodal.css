@@ -198,7 +198,7 @@
 }
 
 .feedback__success-subtext {
-  font-size: 14px !important;
+  font-size: 14px;
   color: var(--color-grey-text);
   font-style: italic;
 }
