@@ -82,7 +82,11 @@ const ReceiptPreview: React.FC = () => {
             setIsUploading(true);
             setScanError(false);
 
-            const response = await uploadReceipt(files);
+            // 1 min delay for gif to load
+            const [response] = await Promise.all([
+                uploadReceipt(files),
+                new Promise(resolve => setTimeout(resolve, 1000)) 
+            ]);
 
             if (!response.items || response.items.length === 0) {
                 setScanError(true);
@@ -207,7 +211,7 @@ const ReceiptPreview: React.FC = () => {
             {isUploading && (
                 <div className="uploading__overlay">
                     <img src={receiptGif} alt="Scanning receipt" className="receipt__gif" />
-                    <p className="loading__text">AI is scanning your receipt…</p>
+                    <p className="loading__text">Stockd is scanning your receipt…</p>
                 </div>
             )}
 
