@@ -376,6 +376,7 @@ const SingleRecipePage: React.FC = () => {
                                         showFullOriginal = true;
                                         const match = ingredient.original.match(/^([\d./\s]+)/);
                                         qty = match ? parseFloat(match[1]) : 1;
+                                        unit = "";
                                     } else {
                                         const originalIndex = recipe.RecipeIngredientParts?.indexOf(ingredientName);
                                         if (originalIndex !== -1 && recipe.RecipeIngredientQuantities?.[originalIndex]) {
@@ -393,7 +394,7 @@ const SingleRecipePage: React.FC = () => {
                                     }
                                 }
                                 
-                                const isAdded = addedToGrocery.has(ingredientName);
+                                const isAdded = addedToGrocery.has(normalize(ingredientName));
                                 const inPantry = isInPantry(ingredientName, pantryNames);
                                 const checkboxDisabled = inPantry;
 
@@ -405,12 +406,12 @@ const SingleRecipePage: React.FC = () => {
                                       checked={isAdded || inPantry}
                                       disabled={checkboxDisabled}
                                       onChange={() => {
-                                        if (!checkboxDisabled) {
-                                          addToGroceryList(
-                                            ingredientName,
-                                            qty,
-                                            unit,
-                                          );
+                                        if (checkboxDisabled) return;
+
+                                        if (isAdded) {
+                                          removeFromGroceryList(ingredientName);
+                                        } else {
+                                          addToGroceryList(ingredientName, qty, unit);
                                         }
                                       }}
                                       title={
@@ -429,13 +430,14 @@ const SingleRecipePage: React.FC = () => {
                                     <div className="ingredient__text">
                                       {showFullOriginal ? (
                                         // When showing original US format, display the full string
-                                        <span className="ingredient__full recipe__ingredient__name">
+                                        <span className="ingredient__full">
                                           {displayQtyUnit}
                                         </span>
                                       ) : (
                                         // When showing metric, display quantity separately
                                         <span className="ingredient__amount">
-                                          {displayQtyUnit}
+                                          <span className="ingredient__qty">{qty}</span>
+                                          <span className="ingredient__unit">{unit}</span>
                                         </span>
                                       )}
                                     </div>
@@ -455,58 +457,6 @@ const SingleRecipePage: React.FC = () => {
                                       </span>
                                     )}
                                   </li>
-                            {recipe.RecipeIngredientParts?.map((part: string, i: number) => {
-                                const rawQty = recipe.RecipeIngredientQuantities?.[i];
-                                const qtyParsed = parseQuantity(rawQty);
-                                const { qty, unit } = resolveIngredientDisplay(part, qtyParsed);
-                                const isAdded = addedToGrocery.has(normalize(part));
-                                const inPantry = isInPantry(part, pantryNames);
-                                const checkboxDisabled = inPantry;
-
-                                return (
-                                    <li key={i} className="recipe__ingredient">
-                                        <input
-                                            type="checkbox"
-                                            className="ingredient__checkbox"
-                                            checked={isAdded || inPantry}
-                                            disabled={checkboxDisabled}
-                                            onChange={() => {
-                                                if (checkboxDisabled) return;
-
-                                                if (isAdded) {
-                                                    removeFromGroceryList(part);
-                                                } else {
-                                                    addToGroceryList(part, qty, unit);
-                                                }
-                                            }}
-                                            title={
-                                                inPantry
-                                                    ? "Already in pantry"
-                                                    : isAdded
-                                                        ? "Added to grocery list"
-                                                        : "Add to grocery list"
-                                            }
-                                        />
-                                        <img
-                                            src={getIngredientIcon(part)}
-                                            alt={part}
-                                            className="recipe__ingredient__icon"
-                                        />
-                                        <div className="ingredient__text">
-                                            {/* <span className="recipe__ingredient__qty">
-                                                {qty} {unit}
-                                            </span> */}
-                                            <span className="ingredient__amount">
-                                                <span className="ingredient__qty">{qty}</span>
-                                                <span className="ingredient__unit">{unit}</span>
-                                            </span>
-
-                                        </div>
-                                        <span className="recipe__ingredient__name">{part}</span>
-
-                                        {inPantry && <span className="ingredient__status">In Pantry</span>}
-                                        {isAdded && <span className="ingredient__status">Added</span>}
-                                    </li>
                                 );
                             })}
                         </ul>
