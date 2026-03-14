@@ -38,6 +38,7 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ onManualAdd }) => {
   const [isMoving, setIsMoving] = useState(false);
   const [showCreationOptions, setShowCreationOptions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [hasNewGroceryItem, setHasNewGroceryItem] = useState(false);
 
   const handleScanClick = () => {
     setShowCreationOptions(true); // Don't open the camera directly,first open the dialog for selecting the upload method.
@@ -73,7 +74,11 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ onManualAdd }) => {
     if (path === "/dashboard") setActiveItem("home");
     else if (path === "/pantry") setActiveItem("pantry");
     else if (path === "/saved") setActiveItem("saved");
-    else if (path === "/cart") setActiveItem("cart");
+    else if (path === "/cart") {
+      setActiveItem("cart");
+      setHasNewGroceryItem(false);
+      localStorage.setItem("groceryBadge", "false");
+    }
 
   }, [location.pathname]);
 
@@ -104,6 +109,31 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ onManualAdd }) => {
       return () => clearTimeout(timeout);
     }
   }, [activeItem]);
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setHasNewGroceryItem(true);
+    };
+
+    window.addEventListener("grocery-updated", handleUpdate);
+
+    return () => {
+      window.removeEventListener("grocery-updated", handleUpdate);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleUpdate = () => setHasNewGroceryItem(true);
+    const handleClear = () => setHasNewGroceryItem(false);
+
+    window.addEventListener("grocery-updated", handleUpdate);
+    window.addEventListener("grocery-cleared", handleClear);
+
+    return () => {
+      window.removeEventListener("grocery-updated", handleUpdate);
+      window.removeEventListener("grocery-cleared", handleClear);
+    };
+  }, []);
 
   const handleFileSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
@@ -165,7 +195,11 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ onManualAdd }) => {
         className={`bottomnav__item ${activeItem === "cart" ? "active" : ""}`}
         onClick={() => { setActiveItem("cart"); navigate("/cart") }}
       >
-        <List size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
+        <div className="icon__wrapper">
+          <List size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
+          {hasNewGroceryItem && <span className="notification__dot"></span>}
+        </div>
+
         <p>Grocery</p>
       </div>
 

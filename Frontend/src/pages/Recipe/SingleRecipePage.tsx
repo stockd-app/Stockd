@@ -31,7 +31,7 @@ const SingleRecipePage: React.FC = () => {
     const [likedLoading, setLikedLoading] = useState(false);
     const [pantryNames, setPantryNames] = useState<string[]>([]);
     const [missingIngredients, setMissingIngredients] = useState<string[]>([]);
-    const [addedToGrocery, setAddedToGrocery] = useState<Set<string>>(new Set());
+    const [addedToGrocery, setAddedToGrocery] = useState<Map<string, number>>(new Map());
     const difficulty = recipe?.Keywords?.find((kw: string) => ["easy", "medium", "hard"].includes(kw.toLowerCase())) ?? "—";
     const isInPantry = (ingredient: string, pantry: string[]) => {
         const normIng = normalize(ingredient);
@@ -148,23 +148,11 @@ const SingleRecipePage: React.FC = () => {
         setMissingIngredients(missing);
     }, [recipe, pantryNames]);
 
-    const addToGroceryList = async (
-        name: string,
-        qty: number,
-        unit: string
-    ) => {
+    const addToGroceryList = async (name: string, qty: number, unit: string) => {
         if (!userId || !accessToken) return;
 
-        if (isInPantry(name, pantryNames)) {
-            console.warn("Item already in pantry, skip adding:", name);
-            return;
-        }
-
-        if (addedToGrocery.has(name)) {
-            return;
-        }
         try {
-            await fetch(API_ROUTES.ADD_UPDATE_GROCERY_ITEM, {
+            const res = await fetch(API_ROUTES.ADD_UPDATE_GROCERY_ITEM, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
@@ -182,11 +170,81 @@ const SingleRecipePage: React.FC = () => {
                 }),
             });
 
-            setAddedToGrocery((prev) => new Set(prev).add(name));
+            const data = await res.json();
+            const groceryId = data.items?.[0]?.id;
+            setAddedToGrocery(prev => {
+                const newMap = new Map(prev);
+                newMap.set(normalize(name), groceryId);
+                return newMap;
+            });
+
+            localStorage.setItem("groceryBadge", "true");
+            window.dispatchEvent(new Event("grocery-updated"));
+
         } catch (e) {
             console.error("Failed to add grocery item", e);
         }
     };
+
+    const removeFromGroceryList = async (name: string) => {
+        const itemId = addedToGrocery.get(normalize(name));
+        if (!itemId || !accessToken) return;
+
+        try {
+            await fetch(API_ROUTES.DELETE_GROCERY_ITEM, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    grocery_item_ids: [itemId],
+                }),
+            });
+
+            setAddedToGrocery(prev => {
+                const newMap = new Map(prev);
+                newMap.delete(normalize(name));
+                if (newMap.size === 0) {
+                    localStorage.setItem("groceryBadge", "false");
+                    window.dispatchEvent(new Event("grocery-cleared"));
+                }
+                return newMap;
+            });
+
+        } catch (e) {
+            console.error("Failed to delete grocery item", e);
+        }
+    };
+
+    useEffect(() => {
+        const fetchGroceryItems = async () => {
+            if (!userId || !accessToken) return;
+
+            try {
+                const res = await fetch(`${API_ROUTES.GET_GROCERY_ITEMS}/${userId}`, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
+
+                const data = await res.json();
+
+                const groceryMap = new Map<string, number>();
+
+                data.items.forEach((item: any) => {
+                    groceryMap.set(normalize(item.item_name), item.id);
+                });
+
+                setAddedToGrocery(groceryMap);
+
+            } catch (err) {
+                console.error("Failed to fetch grocery items", err);
+            }
+        };
+
+        fetchGroceryItems();
+    }, [userId]);
 
     if (loading) return <div>Loading...</div>;
     if (!recipe) return <div>Recipe not found</div>;
@@ -276,7 +334,7 @@ const SingleRecipePage: React.FC = () => {
                                 const rawQty = recipe.RecipeIngredientQuantities?.[i];
                                 const qtyParsed = parseQuantity(rawQty);
                                 const { qty, unit } = resolveIngredientDisplay(part, qtyParsed);
-                                const isAdded = addedToGrocery.has(part);
+                                const isAdded = addedToGrocery.has(normalize(part));
                                 const inPantry = isInPantry(part, pantryNames);
                                 const checkboxDisabled = inPantry;
 
@@ -288,7 +346,11 @@ const SingleRecipePage: React.FC = () => {
                                             checked={isAdded || inPantry}
                                             disabled={checkboxDisabled}
                                             onChange={() => {
-                                                if (!checkboxDisabled) {
+                                                if (checkboxDisabled) return;
+
+                                                if (isAdded) {
+                                                    removeFromGroceryList(part);
+                                                } else {
                                                     addToGroceryList(part, qty, unit);
                                                 }
                                             }}
