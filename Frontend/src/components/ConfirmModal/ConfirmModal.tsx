@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { CONFIRM_MODAL } from "../../config/consts";
+import Button from "../Button/Button";
 
 import "./confirmmodal.css";
 
@@ -9,6 +10,7 @@ interface ConfirmModalProps {
     onCancel: () => void;
     confirmLabel?: string;
     cancelLabel?: string;
+    confirmVariant?: "primary" | "secondary" | "danger";
 }
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -17,6 +19,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
     onCancel,
     confirmLabel = CONFIRM_MODAL.YES,
     cancelLabel = CONFIRM_MODAL.NO,
+    confirmVariant = "primary",
 }) => {
     const [closing, setClosing] = useState(false);
 
@@ -35,19 +38,16 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                 <p className="modal__text">{text}</p>
 
                 <div className="modal__buttons">
-                    <button
-                        className="modal__btn modal__yes"
-                        onClick={() => handleClose(onConfirm)}
-                    >
+                    <Button
+                        variant={confirmVariant}
+                        onClick={() => handleClose(onConfirm)}>
                         {confirmLabel}
-                    </button>
-
-                    <button
-                        className="modal__btn modal__no"
-                        onClick={() => handleClose(onCancel)}
-                    >
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        onClick={() => handleClose(onCancel)}>
                         {cancelLabel}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

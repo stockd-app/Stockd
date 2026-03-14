@@ -109,10 +109,12 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
             {showLogoutModal && (
                 <ConfirmModal
                     text={CONFIRM_LOGOUT_TEXT}
+                    confirmLabel="Log Out"
                     onConfirm={() => {
                         setShowLogoutModal(false);
                         handleLogout();
                     }}
+                    cancelLabel="Cancel"
                     onCancel={() => setShowLogoutModal(false)}
                 />
             )}
@@ -122,10 +124,12 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
                 <ConfirmModal
                     text={CONFIRM_DELETE_TEXT}
                     confirmLabel="Delete"
+                    confirmVariant="danger"
                     onConfirm={() => {
                         setShowDeleteModal(false);
                         handleDelete();
                     }}
+                    cancelLabel="Cancel"
                     onCancel={() => setShowDeleteModal(false)}
                 />
             )}

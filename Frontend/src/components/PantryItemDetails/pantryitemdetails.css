@@ -4,7 +4,7 @@
 .pid__overlay {
     position: fixed;
     inset: 0;
-    background: var(--color-dark-bg);
+    background: var(--color-bg);
     display: flex;
     justify-content: center;
     z-index: 999;
@@ -14,7 +14,7 @@
 .pid__modal {
     width: 100%;
     max-width: 430px;
-    background: var(--color-dark-bg);
+    background: var(--color-bg);
     padding: 2em;
 }
 
@@ -125,29 +125,7 @@
     display: flex;
     justify-content: space-between;
     margin-top: 25px;
-}
-
-
-.pid__save {
-    background: var(--color-primary);
-    color: var(--color-dark-text);
-    padding: 10px 30px;
-    border-radius: 10px;
-    border: none;
-    font-size: 16px;
-    font-weight: 600;
-    width: 100%;
-}
-
-.pid__delete {
-    background: var(--color-red);
-    color: var(--color-dark-text);
-    padding: 10px 30px;
-    border-radius: 10px;
-    font-size: 16px;
-    font-weight: 600;
-    margin-right: 10px;
-    width: 100%;
+    gap: 12px;
 }
 
 @media (min-width: 768px) {
@@ -164,7 +142,7 @@
     .pid__title {
         font-size: 28px;
     }
-    
+
     .pid__body {
         margin-top: 28px;
     }
@@ -186,13 +164,6 @@
 
     .pid__qty_box {
         gap: 18px;
-    }
-
-    .pid__save,
-    .pid__delete {
-        min-width: 140px;
-        padding: 14px 30px;
-        font-size: 17px;
     }
 }
 
@@ -218,7 +189,7 @@
     text-align: center;
 }
 
-.pid__input{
+.pid__input {
     text-align: left;
 }
 
@@ -251,7 +222,7 @@
     outline: none;
     transition: border-color 0.2s ease;
     width: stretch;
-    background-color: var(--color-overlay);
+    background-color: var(--color-input-overlay);
     color: var(--color-main-text);
 }
 

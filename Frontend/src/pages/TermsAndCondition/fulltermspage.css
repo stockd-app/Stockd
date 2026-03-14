@@ -3,7 +3,7 @@
 
 /* Entire page is white like Figma */
 .fullterms__container {
-    background: var(--color-dark-bg);
+    background: var(--color-bg);
     min-height: 100dvh;
     padding: 24px;
     text-align: justify;

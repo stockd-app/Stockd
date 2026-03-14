@@ -5,6 +5,7 @@ import { Trash2, Upload, Camera, ChevronLeft } from "lucide-react";
 import CameraModal from "../../components/CameraModal/CameraModal";
 import type { ConfirmPantryItem } from "../PantryItemConfirmationModal/PantryItemConfirmationModal";
 import PantryItemConfirmationModal from "../PantryItemConfirmationModal/PantryItemConfirmationModal";
+import Button from "../Button/Button";
 
 import "./receiptpreview.css";
 
@@ -122,24 +123,25 @@ const ReceiptPreview: React.FC = () => {
             />
 
             <div className="rp__header">
-                <button className="rp__back" onClick={() => navigate(-1)}>
+                <Button
+                    variant="back"
+                    onClick={() => navigate(-1)}>
                     <ChevronLeft size={22} />
-                </button>
+                </Button>
             </div>
 
             <div className="rp__content">
                 {mainImage && (
                     <div className="rp__previewCard">
                         <img src={mainImage.url} className="rp__image" />
-                        <button
+                        <Button
                             className="rp__delete"
+                            variant="secondary"
                             disabled={isUploading}
-                            onClick={() => handleDelete(mainImage.id)}
-                        >
+                            onClick={() => handleDelete(mainImage.id)}>
                             <Trash2 size={16} />
                             Delete
-                        </button>
-
+                        </Button>
                         {images.length > 1 && (
                             <div className="rp__count">
                                 {images.length} receipts selected
@@ -154,9 +156,13 @@ const ReceiptPreview: React.FC = () => {
                         {images.slice(1).map((img) => (
                             <div key={img.id} className="rp__secondaryCard">
                                 <img src={img.url} />
-                                <button onClick={() => handleDelete(img.id)}>
-                                    <Trash2 size={14} /> Delete
-                                </button>
+                                <Button
+                                    className="rp__delete"
+                                    variant="secondary"
+                                    onClick={() => handleDelete(img.id)}>
+                                    <Trash2 size={16} />
+                                    Delete
+                                </Button>
                             </div>
                         ))}
                     </div>
@@ -182,14 +188,12 @@ const ReceiptPreview: React.FC = () => {
                         </button>
                     </div>
                 </div>
-
-                <button
+                <Button
                     className="rp__recognition"
                     disabled={!images.length || isUploading}
-                    onClick={handleRecognition}
-                >
+                    onClick={handleRecognition}>
                     {isUploading ? "Processing..." : "Scan Receipt(s)"}
-                </button>
+                </Button>
             </div>
 
             {/* Camera Mdal */}

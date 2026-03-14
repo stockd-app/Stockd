@@ -2,7 +2,7 @@
 
 .rp__page {
     min-height: 120vh;
-    background: var(--color-dark-bg);
+    background: var(--color-bg);
     color: var(--color-main-text);
 }
 
@@ -11,16 +11,6 @@
     display: flex;
     align-items: center;
     padding: 0 16px;
-    color: var(--color-main-text);
-}
-
-.rp__back {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
     color: var(--color-main-text);
 }
 
@@ -52,6 +42,7 @@
 }
 
 .rp__delete {
+    width: auto !important;
     position: absolute;
     left: 14px;
     bottom: 14px;
@@ -148,24 +139,6 @@
 
 .rp__recognition {
     margin-top: 18px;
-    width: 160px;
-    height: 44px;
-    border-radius: 12px;
-    border: none;
-    background: var(--color-grey);
-    color: var(--color-dark-text);
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform 0.15s ease, opacity 0.15s ease;
-}
-
-.rp__recognition:active {
-    transform: scale(0.98);
-}
-
-.rp__recognition:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }
 
 .rp__secondaryList {
@@ -206,12 +179,6 @@
     .rp__header {
         height: 72px;
         padding: 0 24px;
-    }
-
-    .rp__back {
-        padding: 8px;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
     }
 
     .rp__content {

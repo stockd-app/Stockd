@@ -1,7 +1,7 @@
 :root {
     /* Default = Dark Mode */
-    /* --color-primary: #8ad348; */
-    /* --color-primary: #F28C28; */
+
+    /* Used primarily in buttons and etc */
     --color-primary: #ff6a1a;
     --color-secondary: #b5e3d9;
     --color-tertiary: #626262;
@@ -10,7 +10,9 @@
     --color-deep-blue: #3E5481;
     --color-dark-blue: #3977d3;
 
-    --color-dark-bg: #242020;
+    --color-bg: #242020;
+    --color-bg-overlay: rgba(51, 51, 51, 0.6);
+
     --color-grey: #e0e0e0;
     --color-dark-grey: #2C2626;
     --color-change-mode: #221e1e;
@@ -21,17 +23,21 @@
     --color-dark-text: #312b2b;
     --color-main-text: #ffffff;
     --color-grey-text: #d8d8d8;
+    --color-button-text: #ffffff;
     --color-light: #f1f3f4;
     --color-light-recipe: #f1f3f4;
-    --color-overlay: rgba(51, 51, 51, 0.6);
+    --color-input-overlay: rgba(51, 51, 51, 0.6);
 }
 
 body[data-theme="light"] {
-    --color-dark-bg: #F7F7F7;
+    --color-bg: #F7F7F7;
+    --color-bg-overlay: rgba(51, 51, 51, 0.6);
+
     --color-light: #d6d8d9;
     --color-dark-grey: #EFEFEF;
     --color-dark-text: #000000;
     --color-main-text: #000000;
     --color-grey-text: #272727;
-    --color-overlay: rgba(255, 255, 255, 0.6);
+    --color-button-text: #ffffff;
+    --color-input-overlay: rgba(255, 255, 255, 0.6);
 }

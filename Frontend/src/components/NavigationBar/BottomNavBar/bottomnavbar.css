@@ -7,7 +7,7 @@
   align-items: center;
   padding: 10px 0;
   border-top: 1px solid var(--color-grey);
-  background-color: var(--color-dark-bg);
+  background-color: var(--color-bg);
   position: fixed;
   bottom: 0;
   width: 100%;
@@ -55,7 +55,7 @@
 }
 
 .scan__button:hover {
-  background-color: var(--color-dark-bg);
+  background-color: var(--color-bg);
   color: var(--color-primary);
   transform: scale(1.1);
 }
@@ -109,7 +109,7 @@
 }
 
 .creation__modal {
-  background: var(--color-dark-bg);
+  background: var(--color-bg);
   color: var(--color-main-text);
   width: 100%;
   padding: 22px;
@@ -136,20 +136,10 @@
   margin-bottom: 18px;
 }
 
-.close__btn {
-  position: absolute;
-  right: 0;
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: var(--color-main-text);
-}
-
 .creation__button {
   width: 48%;
   padding: 14px;
-  background: var(--color-overlay);
+  background: var(--color-input-overlay);
   border-radius: 12px;
   border: none;
   font-size: 16px;

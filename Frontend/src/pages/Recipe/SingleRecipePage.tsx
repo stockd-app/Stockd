@@ -10,7 +10,7 @@ import LikeButton from "../../components/LikeButton/LikeButton";
 import { API_ROUTES } from "../../config/consts";
 import { useNotification } from "../../components/Notification/NotificationContext";
 import { NOTIFICATION_MESSAGES, NOTIFICATION_TYPES, GetNutritionItems } from "../../config/consts";
-
+import Button from "../../components/Button/Button";
 
 import "./singlerecipepage.css";
 
@@ -197,12 +197,11 @@ const SingleRecipePage: React.FC = () => {
     return (
         <div className="recipe__page">
             <div className="recipe__hero">
-                <button
+                <Button
+                    variant="back"
                     className="recipe__back recipe__back__overlay"
                     onClick={() => navigate(-1)}
-                    aria-label="Back" >
-                    <ArrowLeft size={22} />
-                </button>
+                    aria-label="Back" />
                 <img className="recipe__hero-img" src={imageUrl} alt={recipe.Name} />
                 <LikeButton
                     recipeId={recipe.RecipeId}
@@ -216,17 +215,17 @@ const SingleRecipePage: React.FC = () => {
                         <h1 className="recipe__title">{recipe.Name}</h1>
                     </div>
                     <div className="recipe__ratingRow">
-                    <span className="recipe__rating">
-                        {Array.from({ length: 5 }, (_, index) => (
-                            <Star
-                                key={index}
-                                size={16}
-                                color={index < recipe.AggregatedRating ? "#FFD700" : "#CCCCCC"}
-                                fill={index < recipe.AggregatedRating ? "#FFD700" : "none"}
-                            />
-                        ))}
-                        <span className="rating-number">{recipe.AggregatedRating}</span>
-                    </span>
+                        <span className="recipe__rating">
+                            {Array.from({ length: 5 }, (_, index) => (
+                                <Star
+                                    key={index}
+                                    size={16}
+                                    color={index < recipe.AggregatedRating ? "#FFD700" : "#CCCCCC"}
+                                    fill={index < recipe.AggregatedRating ? "#FFD700" : "none"}
+                                />
+                            ))}
+                            <span className="rating-number">{recipe.AggregatedRating}</span>
+                        </span>
                     </div>
                     <div className="recipe__meta__cards">
                         <div className="recipe__meta__card">
@@ -246,18 +245,18 @@ const SingleRecipePage: React.FC = () => {
                         </div>
                     </div>
                     <p className="recipe__description">{recipe.Description}</p>
-                    
+
                     <div className="recipe__nutrition">
-                    <h2 className="recipe__NutritionTitle">Nutritional Information</h2>
+                        <h2 className="recipe__NutritionTitle">Nutritional Information</h2>
                         <div className="recipe__nutritionGrid">
                             {nutritionItems.map((item) => (
                                 <div key={item.label} className="recipe__nutritionCard">
                                     <div className="recipe__nutritionTop">
                                         {item.icon && (
                                             <img
-                                            src={item.icon}
-                                            alt={item.label}
-                                            className="recipe__nutritionIcon"
+                                                src={item.icon}
+                                                alt={item.label}
+                                                className="recipe__nutritionIcon"
                                             />
                                         )}
                                         <span className="recipe__nutritionLabel">{item.label}</span>
@@ -340,9 +339,9 @@ const SingleRecipePage: React.FC = () => {
                     </section>
                     {missingIngredients.length === 0 && (
                         <div className="recipe__complete">
-                            <button className="complete__button" onClick={handleCompleteRecipe}>
+                            <Button variant="primary" onClick={handleCompleteRecipe}>
                                 Complete Recipe
-                            </button>
+                            </Button>
                         </div>
                     )}
                 </div>
