@@ -171,9 +171,7 @@ const SingleRecipePage: React.FC = () => {
             });
 
             const data = await res.json();
-
-            const groceryId = data.items?.[0]?.id; // adjust depending on API
-
+            const groceryId = data.items?.[0]?.id;
             setAddedToGrocery(prev => {
                 const newMap = new Map(prev);
                 newMap.set(normalize(name), groceryId);
