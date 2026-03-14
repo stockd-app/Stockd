@@ -7,6 +7,7 @@ import { CONFIRM_DELETE_TEXT, CONFIRM_LOGOUT_TEXT } from "../../config/consts";
 import DOMPurify from "dompurify";
 import AllergensModal from "../../components/AllergensModal/AllergensModal";
 import FeedbackModal from "../../components/FeedbackModal/FeedbackModal";
+import AccessibilityModal from "../../components/AccessibilityModal/AccessibilityModal";
 
 import "./profile.css";
 
@@ -24,6 +25,7 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showAllergensModal, setShowAllergensModal] = useState(false);
     const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+    const [showAccessibilityModal, setShowAccessibilityModal] = useState(false);
     const [initialAllergens, setInitialAllergens] = useState<string[]>([]);
 
     const handleDelete = async () => {
@@ -68,7 +70,7 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
 
             {/* Options */}
             <div className="profile__options">
-                <div className="profile__item">
+                <div className="profile__item" onClick={() => setShowAccessibilityModal(true)}>
                     <Accessibility className="profile__icon" size={22} />
                     <span>Accessibility</span>
                 </div>
@@ -113,6 +115,13 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
                     onClose={() => setShowFeedbackModal(false)}
                     userEmail={email}
                     userName={name}
+                />
+            )}
+
+            {/* Accessibility Modal */}
+            {showAccessibilityModal && (
+                <AccessibilityModal
+                    onClose={() => setShowAccessibilityModal(false)}
                 />
             )}
 
