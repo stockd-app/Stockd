@@ -152,7 +152,6 @@
 
 .accessibility__option.active {
     border-color: var(--color-primary);
-    background: var(--color-grey);
 }
 
 .accessibility__option-label {
