@@ -85,7 +85,7 @@ const ReceiptPreview: React.FC = () => {
             // 1 min delay for gif to load
             const [response] = await Promise.all([
                 uploadReceipt(files),
-                new Promise(resolve => setTimeout(resolve, 1000)) 
+                new Promise(resolve => setTimeout(resolve, 1000))
             ]);
 
             if (!response.items || response.items.length === 0) {
@@ -93,7 +93,22 @@ const ReceiptPreview: React.FC = () => {
                 return;
             }
 
-            setDetectedItems(response.items);
+            // merge duplicate items by normalized_name and storage
+            const mergedItems: { [key: string]: ConfirmPantryItem } = {};
+            
+            response.items.forEach((item: ConfirmPantryItem) => {
+                const key = `${item.normalized_name}_${item.storage}`;
+                
+                if (mergedItems[key]) {
+                    mergedItems[key].quantity_value += item.quantity_value;
+                } else {
+                    mergedItems[key] = { ...item };
+                }
+            });
+
+            const mergedItemsArray = Object.values(mergedItems);
+
+            setDetectedItems(mergedItemsArray);
             setShowConfirmation(true);
         } catch (err) {
             console.error("Recognition failed:", err);
