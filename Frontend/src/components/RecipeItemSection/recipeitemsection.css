@@ -2,6 +2,7 @@
 
 .recipeItemSection__container {
     padding: 0 16px;
+    margin-bottom: 30px;;
 }
 
 .recipeItemSection__header {
@@ -9,6 +10,7 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
+    color: var(--color-main-text);
 }
 
 .recipeItemSection__header h3 {
@@ -50,7 +52,7 @@
     height: 138px;
     border-radius: 16px;
     overflow: hidden;
-    background-color: var(--color-light);
+    background-color: var(--color-light-recipe);
     margin-top: 12px;
     padding: 16px;
     display: flex;
@@ -87,5 +89,5 @@
     font-weight: 500;
     margin-top: 4px;
     line-height: 1.4;
-    color: var(--color-dark-grey);
+    color: var(--color-tertiary);
 }

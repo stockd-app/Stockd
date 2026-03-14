@@ -26,7 +26,7 @@
   padding: 14px 22px;
   border-radius: 14px;
   border: 1px solid var(--color-grey);
-  background-color: var(--color-white);
+  background-color: var(--color-dark-bg);
   font-size: 15px;
   line-height: 1;
   cursor: pointer;
@@ -39,9 +39,9 @@
 }
 
 .pantryItemSection__bulkActionDeleteBtn:hover{
-  background: var(--color-dark-red);
+  background: var(--color-red);
   border-color: var(--color-red);
-  color: var(--color-white);
+  color: var(--color-dark-text);
   transition: background 270ms ease,
               border-color 270ms ease,
               color 300ms ease;

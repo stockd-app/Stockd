@@ -551,8 +551,9 @@ export const toggleLikeRecipe = async (recipeId: number) => {
   let idToken = localStorage.getItem("google_id_token");
 
   try {
+    console.log(API_ROUTES.TOGGLE_LIKE_RECIPE.replace(":recipeId", String(recipeId)))
+    console.log("Toggling like for recipe ID:", recipeId)
     const res = await axios.post(
-      // API_ROUTES.TOGGLE_LIKE_RECIPE(recipeId),
       API_ROUTES.TOGGLE_LIKE_RECIPE.replace(":recipeId", String(recipeId)),
       {},
       {

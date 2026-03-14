@@ -3,12 +3,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 24px 0;
+  margin-top: 2.5em;
   gap: 10px;
   border: 2px solid #0077ff;
   border-radius: 8px;
   background-color: white;
   color: #333;
-  padding: 12px 24px;
   width: 90%;
   max-width: 340px;
   cursor: pointer;

@@ -13,20 +13,17 @@
   align-items: center;
   flex: 1;
   max-width: 700px;
-
-  background: var(--color-white);
+  background: var(--color-light);
   border-radius: 14px;
-
   padding: 12px 16px;
   gap: 12px;
-
   border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Search icon styling */
 .searchbar__icon {
-  color: var(--color-dark-grey);
+  color: var(--color-tertiary);
 }
 
 /* Input text */
@@ -35,12 +32,12 @@
   outline: none;
   width: 100%;
   font-size: 17px;
-  color: var(--color-dark-grey);
+  color: var(--color-dark-text);
   background: transparent;
 }
 
 .searchbar__profile-button:hover {
-  background-color: var(--color-light);
+  background-color: var(--color-grey);
   color: var(--color-primary);
   box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
   transform: scale(1.05);
@@ -51,7 +48,7 @@
 }
 
 .searchbar__input::placeholder {
-  color: var(--color-dark-grey);
+  color: var(--color-dark-text);
 }
 
 /* Small screens (mobile) */

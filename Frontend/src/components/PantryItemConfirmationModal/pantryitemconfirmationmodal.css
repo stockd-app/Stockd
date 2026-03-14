@@ -11,7 +11,7 @@
 }
 
 .pcm__modal {
-    background: var(--color-white);
+    background: var(--color-dark-bg);
     width: 95%;
     max-width: 480px;
     border-radius: 16px;
@@ -72,7 +72,7 @@
 
 .pcm__confirm {
     background: var(--color-primary);
-    color: var(--color-white);
+    color: var(--color-dark-text);
     border: none;
     padding: 8px 16px;
     border-radius: 8px;

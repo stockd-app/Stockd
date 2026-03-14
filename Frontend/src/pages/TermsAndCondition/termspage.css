@@ -1,17 +1,18 @@
 @import "@/styles/variable.css";
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
 
 .terms__container {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100dvh;
-    background: var(--color-light);
+    background: var(--color-dark-bg);
 }
 
 .terms__card {
     width: 70dvw;
     max-width: 380px;
-    background: var(--color-white);
+    background: var(--color-dark-bg);
     padding: 24px;
     border-radius: 16px;
     box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.08);
@@ -28,13 +29,14 @@
     border: none;
     font-size: 20px;
     cursor: pointer;
+    color: var(--color-main-text);
 }
 
 .terms__title {
     font-size: 1.4rem;
     font-weight: 600;
     margin-bottom: 12px;
-    color: var(--color-dark);
+    color: var(--color-main-text);
 }
 
 /* Logo styling */
@@ -49,20 +51,22 @@
     color: var(--color-primary);
     margin-top: 4px;
     margin-bottom: 8px;
+    font-family: 'Righteous', cursive;
 }
 
 .terms__text {
     text-align: left;
     font-size: 0.95rem;
-    color: var(--color-dark-grey);
+    color: var(--color-grey-text);
     margin-top: 12px;
 }
 
 .terms__link {
-    color: var(--color-primary);
+    color: var(--color-dark-blue);
     margin: 14px 0;
     font-size: 0.95rem;
     cursor: pointer;
+    text-decoration: underline;
 }
 
 .terms__checkbox {
@@ -81,7 +85,7 @@
     border: none;
     border-radius: 8px;
     background: var(--color-tertiary);
-    color: var(--color-white);
+    color: var(--color-dark-text);
     cursor: not-allowed;
     transition: 0.3s;
 }
