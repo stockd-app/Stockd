@@ -6,6 +6,7 @@ import { deleteUserAccount, handleLogout, getUserAllergens, updateUserAllergens 
 import { CONFIRM_DELETE_TEXT, CONFIRM_LOGOUT_TEXT } from "../../config/consts";
 import DOMPurify from "dompurify";
 import AllergensModal from "../../components/AllergensModal/AllergensModal";
+import FeedbackModal from "../../components/FeedbackModal/FeedbackModal";
 
 import "./profile.css";
 
@@ -22,6 +23,7 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showAllergensModal, setShowAllergensModal] = useState(false);
+    const [showFeedbackModal, setShowFeedbackModal] = useState(false);
     const [initialAllergens, setInitialAllergens] = useState<string[]>([]);
 
     const handleDelete = async () => {
@@ -76,7 +78,7 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
                     <span>Legal, Data and Privacy</span>
                 </div>
 
-                <div className="profile__item">
+                <div className="profile__item" onClick={() => setShowFeedbackModal(true)}>
                     <MessageSquare className="profile__icon" size={22} />
                     <span>Feedback</span>
                 </div>
@@ -102,6 +104,15 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
                     initial={initialAllergens}
                     onConfirm={handleAllergensConfirm}
                     onClose={() => setShowAllergensModal(false)}
+                />
+            )}
+
+            {/* Feedback Modal */}
+            {showFeedbackModal && (
+                <FeedbackModal
+                    onClose={() => setShowFeedbackModal(false)}
+                    userEmail={email}
+                    userName={name}
                 />
             )}
 
