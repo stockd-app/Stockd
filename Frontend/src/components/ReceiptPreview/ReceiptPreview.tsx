@@ -5,6 +5,7 @@ import { Trash2, Upload, Camera, ChevronLeft } from "lucide-react";
 import CameraModal from "../../components/CameraModal/CameraModal";
 import type { ConfirmPantryItem } from "../PantryItemConfirmationModal/PantryItemConfirmationModal";
 import PantryItemConfirmationModal from "../PantryItemConfirmationModal/PantryItemConfirmationModal";
+import receiptGif from "../../assets/images/receipt.gif";
 
 import "./receiptpreview.css";
 
@@ -21,6 +22,7 @@ const ReceiptPreview: React.FC = () => {
 
     const [showCamera, setShowCamera] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [scanError, setScanError] = useState(false);
 
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [detectedItems, setDetectedItems] = useState<ConfirmPantryItem[]>([]);
@@ -78,11 +80,12 @@ const ReceiptPreview: React.FC = () => {
 
             console.log("Uploading:", files);
             setIsUploading(true);
+            setScanError(false);
 
             const response = await uploadReceipt(files);
 
             if (!response.items || response.items.length === 0) {
-                alert("No items detected.");
+                setScanError(true);
                 return;
             }
 
@@ -90,7 +93,7 @@ const ReceiptPreview: React.FC = () => {
             setShowConfirmation(true);
         } catch (err) {
             console.error("Recognition failed:", err);
-            alert("Failed to recognize receipt. Please try again.");
+            setScanError(true);
         } finally {
             setIsUploading(false);
         }
@@ -203,8 +206,28 @@ const ReceiptPreview: React.FC = () => {
             {/* Loading indicator */}
             {isUploading && (
                 <div className="uploading__overlay">
-                    <div className="spinner"></div>
+                    <img src={receiptGif} alt="Scanning receipt" className="receipt__gif" />
                     <p className="loading__text">AI is scanning your receipt…</p>
+                </div>
+            )}
+
+            {/* Error modal */}
+            {scanError && (
+                <div className="error__overlay" onClick={() => setScanError(false)}>
+                    <div className="error__modal" onClick={(e) => e.stopPropagation()}>
+                        <img
+                            src="https://t3.ftcdn.net/jpg/16/96/38/40/360_F_1696384050_HFgZ4cK9R3z0iUjEjhfAchZeYBR2yADc.jpg"
+                            alt="Try again"
+                            className="error__image"
+                        />
+                        <h3 className="error__title">Oops!</h3>
+                        <p className="error__message">
+                            Sorry, we couldn't parse your receipt. Please try again later.
+                        </p>
+                        <button className="error__button" onClick={() => setScanError(false)}>
+                            Close
+                        </button>
+                    </div>
                 </div>
             )}
 
