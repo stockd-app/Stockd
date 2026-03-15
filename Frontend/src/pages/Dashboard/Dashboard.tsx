@@ -240,7 +240,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         emptySubtitle={"Add More Ingredients To Your Pantry To Unlock New Recipes!"}
       />
 
-      <RecipeItemSection title="Some Ingredients Needed"
+      <RecipeItemSection
+        title="Some Ingredients Needed"
         items={filteredIncompleteRecipes}
         onItemClick={(recipeId: number) => {
           navigate(`/recipes/${recipeId}`);
@@ -250,7 +251,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         emptySubtitle={"Add ingredients by uploading a receipt or other methods!"}
       />
 
-      <RecipeItemSection title="Based On Your Liked Recipes"
+      <RecipeItemSection
+        title="Based On Your Liked Recipes"
         items={filteredLikedRecommendedRecipes}
         onItemClick={(recipeId: number) => {
           navigate(`/recipes/${recipeId}`);
@@ -259,7 +261,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         emptyTitle={"No Liked Recipe Recommendations Yet!"}
         emptySubtitle={"Like A Few Recipes To Get Personalized Recommendations!"}
       />
-      <RecipeItemSection title="Other Users Have Tried These"
+      <RecipeItemSection
+        title="Other Users Have Tried These"
         items={filteredCollaborativeRecipes}
         onItemClick={(recipeId: number) => {
           navigate(`/recipes/${recipeId}`);

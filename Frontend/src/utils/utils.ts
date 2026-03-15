@@ -1,5 +1,5 @@
 import type { Recipe } from "../pages/Dashboard/Dashboard";
-import image_placeholder from "../assets/images/error_handling/image_placeholder.png"
+import recipe_placeholder_white from "../assets/images/error_handling/recipe_placeholder_white.png";
 import DOMPurify from "dompurify";
 
 /**
@@ -85,7 +85,7 @@ export const applyAllergenFilter = (recipes: Recipe[]) => {
 export const formatRecipes = (recipes: any[]) =>
     recipes.map((recipe: any, index: number) => {
         const hasImages = Array.isArray(recipe.Images) && recipe.Images.length > 0;
-        const imageUrl = hasImages ? recipe.Images[0] : image_placeholder;
+        const imageUrl = hasImages ? recipe.Images[0] : recipe_placeholder_white;
 
         return {
             id: Number(recipe.RecipeId) || index + 1,

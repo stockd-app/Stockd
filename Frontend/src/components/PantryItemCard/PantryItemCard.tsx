@@ -1,5 +1,5 @@
 import React from "react";
-import image_placeholder from "../../assets/images/error_handling/image_placeholder.png"
+import pantry_placeholder from "../../assets/images/error_handling/recipe_placeholder_white.png"
 import { useLongPress } from "../../utils/useLongPress";
 import { Square, SquareCheckBig } from "lucide-react";
 
@@ -16,7 +16,7 @@ interface PantryItemCardProps {
 }
 
 const PantryItemCard: React.FC<PantryItemCardProps> = ({ name, qty, image, onClick, isSelecting, selected, onLongPress }) => {
-    const displayImage = image && image.trim() !== "" ? image : image_placeholder;
+    const displayImage = image && image.trim() !== "" ? image : pantry_placeholder;
     const { handlers, wasLongPressed } = useLongPress(() => {
         onLongPress?.();
     }, 450);
@@ -48,8 +48,8 @@ const PantryItemCard: React.FC<PantryItemCardProps> = ({ name, qty, image, onCli
                     onError={(e) => {
                         // If image fails to load, use fallback
                         const target = e.target as HTMLImageElement;
-                        if (target.src !== image_placeholder) {
-                            target.src = image_placeholder;
+                        if (target.src !== pantry_placeholder) {
+                            target.src = pantry_placeholder;
                         }
                     }}
                 />

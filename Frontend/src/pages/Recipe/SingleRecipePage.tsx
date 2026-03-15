@@ -3,14 +3,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getRecipeById, getLikedRecipes, getPantryItems, completeRecipe } from "../../services/api";
 import { getIngredientIcon } from "../../utils/ingredientIconMap";
 import { Clock, Star, ArrowLeft } from "lucide-react";
-import image_placeholder from "../../assets/images/error_handling/image_placeholder.png";
+import recipe_placeholder_white from "../../assets/images/error_handling/recipe_placeholder_white.png"
 import { formatPrepTime } from "../../utils/utils";
 import { parseQuantity, resolveIngredientDisplay } from "../../utils/ingredientUnit";
 import LikeButton from "../../components/LikeButton/LikeButton";
 import { API_ROUTES } from "../../config/consts";
 import { useNotification } from "../../components/Notification/NotificationContext";
 import { NOTIFICATION_MESSAGES, NOTIFICATION_TYPES, GetNutritionItems } from "../../config/consts";
-
 
 import "./singlerecipepage.css";
 
@@ -32,7 +31,6 @@ const SingleRecipePage: React.FC = () => {
     const [pantryNames, setPantryNames] = useState<string[]>([]);
     const [missingIngredients, setMissingIngredients] = useState<string[]>([]);
     const [addedToGrocery, setAddedToGrocery] = useState<Map<string, number>>(new Map());
-    const difficulty = recipe?.Keywords?.find((kw: string) => ["easy", "medium", "hard"].includes(kw.toLowerCase())) ?? "—";
     const isInPantry = (ingredient: string, pantry: string[]) => {
         const normIng = normalize(ingredient);
         return pantry.some(
@@ -249,7 +247,7 @@ const SingleRecipePage: React.FC = () => {
     if (loading) return <div>Loading...</div>;
     if (!recipe) return <div>Recipe not found</div>;
 
-    const imageUrl = recipe.Images?.[0] || image_placeholder;
+    const imageUrl = recipe.Images?.[0] || recipe_placeholder_white;
     const nutritionItems = GetNutritionItems(recipe);
 
     return (
@@ -273,6 +271,16 @@ const SingleRecipePage: React.FC = () => {
                     <div className="recipe__titleRow">
                         <h1 className="recipe__title">{recipe.Name}</h1>
                     </div>
+                    <div className="recipe__source">
+                        Recipe obtained from{" "}
+                        <a
+                            href="https://www.food.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Food.com
+                        </a>
+                    </div>
                     <div className="recipe__ratingRow">
                         <span className="recipe__rating">
                             {Array.from({ length: 5 }, (_, index) => (
@@ -293,14 +301,6 @@ const SingleRecipePage: React.FC = () => {
                                 {formatPrepTime(recipe.TotalTime)}
                             </div>
                             <div className="recipe__meta__label">Cook time</div>
-                        </div>
-                        <div className="recipe__meta__card recipe__meta__card__secondary">
-                            {/* <div className="recipe__meta__value">
-                                <Clock size={16} />
-                                {formatPrepTime(recipe.TotalTime)}
-                            </div> */}
-                            <div className="recipe__meta__value">{difficulty}</div>
-                            <div className="recipe__meta__label">Difficulty</div>
                         </div>
                     </div>
                     <p className="recipe__description">{recipe.Description}</p>
@@ -400,6 +400,18 @@ const SingleRecipePage: React.FC = () => {
                             )}
                         </ol>
                     </section>
+
+                    <div className="recipe__source recipe__source__bottom">
+                        Recipe obtained from{" "}
+                        <a
+                            href="https://www.food.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Food.com
+                        </a>
+                    </div>
+
                     {missingIngredients.length === 0 && (
                         <div className="recipe__complete">
                             <button className="complete__button" onClick={handleCompleteRecipe}>

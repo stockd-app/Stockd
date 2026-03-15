@@ -6,7 +6,7 @@ import { applyAllergenFilter, formatRecipes, isoDurationToMinutes, isSameRange }
 import { TIME_RANGES } from "../../config/consts";
 import FilterDrawer from "../../components/FilterDrawer/FilterDrawer";
 import FilterChip from "../../components/FilterChip/FilterChip";
-import RecipeItemCard from "../../components/RecipeItemCard/RecipeItemCard";
+import RecipeListCard from "../../components/RecipeListCard/RecipeListCard";
 
 import "./pantryrecipelistpage.css";
 
@@ -128,7 +128,7 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
                     </p>
                 ) : (
                     filteredRecipes.map(recipe => (
-                        <RecipeItemCard
+                        <RecipeListCard
                             key={recipe.id}
                             name={recipe.name}
                             image={recipe.image}

@@ -39,15 +39,15 @@
 
 .pantryRecipes__grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 14px;
     padding: 16px;
 }
 
 .no-results {
-  grid-column: 1 / -1;
-  text-align: center;
-  margin-top: 40px;
-  font-size: 16px;
-  color: var(--color-dark-grey);
+    grid-column: 1 / -1;
+    text-align: center;
+    margin-top: 40px;
+    font-size: 16px;
+    color: var(--color-dark-grey);
 }

@@ -2,7 +2,7 @@
 
 .recipeItemSection__container {
     padding: 0 16px;
-    margin-bottom: 30px;;
+    margin-bottom: 30px;
 }
 
 .recipeItemSection__header {
@@ -36,14 +36,14 @@
 
 .recipeItemSection__items_scroll {
     display: flex;
-    gap: 16px;
+    gap: 5px;
     overflow-x: auto;
     padding-top: 12px;
     scrollbar-width: none;
 }
 
 .recipeItemSection__items_scroll .recipeitemcard {
-  width: 150px;
+    width: 150px;
 }
 
 .recipeItemSection__empty {
