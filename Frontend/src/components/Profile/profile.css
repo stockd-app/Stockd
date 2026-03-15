@@ -1,7 +1,7 @@
 @import "@/styles/variable.css";
 
 .profile__button {
-    background: var(--color-dark-bg);
+    background: var(--color-bg);
     border: 1px solid rgba(0, 0, 0, 0.08);
     color: var(--color-main-text);
     cursor: pointer;
@@ -21,7 +21,7 @@
 }
 
 .profile__button:hover {
-    background-color: var(--color-dark-bg);
+    background-color: var(--color-bg);
     color: var(--color-primary);
     box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
     transform: scale(1.05);

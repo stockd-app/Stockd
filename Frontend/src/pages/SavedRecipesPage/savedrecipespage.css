@@ -2,7 +2,7 @@
 
 .savedRecipes__container {
   min-height: 100vh;
-  background: var(--color-dark-bg);
+  background: var(--color-bg);
   color: var(--color-main-text);
   padding-bottom: 40px;
 }

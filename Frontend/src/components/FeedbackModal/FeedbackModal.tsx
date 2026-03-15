@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { X, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import { FEEDBACK_RECIPIENTS } from "../../config/consts";
+import Button from "../Button/Button";
 import "./feedbackmodal.css";
 
 interface FeedbackModalProps {
@@ -54,7 +55,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
       setIsSuccess(true);
       setTimeout(() => {
         onClose();
-      }, 2000);
+      }, 5000);
     } catch (error) {
       console.error("Error sending feedback:", error);
       alert("Failed to send feedback. Please try again.");
@@ -84,9 +85,9 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   return (
     <div className="feedback__overlay" onClick={onClose}>
       <div className="feedback__modal" onClick={(e) => e.stopPropagation()}>
-        <button className="feedback__close" onClick={onClose}>
-          <X size={24} />
-        </button>
+        <Button
+          variant="close"
+          onClick={onClose} />
 
         <h2 className="feedback__title">Send Us Your Feedback</h2>
         <p className="feedback__subtitle">
@@ -151,12 +152,10 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
               rows={6}
             />
           </div>
-
-          <button
+          <Button
             type="submit"
             className="feedback__submit"
-            disabled={isSubmitting}
-          >
+            disabled={isSubmitting} >
             {isSubmitting ? (
               "Sending..."
             ) : (
@@ -165,7 +164,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                 Send Feedback
               </>
             )}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

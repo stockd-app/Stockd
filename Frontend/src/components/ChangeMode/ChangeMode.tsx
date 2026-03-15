@@ -1,19 +1,24 @@
 import { Sun, Moon } from "lucide-react";
-import { useEffect, useState } from "react";
 import "./changemode.css";
 
-const ChangeMode: React.FC = () => {
-  const [theme, setTheme] = useState(
-    localStorage.getItem("theme") || "dark"
-  );
+/* 
+  Props for the ChangeMode component 
+*/
+interface ChangeModeProps {
+  theme: string;
+  setTheme: React.Dispatch<React.SetStateAction<string>>;
+}
 
-  useEffect(() => {
-    document.body.dataset.theme = theme;
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
+/**
+ * A toggle switch for switching between light and dark themes.
+ * @param param0 ]
+ * @returns 
+ */
+const ChangeMode: React.FC<ChangeModeProps> = ({ theme, setTheme }) => {
   const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
+    const newTheme = theme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
   };
 
   return (

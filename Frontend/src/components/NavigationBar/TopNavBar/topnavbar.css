@@ -3,9 +3,8 @@
 /*  Top Navigation */
 .topnav__container {
   padding: 1rem 1rem 0 1rem;
-  background-color: var(--color-dark-bg);
+  background-color: var(--color-bg);
   padding-bottom: 1.5rem;
-  /* border-bottom: #000 3px solid; */
 }
 
 .topnav__logo-search {
@@ -33,7 +32,7 @@
 
 .topnav__search:focus {
   box-shadow: 0 0 0 2px var(--color-secondary);
-  background-color: var(--color-dark-bg);
+  background-color: var(--color-bg);
 }
 
 .topnav__profile {
