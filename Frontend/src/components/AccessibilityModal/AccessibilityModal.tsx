@@ -1,19 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { X, Type } from "lucide-react";
+import { TEXT_SIZE_OPTIONS } from "../../config/consts";
+import type { TextSize, TextSizeOption } from "../../config/consts";
 import "./accessibilitymodal.css";
 
 interface AccessibilityModalProps {
     onClose: () => void;
 }
-
-type TextSize = "small" | "medium" | "large" | "xlarge";
-
-const TEXT_SIZE_OPTIONS = [
-    { value: "small" as TextSize, label: "Small", scale: 0.875 },
-    { value: "medium" as TextSize, label: "Medium", scale: 1 },
-    { value: "large" as TextSize, label: "Large", scale: 1.125 },
-    { value: "xlarge" as TextSize, label: "Extra Large", scale: 1.25 },
-];
 
 const AccessibilityModal: React.FC<AccessibilityModalProps> = ({ onClose }) => {
     const [selectedSize, setSelectedSize] = useState<TextSize>("medium");
@@ -24,7 +17,7 @@ const AccessibilityModal: React.FC<AccessibilityModalProps> = ({ onClose }) => {
         const savedSize = localStorage.getItem("text_size") as TextSize;
         if (savedSize) {
             setSelectedSize(savedSize);
-            const option = TEXT_SIZE_OPTIONS.find(opt => opt.value === savedSize);
+            const option = TEXT_SIZE_OPTIONS.find((opt: TextSizeOption) => opt.value === savedSize);
             if (option) {
                 setPreviewScale(option.scale);
             }
@@ -35,7 +28,7 @@ const AccessibilityModal: React.FC<AccessibilityModalProps> = ({ onClose }) => {
         setSelectedSize(size);
         
         // update preview only
-        const option = TEXT_SIZE_OPTIONS.find(opt => opt.value === size);
+        const option = TEXT_SIZE_OPTIONS.find((opt: TextSizeOption) => opt.value === size);
         if (option) {
             setPreviewScale(option.scale);
         }
@@ -45,7 +38,7 @@ const AccessibilityModal: React.FC<AccessibilityModalProps> = ({ onClose }) => {
         // aave to localStorage and apply the text size when Done is clicked
         localStorage.setItem("text_size", selectedSize);
         
-        const option = TEXT_SIZE_OPTIONS.find(opt => opt.value === selectedSize);
+        const option = TEXT_SIZE_OPTIONS.find((opt: TextSizeOption) => opt.value === selectedSize);
         if (option) {
             document.documentElement.style.setProperty("--text-scale", option.scale.toString());
         }
@@ -75,7 +68,7 @@ const AccessibilityModal: React.FC<AccessibilityModalProps> = ({ onClose }) => {
                     </p>
 
                     <div className="accessibility__options">
-                        {TEXT_SIZE_OPTIONS.map((option) => (
+                        {TEXT_SIZE_OPTIONS.map((option: TextSizeOption) => (
                             <button
                                 key={option.value}
                                 className={`accessibility__option ${

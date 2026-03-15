@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { X, Send } from "lucide-react";
+import { FEEDBACK_RECIPIENTS } from "../../config/consts";
 import "./feedbackmodal.css";
 
 interface FeedbackModalProps {
@@ -39,13 +40,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
 
     try {
       // send feedback via mailto (opens email client)
-      const recipients = [
-        "d00253215@student.dkit.ie",
-        "d00262135@student.dkit.ie",
-        "D00262370@student.dkit.ie",
-        "D00252640@student.dkit.ie",
-        "D00251825@student.dkit.ie",
-      ].join(",");
+      const recipients = FEEDBACK_RECIPIENTS.join(",");
 
       const subject = encodeURIComponent(
         `Stockd Feedback: ${formData.subject}`,
