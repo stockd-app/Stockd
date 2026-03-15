@@ -5,8 +5,10 @@ import "./pantryitemconfirmationmodal.css";
 export interface ConfirmPantryItem {
     id?: number;
     item_name: string;
+    normalized_name?: string;
     quantity_value: number;
     storage: string;
+    category?: string;
 }
 
 interface Props {
