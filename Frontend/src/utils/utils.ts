@@ -92,9 +92,9 @@ export const formatRecipes = (recipes: any[]) =>
             name: DOMPurify.sanitize(recipe.Name || "Unnamed Recipe"),
             image: imageUrl,
             rating: Number(recipe.AggregatedRating) || 0.0,
-            rawTime: recipe.PrepTime,
+            rawTime: recipe.TotalTime,
             category: recipe.RecipeCategory || "Uncategorised",
-            time: formatPrepTime(recipe.PrepTime),
+            time: formatPrepTime(recipe.TotalTime),
             allergens: recipe.Allergens ?? [],
         };
     });

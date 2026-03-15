@@ -27,8 +27,9 @@
 }
 
 .recipe__hero {
-  position: relative;
-  z-index: 1;
+  position: sticky;
+  top: 100px;
+  z-index: 0;
   width: 100%;
   overflow: hidden;
 }
