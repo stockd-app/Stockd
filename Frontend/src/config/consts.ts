@@ -1,5 +1,4 @@
 import { Check, Pencil, Trash2, Heart, HeartOff, CircleCheckBig, CircleAlert } from "lucide-react";
-
 // Common Allergens Icons (Separation for readability)
 import {
   Wheat,
@@ -155,3 +154,22 @@ export const GetNutritionItems = (recipe: any) => [
   { label: "Protein", value: recipe.ProteinContent, unit: "g", icon: "https://cdn-icons-png.flaticon.com/512/3024/3024310.png" },
   { label: "Fiber", value: recipe.FiberContent, unit: "g", icon: "https://cdn-icons-png.flaticon.com/512/18433/18433150.png" },
 ];
+
+// Accessibility settings
+export type TextSize = "small" | "medium" | "large" | "xlarge";
+
+export interface TextSizeOption {
+  value: TextSize;
+  label: string;
+  scale: number;
+}
+
+export const TEXT_SIZE_OPTIONS: TextSizeOption[] = [
+  { value: "small", label: "Small", scale: 0.875 },
+  { value: "medium", label: "Medium", scale: 1 },
+  { value: "large", label: "Large", scale: 1.125 },
+  { value: "xlarge", label: "Extra Large", scale: 1.25 },
+];
+
+// take feedback recipients from env 
+export const FEEDBACK_RECIPIENTS = import.meta.env.STOCKD_DEVELOPER_EMAILS?.split(',') || [];

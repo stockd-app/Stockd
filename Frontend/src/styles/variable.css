@@ -27,6 +27,71 @@
     --color-light: #f1f3f4;
     --color-light-recipe: #f1f3f4;
     --color-input-overlay: rgba(51, 51, 51, 0.6);
+
+    /* ============================================  
+       values for scaling:
+       - 0.875 = Small
+       - 1.0   = Medium (default)
+       - 1.125 = Large
+       - 1.25  = Extra Large
+    */
+    --text-scale: 1;
+}
+
+html {
+    font-size: calc(16px * var(--text-scale)) !important;
+}
+
+/* ensure body inherits the scaled font size */
+body {
+    font-size: 1rem !important;
+}
+
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+div,
+a,
+button,
+input,
+textarea,
+select,
+label,
+li,
+td,
+th {
+    font-size: 1em !important;
+}
+
+.no-scale,
+.no-scale * {
+    font-size: 16px !important;
+}
+
+.no-scale-sm,
+.no-scale-sm * {
+    font-size: 14px !important;
+}
+
+.no-scale-base,
+.no-scale-base * {
+    font-size: 16px !important;
+}
+
+.no-scale-lg,
+.no-scale-lg * {
+    font-size: 18px !important;
+}
+
+.no-scale-xl,
+.no-scale-xl * {
+    font-size: 20px !important;
 }
 
 body[data-theme="light"] {
