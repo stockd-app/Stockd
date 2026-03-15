@@ -50,12 +50,15 @@ const RecipeListCard: React.FC<RecipeListCardProps> = ({
                     )}
                 </div>
                 {allergens && allergens.length > 0 && (
-                    <div className="recipelistcard__allergens">
-                        {allergens.map((a) => (
-                            <span key={a} className="recipelistcard__allergen">
-                                {a}
-                            </span>
-                        ))}
+                    <div className="recipelistcard__allergenSection">
+                        <span className="recipelistcard__allergenLabel">Contains:</span>
+                        <div className="recipelistcard__allergens">
+                            {allergens.map((a) => (
+                                <span key={a} className="recipelistcard__allergen">
+                                    {a}
+                                </span>
+                            ))}
+                        </div>
                     </div>
                 )}
             </div>

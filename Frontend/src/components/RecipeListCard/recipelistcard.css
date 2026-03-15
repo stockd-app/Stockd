@@ -68,10 +68,20 @@
     color: var(--color-main-text);
 }
 
+.recipelistcard__allergenSection {
+    margin-top: 6px;
+}
+
+.recipelistcard__allergenLabel {
+    font-size: 12px;
+    color: var(--color-grey-text);
+    margin-right: 6px;
+    font-weight: 600;
+}
+
 .recipelistcard__allergens {
     display: flex;
     flex-wrap: wrap;
-    margin-top: 6px;
 }
 
 .recipelistcard__allergen {
