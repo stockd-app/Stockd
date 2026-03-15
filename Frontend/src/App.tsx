@@ -28,6 +28,21 @@ const App: React.FC = () => {
   const [showAddItem, setShowAddItem] = useState(false);
   const location = useLocation();
 
+  // load saved text size from localstorage
+  useEffect(() => {
+    const savedTextSize = localStorage.getItem("text_size");
+    if (savedTextSize) {
+      const sizeMap: { [key: string]: number } = {
+        small: 0.875,
+        medium: 1,
+        large: 1.125,
+        xlarge: 1.25,
+      };
+      const scale = sizeMap[savedTextSize] || 1;
+      document.documentElement.style.setProperty("--text-scale", scale.toString());
+    }
+  }, []);
+
   // Recheck whenever localStorage changes (login/logout)
   useEffect(() => {
     const handleStorageChange = () => {
