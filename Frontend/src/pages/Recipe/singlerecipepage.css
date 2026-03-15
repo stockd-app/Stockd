@@ -1,5 +1,63 @@
 @import "@/styles/variable.css";
 
+.recipe__section__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.recipe__unit__toggle {
+    display: flex;
+    gap: 8px;
+    background-color: var(--color-dark-grey);
+    border-radius: 8px;
+    padding: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.recipe__unit__btn {
+    padding: 6px 16px;
+    border: none;
+    background-color: transparent;
+    color: var(--color-grey-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    min-width: 50px;
+}
+
+.recipe__unit__btn:hover {
+    background-color: var(--color-tertiary);
+}
+
+.recipe__unit__btn.active {
+    background-color: var(--color-primary);
+    color: white;
+    box-shadow: 0 2px 4px rgba(255, 106, 26, 0.3);
+}
+
+.recipe__unit__btn:focus {
+    outline: 2px solid var(--primary-color, #4CAF50);
+    outline-offset: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .recipe__section__header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .recipe__unit__toggle {
+        align-self: flex-end;
+    }
+}
+
 .recipe__page {
   width: 100%;
   background-color: var(--color-dark-bg);
@@ -267,6 +325,12 @@
   gap: 4px;
   font-weight: 600;
   align-items: center
+}
+
+.ingredient__full {
+  font-weight: 500;
+  color: var(--color-main-text);
+  flex: 1;
 }
 
 .ingredient__unit {
