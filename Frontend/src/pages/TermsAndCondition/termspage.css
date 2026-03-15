@@ -70,6 +70,7 @@
 }
 
 .terms__checkbox {
+    color: var(--color-main-text);
     display: flex;
     align-items: center;
     gap: 10px;

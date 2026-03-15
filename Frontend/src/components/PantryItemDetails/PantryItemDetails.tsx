@@ -81,13 +81,7 @@ const PantryItemDetails: React.FC<PantryItemDetailProps> = ({
             <div className="pid__modal">
 
                 <div className="pid__header">
-                    <button
-                        className="pid__back"
-                        onClick={onClose}
-                        aria-label="Go back"
-                    >
-                        <ArrowLeft size={22} />
-                    </button>
+                    <Button variant="back" onClick={onClose} />
 
                     <h2 className="pid__title">
                         {id === 0 ? "Add Pantry Item" : "Pantry Item"}

@@ -89,7 +89,14 @@ const App: React.FC = () => {
 
   // Also recheck on route change
   useEffect(() => {
-    setUser(localStorage.getItem("user"));
+    const currentUser = localStorage.getItem("user");
+    setUser(currentUser);
+
+    if (currentUser) {
+      document.body.classList.add("has-bottom-nav");
+    } else {
+      document.body.classList.remove("has-bottom-nav");
+    }
   }, [location.pathname]);
 
   return (

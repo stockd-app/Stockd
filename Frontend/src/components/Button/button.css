@@ -71,8 +71,8 @@
 
 .custom-button.close {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 16px;
+    right: 16px;
     background: transparent;
     color: var(--color-main-text);
     font-size: 20px;
