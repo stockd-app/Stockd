@@ -1,6 +1,7 @@
 import React from "react";
 import StockdLogo from "../../assets/images/StockdLogo.svg";
 import { useNavigate } from "react-router-dom";
+import Button from "../../components/Button/Button";
 
 import "./fulltermspage.css";
 
@@ -15,9 +16,10 @@ const FullTermsPage: React.FC = () => {
         <div className="fullterms__container">
 
             {/* Back Button */}
-            <button className="fullterms__back" onClick={() => navigate(-1)}>
-                ← Back
-            </button>
+            <Button
+                variant="back"
+                onClick={() => navigate(-1)}
+            />
 
             {/* Header */}
             <div className="fullterms__header">

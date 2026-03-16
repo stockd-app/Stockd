@@ -3,11 +3,11 @@
 
 /* Entire page is white like Figma */
 .fullterms__container {
-    background: var(--color-dark-bg);
+    background: var(--color-bg);
     min-height: 100dvh;
     padding: 24px;
     text-align: justify;
-    margin-bottom: 5em;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
 }
 
 /* Back button */
@@ -82,4 +82,8 @@
     color: var(--color-grey-text);
     margin-bottom: 8px;
     line-height: 1.5;
+}
+
+body.has-bottom-nav .fullterms__container {
+    padding-bottom: 100px;
 }

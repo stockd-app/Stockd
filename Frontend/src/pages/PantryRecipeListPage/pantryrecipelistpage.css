@@ -2,7 +2,7 @@
 
 .pantryRecipes__container {
     min-height: 100vh;
-    background: var(--color-dark-bg);
+    background: var(--color-bg);
     padding-bottom: 40px;
 }
 
@@ -26,6 +26,30 @@
     pointer-events: none;
     /* prevents overlap issues */
 }
+
+/* Filter */
+
+.filter__section h4 {
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.filter__section {
+    margin-bottom: 20px;
+}
+
+.filter__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.filter__actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+}
+
 
 .backBtn,
 .filterIcon {

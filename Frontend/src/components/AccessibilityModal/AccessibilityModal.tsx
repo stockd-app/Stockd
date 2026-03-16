@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { X, Type } from "lucide-react";
+import { Type } from "lucide-react";
 import { TEXT_SIZE_OPTIONS } from "../../config/consts";
 import type { TextSize, TextSizeOption } from "../../config/consts";
+import Button from "../Button/Button";
 import "./accessibilitymodal.css";
 
 interface AccessibilityModalProps {
@@ -26,7 +27,7 @@ const AccessibilityModal: React.FC<AccessibilityModalProps> = ({ onClose }) => {
 
     const handleSizeChange = (size: TextSize) => {
         setSelectedSize(size);
-        
+
         // update preview only
         const option = TEXT_SIZE_OPTIONS.find((opt: TextSizeOption) => opt.value === size);
         if (option) {
@@ -37,21 +38,22 @@ const AccessibilityModal: React.FC<AccessibilityModalProps> = ({ onClose }) => {
     const handleDone = () => {
         // aave to localStorage and apply the text size when Done is clicked
         localStorage.setItem("text_size", selectedSize);
-        
+
         const option = TEXT_SIZE_OPTIONS.find((opt: TextSizeOption) => opt.value === selectedSize);
         if (option) {
             document.documentElement.style.setProperty("--text-scale", option.scale.toString());
         }
-        
+
         onClose();
     };
 
     return (
         <div className="accessibility__overlay" onClick={onClose}>
             <div className="accessibility__modal no-scale" onClick={(e) => e.stopPropagation()}>
-                <button className="accessibility__close" onClick={onClose}>
-                    <X size={24} />
-                </button>
+                <Button
+                    variant="close"
+                    className="accessibility__close"
+                    onClick={onClose} />
 
                 <div className="accessibility__header">
                     <Type size={32} className="accessibility__header-icon" />
@@ -71,9 +73,8 @@ const AccessibilityModal: React.FC<AccessibilityModalProps> = ({ onClose }) => {
                         {TEXT_SIZE_OPTIONS.map((option: TextSizeOption) => (
                             <button
                                 key={option.value}
-                                className={`accessibility__option ${
-                                    selectedSize === option.value ? "active" : ""
-                                }`}
+                                className={`accessibility__option ${selectedSize === option.value ? "active" : ""
+                                    }`}
                                 onClick={() => handleSizeChange(option.value)}
                             >
                                 <div className="accessibility__option-label">
@@ -100,9 +101,11 @@ const AccessibilityModal: React.FC<AccessibilityModalProps> = ({ onClose }) => {
                 </div>
 
                 <div className="accessibility__footer">
-                    <button className="accessibility__done" onClick={handleDone}>
+                    <Button
+                        variant="primary"
+                        onClick={handleDone}>
                         Done
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

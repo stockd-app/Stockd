@@ -11,7 +11,7 @@
 }
 
 .pcm__modal {
-    background: var(--color-dark-bg);
+    background: var(--color-bg);
     width: 95%;
     max-width: 480px;
     border-radius: 16px;

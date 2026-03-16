@@ -43,6 +43,41 @@ const App: React.FC = () => {
     }
   }, []);
 
+  /**
+   * Detects the user's system theme preference (dark or light).
+   * @returns 
+   */
+  const getSystemTheme = () =>
+    window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+
+  /**
+   * Determines the initial theme to use based on localStorage or system preference.
+   */
+  const getInitialTheme = () => {
+    const saved = localStorage.getItem("theme");
+    return saved ? saved : getSystemTheme();
+  };
+
+  const [theme, setTheme] = useState(getInitialTheme);
+
+  useEffect(() => {
+    document.body.dataset.theme = theme;
+  }, [theme]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      if (!localStorage.getItem("theme")) {
+        setTheme(e.matches ? "dark" : "light");
+      }
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
   // Recheck whenever localStorage changes (login/logout)
   useEffect(() => {
     const handleStorageChange = () => {
@@ -54,12 +89,19 @@ const App: React.FC = () => {
 
   // Also recheck on route change
   useEffect(() => {
-    setUser(localStorage.getItem("user"));
+    const currentUser = localStorage.getItem("user");
+    setUser(currentUser);
+
+    if (currentUser) {
+      document.body.classList.add("has-bottom-nav");
+    } else {
+      document.body.classList.remove("has-bottom-nav");
+    }
   }, [location.pathname]);
 
   return (
     <>
-      {user && <TopNavBar />}
+      {user && <TopNavBar theme={theme} setTheme={setTheme} />}
 
       <Routes>
         {/* If user exists, go to dashboard */}
@@ -92,7 +134,7 @@ const App: React.FC = () => {
           path="/pantry-recommend-liked-recipes"
           element={user ? <LikedRecipeRecPage /> : <Navigate to="/" replace />}
         />
-        <Route 
+        <Route
           path="/pantry-collaborative-recipes"
           element={user ? <CollaborativeRecipeRecPage /> : <Navigate to="/" replace />}
         />

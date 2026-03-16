@@ -3,20 +3,63 @@
 
 /* Container for the entire landing page */
 .landingPage__container {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100dvh;
   width: 100dvw;
-  padding-top: 3em;
-  background-color: var(--color-dark-bg);
+  background-color: var(--color-bg);
   color: var(--color-dark-text);
   font-family: 'Righteous', cursive;
   text-align: center;
   transition: all 0.3s ease-in-out;
-  background-image: url("../../assets/images/login_page/login_bg.jpg"); 
+  overflow: hidden;
 }
+
+/* Content above background */
+.landingPage__content {
+  z-index: 2;
+  text-align: center;
+  padding-top: 3em;
+}
+
+/* Background images */
+.bg-top-left,
+.bg-top-right,
+.bg-bottom-left,
+.bg-bottom-right {
+  position: absolute;
+  z-index: 1;
+  opacity: 0.9;
+}
+
+/* Corners */
+.bg-top-left {
+  top: -38px;
+  left: -20px;
+  width: 180px;
+}
+
+.bg-top-right {
+  top: 0;
+  right: -60px;
+  width: 220px;
+}
+
+.bg-bottom-left {
+  bottom: 0;
+  left: 0;
+  width: 180px;
+}
+
+.bg-bottom-right {
+  bottom: 0;
+  right: -50px;
+  width: 300px;
+}
+
 
 /* Stockd Title */
 .landingPage__header {
