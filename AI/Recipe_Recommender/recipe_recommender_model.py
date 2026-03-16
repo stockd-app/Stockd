@@ -104,6 +104,20 @@ if not os.path.exists(ALLERGENS_CSV_PATH):
 
 df = pd.read_parquet(DATA_PATH)
 df = df.copy()
+df = df.head(20000)
+
+print(f"Initial dataset size: {len(df)}")
+
+def has_valid_images(images):
+    if images is None:
+        return False
+    if isinstance(images, (list, np.ndarray, pd.Series)):
+        return any(isinstance(img, str) and img.strip() != "" for img in images)
+    return False
+
+df = df[df["Images"].apply(has_valid_images)]
+
+print(f"Dataset size after removing recipes without images: {len(df)} rows")
 
 # create a clean list of ingredients specifically for allergen detection
 df['ingredients_list'] = df['RecipeIngredientParts'].apply(prepare_ingredients_for_allergens)
@@ -124,8 +138,7 @@ df['Allergens'] = df['ingredients_list'].apply(
 # convert RecipeId to int to match IDs from likedrecipes
 df["RecipeId"] = df["RecipeId"].astype(int)
 
-df = df.head(5000) # limit to 5000 recipes for faster testing. full 500k dataset will probably take 1-2 hours to compute. only need to compute once before prod
-
+df = df.head(20000)
 # print("Sample RecipeIds in df:", df["RecipeId"].tolist()[:10])
 
 # join each list in recipeingredientparts into a single string
