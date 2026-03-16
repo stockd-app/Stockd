@@ -4,9 +4,10 @@ import type { PantryItem } from "../PantryItemSection/PantryItemSection";
 import { addOrUpdatePantryItem, deletePantryItems } from "../../services/api";
 import { useNotification } from "../Notification/NotificationContext";
 import { CONFIRM_DELETE_PANTRY_ITEM, NOTIFICATION_MESSAGES, NOTIFICATION_TYPES } from "../../config/consts";
+import ConfirmModal from "../ConfirmModal/ConfirmModal";
+import Button from "../Button/Button";
 
 import "./pantryitemdetails.css";
-import ConfirmModal from "../ConfirmModal/ConfirmModal";
 
 interface PantryItemDetailProps extends PantryItem {
     onClose: () => void;
@@ -80,13 +81,7 @@ const PantryItemDetails: React.FC<PantryItemDetailProps> = ({
             <div className="pid__modal">
 
                 <div className="pid__header">
-                    <button
-                        className="pid__back"
-                        onClick={onClose}
-                        aria-label="Go back"
-                    >
-                        <ArrowLeft size={22} />
-                    </button>
+                    <Button variant="back" onClick={onClose} />
 
                     <h2 className="pid__title">
                         {id === 0 ? "Add Pantry Item" : "Pantry Item"}
@@ -179,10 +174,15 @@ const PantryItemDetails: React.FC<PantryItemDetailProps> = ({
 
                 <div className="pid__footer">
                     {id !== 0 && (
-                        <button className="pid__delete" onClick={() => setShowConfirmDelete(true)}> Delete </button>
+                        <Button
+                            onClick={() => setShowConfirmDelete(true)}
+                            variant="danger"
+                        >
+                            Delete
+                        </Button>
                     )}
 
-                    <button className="pid__save" onClick={handleSave}>Done</button>
+                    <Button onClick={handleSave} variant="primary"> Done </Button>
                 </div>
 
                 {showConfirmDelete && (

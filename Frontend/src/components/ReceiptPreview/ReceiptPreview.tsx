@@ -5,7 +5,9 @@ import { Trash2, Upload, Camera, ChevronLeft } from "lucide-react";
 import CameraModal from "../../components/CameraModal/CameraModal";
 import type { ConfirmPantryItem } from "../PantryItemConfirmationModal/PantryItemConfirmationModal";
 import PantryItemConfirmationModal from "../PantryItemConfirmationModal/PantryItemConfirmationModal";
-import receiptGif from "../../assets/images/receipt.gif";
+import receiptGif from "../../assets/images/receipt_gif.gif";
+import try_again from "../../assets/images/error_handling/try_again.png";
+import Button from "../Button/Button";
 
 import "./receiptpreview.css";
 
@@ -95,10 +97,10 @@ const ReceiptPreview: React.FC = () => {
 
             // merge duplicate items by normalized_name and storage
             const mergedItems: { [key: string]: ConfirmPantryItem } = {};
-            
+
             response.items.forEach((item: ConfirmPantryItem) => {
                 const key = `${item.normalized_name}_${item.storage}`;
-                
+
                 if (mergedItems[key]) {
                     mergedItems[key].quantity_value += item.quantity_value;
                 } else {
@@ -144,24 +146,25 @@ const ReceiptPreview: React.FC = () => {
             />
 
             <div className="rp__header">
-                <button className="rp__back" onClick={() => navigate(-1)}>
+                <Button
+                    variant="back"
+                    onClick={() => navigate(-1)}>
                     <ChevronLeft size={22} />
-                </button>
+                </Button>
             </div>
 
             <div className="rp__content">
                 {mainImage && (
                     <div className="rp__previewCard">
                         <img src={mainImage.url} className="rp__image" />
-                        <button
+                        <Button
                             className="rp__delete"
+                            variant="secondary"
                             disabled={isUploading}
-                            onClick={() => handleDelete(mainImage.id)}
-                        >
+                            onClick={() => handleDelete(mainImage.id)}>
                             <Trash2 size={16} />
                             Delete
-                        </button>
-
+                        </Button>
                         {images.length > 1 && (
                             <div className="rp__count">
                                 {images.length} receipts selected
@@ -176,9 +179,13 @@ const ReceiptPreview: React.FC = () => {
                         {images.slice(1).map((img) => (
                             <div key={img.id} className="rp__secondaryCard">
                                 <img src={img.url} />
-                                <button onClick={() => handleDelete(img.id)}>
-                                    <Trash2 size={14} /> Delete
-                                </button>
+                                <Button
+                                    className="rp__delete"
+                                    variant="secondary"
+                                    onClick={() => handleDelete(img.id)}>
+                                    <Trash2 size={16} />
+                                    Delete
+                                </Button>
                             </div>
                         ))}
                     </div>
@@ -204,14 +211,12 @@ const ReceiptPreview: React.FC = () => {
                         </button>
                     </div>
                 </div>
-
-                <button
+                <Button
                     className="rp__recognition"
                     disabled={!images.length || isUploading}
-                    onClick={handleRecognition}
-                >
+                    onClick={handleRecognition}>
                     {isUploading ? "Processing..." : "Scan Receipt(s)"}
-                </button>
+                </Button>
             </div>
 
             {/* Camera Mdal */}
@@ -235,7 +240,7 @@ const ReceiptPreview: React.FC = () => {
                 <div className="error__overlay" onClick={() => setScanError(false)}>
                     <div className="error__modal" onClick={(e) => e.stopPropagation()}>
                         <img
-                            src="https://t3.ftcdn.net/jpg/16/96/38/40/360_F_1696384050_HFgZ4cK9R3z0iUjEjhfAchZeYBR2yADc.jpg"
+                            src={try_again}
                             alt="Try again"
                             className="error__image"
                         />
@@ -243,9 +248,9 @@ const ReceiptPreview: React.FC = () => {
                         <p className="error__message">
                             Sorry, we couldn't parse your receipt. Please try again later.
                         </p>
-                        <button className="error__button" onClick={() => setScanError(false)}>
+                        <Button onClick={() => setScanError(false)}>
                             Close
-                        </button>
+                        </Button>
                     </div>
                 </div>
             )}

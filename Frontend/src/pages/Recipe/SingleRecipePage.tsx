@@ -11,7 +11,7 @@ import { API_ROUTES } from "../../config/consts";
 import { useNotification } from "../../components/Notification/NotificationContext";
 import { formatQuantityUnit } from "../../utils/unitStandardizer";
 import { NOTIFICATION_MESSAGES, NOTIFICATION_TYPES, GetNutritionItems } from "../../config/consts";
-
+import Button from "../../components/Button/Button";
 
 import "./singlerecipepage.css";
 
@@ -257,12 +257,11 @@ const SingleRecipePage: React.FC = () => {
     return (
         <div className="recipe__page">
             <div className="recipe__hero">
-                <button
+                <Button
+                    variant="back"
                     className="recipe__back recipe__back__overlay"
                     onClick={() => navigate(-1)}
-                    aria-label="Back" >
-                    <ArrowLeft size={22} />
-                </button>
+                    aria-label="Back" />
                 <img className="recipe__hero-img" src={imageUrl} alt={recipe.Name} />
                 <LikeButton
                     recipeId={recipe.RecipeId}
@@ -476,9 +475,9 @@ const SingleRecipePage: React.FC = () => {
                     </section>
                     {missingIngredients.length === 0 && (
                         <div className="recipe__complete">
-                            <button className="complete__button" onClick={handleCompleteRecipe}>
+                            <Button variant="primary" onClick={handleCompleteRecipe}>
                                 Complete Recipe
-                            </button>
+                            </Button>
                         </div>
                     )}
                 </div>

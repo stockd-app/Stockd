@@ -11,14 +11,14 @@
   height: 2em;
 }
 
-.pantryItemSection__bulkActionsTrack{
+.pantryItemSection__bulkActionsTrack {
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
   margin: 15px 0 15px 0;
 }
 
-.pantryItemSection__bulkActionBtn{
+.pantryItemSection__bulkActionBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -26,28 +26,28 @@
   padding: 14px 22px;
   border-radius: 14px;
   border: 1px solid var(--color-grey);
-  background-color: var(--color-dark-bg);
+  background-color: var(--color-bg);
   font-size: 15px;
   line-height: 1;
   cursor: pointer;
   white-space: nowrap;
 }
 
-.pantryItemSection__bulkActionIcon{
+.pantryItemSection__bulkActionIcon {
   width: 22px;
   height: 22px;
 }
 
-.pantryItemSection__bulkActionDeleteBtn:hover{
+.pantryItemSection__bulkActionDeleteBtn:hover {
   background: var(--color-red);
   border-color: var(--color-red);
   color: var(--color-dark-text);
   transition: background 270ms ease,
-              border-color 270ms ease,
-              color 300ms ease;
+    border-color 270ms ease,
+    color 300ms ease;
 }
 
-.pantryItemSection__bulkActionBtn:disabled{
+.pantryItemSection__bulkActionBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -68,21 +68,21 @@
     height: 0.7em;
   }
 
-  .pantryItemSection__bulkActionsTrack{
+  .pantryItemSection__bulkActionsTrack {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
 
-  .pantryItemSection__bulkActionBtn{
+  .pantryItemSection__bulkActionBtn {
     width: 100%;
-    min-height: 44px;   
+    min-height: 44px;
     padding: 10px 8px;
     font-size: 12px;
     border-radius: 14px;
   }
 
-  .pantryItemSection__bulkActionIcon{
+  .pantryItemSection__bulkActionIcon {
     width: 16px;
     height: 16px;
   }

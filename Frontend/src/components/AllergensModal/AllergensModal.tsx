@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Button from "../Button/Button";
 import { X } from "lucide-react";
 import { COMMON_ALLERGENS } from "../../config/consts";
 
@@ -54,12 +55,12 @@ const AllergensModal: React.FC<Props> = ({
           ))}
         </div>
 
-        <button
-          className="modal__confirm"
+        <Button
+          variant="primary"
           onClick={() => onConfirm(selected)}
         >
           Confirm
-        </button>
+        </Button>
       </div>
     </div>
   );

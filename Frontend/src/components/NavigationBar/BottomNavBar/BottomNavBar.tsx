@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   Home,
   Refrigerator,
-  Bookmark,
   List,
   Camera,
   PencilLine,
@@ -13,6 +12,7 @@ import {
 } from "lucide-react";
 import { BOTTOM_NAV_ICON_SIZE } from "../../../config/consts";
 import CameraModal from "../../CameraModal/CameraModal";
+import Button from "../../Button/Button";
 
 import "./bottomnavbar.css";
 import "@/styles/variable.css";
@@ -213,7 +213,7 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ onManualAdd }) => {
           <div className="creation__modal">
             <div className="creation__modal__header">
               <h3>Choose Creation Method</h3>
-              <button className="close__btn" onClick={() => setShowCreationOptions(false)}>✕</button>
+              <Button variant="close" onClick={() => setShowCreationOptions(false)} aria-label="Close creation options" />
             </div>
 
             <button className="creation__button large" onClick={handleTakePhoto}>

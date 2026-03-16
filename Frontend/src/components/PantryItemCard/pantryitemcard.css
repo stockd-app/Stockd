@@ -27,7 +27,7 @@
     align-items: center;
     border-radius: 1em;
     overflow: hidden;
-    background-color: var(--color-dark-bg);
+    background-color: var(--color-bg);
 }
 
 .pantryitemcard:hover .pantryitemcard__container {

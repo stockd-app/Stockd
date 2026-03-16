@@ -10,8 +10,7 @@
   border-radius: 8px;
   background-color: white;
   color: #333;
-  width: 90%;
-  max-width: 340px;
+  width: 100%;
   cursor: pointer;
   transition: all 0.25s ease;
 }
