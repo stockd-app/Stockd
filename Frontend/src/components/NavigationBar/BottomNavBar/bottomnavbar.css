@@ -6,8 +6,8 @@
   justify-content: space-evenly;
   align-items: center;
   padding: 10px 0;
-  border-top: 2px solid var(--color-grey);
-  background-color: var(--color-white);
+  border-top: 1px solid var(--color-grey);
+  background-color: var(--color-bg);
   position: fixed;
   bottom: 0;
   width: 100%;
@@ -22,7 +22,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: var(--color-tertiary);
+  color: var(--color-main-text);
   font-size: 0.7rem;
   text-align: center;
   transition: color 0.2s ease;
@@ -31,7 +31,7 @@
 }
 
 .bottomnav__item.active {
-  color: var(--color-cyan);
+  color: var(--color-primary);
 }
 
 /* Central Scan Button */
@@ -40,8 +40,8 @@
   position: absolute;
   /*  lifts it halfway above the bar */
   top: -2px;
-  background-color: var(--color-cyan);
-  color: var(--color-white);
+  background-color: var(--color-primary);
+  color: #fff;
   padding: 14px;
   border-radius: 50%;
   margin-top: -25px;
@@ -55,8 +55,8 @@
 }
 
 .scan__button:hover {
-  background-color: var(--color-white);
-  color: var(--color-cyan);
+  background-color: var(--color-bg);
+  color: var(--color-primary);
   transform: scale(1.1);
 }
 
@@ -66,7 +66,7 @@
 
 /* Active and hover feedback */
 .bottomnav__item:hover {
-  color: var(--color-cyan);
+  color: var(--color-primary);
 }
 
 .bottomnav__item:active {
@@ -80,7 +80,7 @@
   position: absolute;
   bottom: 15px;
   height: 3px;
-  background-color: var(--color-cyan);
+  background-color: var(--color-primary);
   border-radius: 3px;
   transition:
     left 0.35s cubic-bezier(0.22, 1, 0.36, 1),
@@ -109,7 +109,8 @@
 }
 
 .creation__modal {
-  background: white;
+  background: var(--color-bg);
+  color: var(--color-main-text);
   width: 100%;
   padding: 22px;
   border-radius: 20px 20px 0 0;
@@ -135,19 +136,10 @@
   margin-bottom: 18px;
 }
 
-.close__btn {
-  position: absolute;
-  right: 0;
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-}
-
 .creation__button {
   width: 48%;
   padding: 14px;
-  background: #f4f4f4;
+  background: var(--color-input-overlay);
   border-radius: 12px;
   border: none;
   font-size: 16px;
@@ -167,4 +159,18 @@
 .creation__row {
   display: flex;
   justify-content: space-between;
+}
+
+.icon__wrapper {
+  position: relative;
+}
+
+.notification__dot {
+  position: absolute;
+  top: -2px;
+  right: -6px;
+  width: 8px;
+  height: 8px;
+  background: var(--color-primary);
+  border-radius: 50%;
 }

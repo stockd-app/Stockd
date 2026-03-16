@@ -1,12 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, CheckSquare2, Square, Trash2, X } from "lucide-react";
+import { CheckSquare2, Square, Trash2, X } from "lucide-react";
 import PantryItemCard from "../../components/PantryItemCard/PantryItemCard";
 import PantryItemDetails from "../../components/PantryItemDetails/PantryItemDetails";
 import type { PantryItem } from "../../components/PantryItemSection/PantryItemSection";
 import { getPantryItems, deletePantryItems } from "../../services/api";
 import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
 import { CONFIRM_DELETE_PANTRY_ITEM } from "../../config/consts";
+import Button from "../../components/Button/Button";
 
 import "./pantrysectionlistpage.css";
 
@@ -96,13 +97,9 @@ const PantrySectionListPage: React.FC<PantrySectionListPageProps> = ({
         <>
             <div className="pantrySection__container">
                 <div className="pantrySection__header">
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="pantrySection__back"
-                        aria-label="Go back"
-                    >
-                        <ArrowLeft size={22} />
-                    </button>
+                    <Button
+                        variant="back"
+                        onClick={() => navigate(-1)} />
 
                     <h2 className="pantrySection__title">{title}</h2>
 

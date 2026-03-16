@@ -1,0 +1,237 @@
+@import "@/styles/variable.css";
+
+.feedback__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.feedback__modal {
+  background: var(--color-bg);
+  border-radius: 20px;
+  padding: 32px 24px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.feedback__title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-main-text);
+  margin-bottom: 8px;
+}
+
+.feedback__subtitle {
+  font-size: 14px;
+  color: var(--color-grey-text);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.feedback__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.feedback__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.feedback__field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-main-text);
+}
+
+.feedback__field input,
+.feedback__field select,
+.feedback__field textarea {
+  padding: 12px 16px;
+  border: 2px solid var(--color-grey);
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--color-bg);
+  color: var(--color-main-text);
+  transition: border-color 0.2s ease;
+}
+
+.feedback__field input:focus,
+.feedback__field select:focus,
+.feedback__field textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.feedback__field textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.feedback__field input::placeholder,
+.feedback__field textarea::placeholder {
+  color: var(--color-grey-text);
+}
+
+.feedback__submit {
+  margin-top: 8px;
+  padding: 14px 24px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease,
+    background 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.feedback__submit:hover:not(:disabled) {
+  background: #ff7a2a;
+}
+
+.feedback__submit:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.feedback__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Success State */
+.feedback__modal.success {
+  text-align: center;
+  padding: 48px 32px;
+}
+
+.feedback__success-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+  background: var(--color-green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  color: white;
+  animation: scaleIn 0.4s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+.feedback__modal.success h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-main-text);
+  margin-bottom: 12px;
+}
+
+.feedback__modal.success p {
+  font-size: 16px;
+  color: var(--color-grey-text);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.feedback__success-subtext {
+  font-size: 14px;
+  color: var(--color-grey-text);
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .feedback__modal {
+    padding: 40px 32px;
+  }
+
+  .feedback__title {
+    font-size: 28px;
+  }
+
+  .feedback__subtitle {
+    font-size: 15px;
+  }
+
+  .feedback__field label {
+    font-size: 15px;
+  }
+
+  .feedback__field input,
+  .feedback__field select,
+  .feedback__field textarea {
+    padding: 14px 18px;
+    font-size: 15px;
+  }
+
+  .feedback__submit {
+    padding: 16px 32px;
+    font-size: 17px;
+  }
+
+  .feedback__modal.success {
+    padding: 56px 40px;
+  }
+
+  .feedback__success-icon {
+    width: 100px;
+    height: 100px;
+    font-size: 60px;
+  }
+
+  .feedback__modal.success h2 {
+    font-size: 32px;
+  }
+
+  .feedback__modal.success p {
+    font-size: 17px;
+  }
+}

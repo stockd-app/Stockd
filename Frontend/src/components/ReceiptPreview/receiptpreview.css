@@ -1,8 +1,10 @@
 @import "@/styles/variable.css";
 
 .rp__page {
-    min-height: 120vh;
-    background: var(--color-white);
+    min-height: 100vh;
+    background: var(--color-bg);
+    color: var(--color-main-text);
+    padding-bottom: 80px;
 }
 
 .rp__header {
@@ -10,12 +12,7 @@
     display: flex;
     align-items: center;
     padding: 0 16px;
-}
-
-.rp__back {
-    background: none;
-    border: none;
-    cursor: pointer;
+    color: var(--color-main-text);
 }
 
 .rp__spacer {
@@ -26,6 +23,7 @@
     max-width: 430px;
     margin: 0 auto;
     padding: 0 18px 24px;
+    overflow-y: auto;
 }
 
 .rp__previewCard {
@@ -46,6 +44,7 @@
 }
 
 .rp__delete {
+    width: auto !important;
     position: absolute;
     left: 14px;
     bottom: 14px;
@@ -54,10 +53,12 @@
     gap: 8px;
     padding: 10px 12px;
     border-radius: 12px;
-    border: 1px solid var(--color-white);
-    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid var(--color-grey);
+    color: var(--color-dark-text);
+    background: var(--color-grey);
     cursor: pointer;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
+    font-weight: 600;
 }
 
 .rp__delete:active {
@@ -70,19 +71,20 @@
     top: 12px;
     padding: 6px 10px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.92);
+    background: var(--color-grey);
     font-size: 12px;
-    color: var(--color-dark-grey);
+    color: var(--color-dark-text);
+    font-weight: 600;
 }
 
 .rp__empty {
-    color: var(--color-dark-grey);
+    color: var(--color-grey-text);
     font-weight: 600;
 }
 
 .rp__addMore {
     margin-top: 18px;
-    border: 2px dashed var(--color-primary);
+    border: 2px dashed var(--color-main-text);
     border-radius: 14px;
     padding: 16px;
     text-align: center;
@@ -95,7 +97,7 @@
 
 .rp__addHint {
     font-size: 12px;
-    color: var(--color-dark-grey);
+    color: var(--color-grey-text);
     line-height: 1.35;
     margin-bottom: 14px;
 }
@@ -120,7 +122,7 @@
 
     font-weight: 600;
     font-size: 13px;
-    color: var(--color-dark);
+    color: var(--color-dark-text);
 
     cursor: pointer;
     transition: transform 0.15s ease, background 0.15s ease;
@@ -141,24 +143,6 @@
 
 .rp__recognition {
     margin-top: 18px;
-    width: 160px;
-    height: 44px;
-    border-radius: 12px;
-    border: none;
-    background: var(--color-primary);
-    color: var(--color-white);
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform 0.15s ease, opacity 0.15s ease;
-}
-
-.rp__recognition:active {
-    transform: scale(0.98);
-}
-
-.rp__recognition:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }
 
 .rp__secondaryList {
@@ -189,8 +173,221 @@
     padding: 8px 10px;
     border-radius: 10px;
     border: 1px solid var(--color-grey);
-    background: rgba(255, 255, 255, 0.92);
+    background: var(--color-grey);
+    color: var(--color-dark-text);
     display: flex;
     align-items: center;
     gap: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.rp__secondaryCard button:active {
+    transform: scale(0.98);
+}
+
+@media (min-width: 768px) {
+    .rp__header {
+        height: 72px;
+        padding: 0 24px;
+    }
+
+    .rp__content {
+        max-width: 620px;
+        padding: 0 28px 32px;
+    }
+
+    .rp__previewCard {
+        height: 420px;
+        border-radius: 18px;
+    }
+
+    .rp__delete {
+        left: 18px;
+        bottom: 18px;
+        padding: 12px 16px;
+        border-radius: 14px;
+        font-size: 15px;
+    }
+
+    .rp__count {
+        right: 16px;
+        top: 16px;
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    .rp__secondaryList {
+        margin-top: 16px;
+        gap: 16px;
+    }
+
+    .rp__secondaryCard {
+        height: 220px;
+        border-radius: 18px;
+    }
+
+    .rp__secondaryCard button {
+        left: 16px;
+        bottom: 16px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        font-size: 14px;
+    }
+
+    .rp__addMore {
+        margin-top: 24px;
+        border-radius: 18px;
+        padding: 24px;
+    }
+
+    .rp__addMore h4 {
+        font-size: 22px;
+        margin-bottom: 10px;
+    }
+
+    .rp__addMore p {
+        font-size: 15px;
+        line-height: 1.5;
+        margin-bottom: 18px;
+    }
+
+    .rp__actions {
+        gap: 16px;
+    }
+
+    .rp__actionBtn {
+        min-height: 120px;
+        border-radius: 18px;
+        gap: 10px;
+        font-size: 16px;
+    }
+
+    .rp__actionBtn svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .rp__recognition {
+        margin: 24px auto 0;
+        max-width: 320px;
+        height: 56px;
+        border-radius: 16px;
+        font-size: 18px;
+    }
+}
+
+/* Loading overlay */
+.uploading__overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    gap: 24px;
+    overflow: hidden;
+}
+
+.receipt__gif {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 20px rgba(255, 106, 26, 0.5));
+    opacity: 0.95;
+    flex-shrink: 0;
+}
+
+.loading__text {
+    color: var(--color-main-text);
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+    padding: 0 20px;
+}
+
+/* Error overlay */
+.error__overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.error__modal {
+    background: var(--color-bg);
+    border-radius: 20px;
+    padding: 32px 24px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.error__image {
+    width: 180px;
+    height: 180px;
+    object-fit: contain;
+    border-radius: 12px;
+}
+
+.error__title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-main-text);
+    margin-bottom: 12px;
+}
+
+.error__message {
+    font-size: 16px;
+    color: var(--color-grey-text);
+    line-height: 1.5;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .receipt__gif {
+        width: 250px;
+        height: 250px;
+    }
+
+    .loading__text {
+        font-size: 20px;
+    }
+
+    .error__modal {
+        padding: 40px 32px;
+    }
+
+    .error__image {
+        width: 220px;
+        height: 220px;
+    }
+
+    .error__title {
+        font-size: 28px;
+    }
+
+    .error__message {
+        font-size: 18px;
+    }
 }

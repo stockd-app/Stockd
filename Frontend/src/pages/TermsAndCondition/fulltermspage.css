@@ -1,11 +1,13 @@
 @import "@/styles/variable.css";
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
 
 /* Entire page is white like Figma */
 .fullterms__container {
-    background: white;
+    background: var(--color-bg);
     min-height: 100dvh;
     padding: 24px;
     text-align: justify;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
 }
 
 /* Back button */
@@ -15,7 +17,9 @@
     font-size: 1rem;
     cursor: pointer;
     margin-bottom: 12px;
-    color: var(--color-dark);
+    margin-left: -20px;
+    margin-top: -20px;
+    color: var(--color-main-text);
 }
 
 /* Header */
@@ -27,7 +31,7 @@
 .fullterms__title {
     font-size: 1.2rem;
     font-weight: 600;
-    color: var(--color-dark);
+    color: var(--color-main-text);
     margin: 16px 0;
 }
 
@@ -40,6 +44,7 @@
 /* Stockd title under logo */
 .fullterms__stockd {
     font-size: 1.4rem;
+    font-family: 'Righteous', cursive;
     font-weight: 600;
     color: var(--color-primary);
     margin-bottom: 4px;
@@ -55,14 +60,14 @@
 
 /* Content */
 .fullterms__content h4 {
-    color: var(--color-dark);
+    color: var(--color-main-text);
     font-size: 1.05rem;
     margin-top: 22px;
     font-weight: 600;
 }
 
 .fullterms__content p {
-    color: var(--color-dark-grey);
+    color: var(--color-grey-text);
     line-height: 1.6;
     margin-top: 8px;
     font-size: 0.95rem;
@@ -74,7 +79,11 @@
 }
 
 .fullterms__content ul li {
-    color: var(--color-dark-grey);
+    color: var(--color-grey-text);
     margin-bottom: 8px;
     line-height: 1.5;
+}
+
+body.has-bottom-nav .fullterms__container {
+    padding-bottom: 100px;
 }

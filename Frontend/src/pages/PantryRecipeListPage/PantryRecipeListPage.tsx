@@ -7,6 +7,7 @@ import { TIME_RANGES } from "../../config/consts";
 import FilterDrawer from "../../components/FilterDrawer/FilterDrawer";
 import FilterChip from "../../components/FilterChip/FilterChip";
 import RecipeItemCard from "../../components/RecipeItemCard/RecipeItemCard";
+import Button from "../../components/Button/Button";
 
 import "./pantryrecipelistpage.css";
 
@@ -33,6 +34,7 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
     const [filters, setFilters] = useState({
         minRating: 0,
         timeRange: null as { min: number | null; max: number | null } | null,
+        category: null as string | null,
     });
 
 
@@ -78,50 +80,66 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
                 return true;
             });
         }
+
+        if (filters.category) {
+            result = result.filter(
+                r => r.category?.toLowerCase() === filters.category?.toLowerCase()
+            );
+        }
+
         setFilteredRecipes(result);
     }, [filters, recipes]);
+
+    const categories = Array.from(
+        new Set(
+            recipes
+                .map(r => r.category)
+                .filter((cat): cat is string => Boolean(cat))
+        )
+    );
 
     return (
         <div className="pantryRecipes__container">
             {/* Header */}
             <div className="pantryRecipes__header">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="backBtn"
-                    aria-label="Go back"
-                >
-                    <ArrowLeft size={22} />
-                </button>
+                <Button variant="back" onClick={() => navigate(-1)} aria-label="Go back" />
 
                 <h2 className="pantryRecipes__title">{title}</h2>
 
-                <button
+                {/* <button
                     className="filterIcon"
                     onClick={() => setShowFilters(true)}
                     aria-label="Open filters"
                 >
                     <SlidersHorizontal size={20} />
-                </button>
+                </button> */}
+                <Button
+                    variant=""
+                    onClick={() => setShowFilters(true)}
+                    aria-label="Open filters"
+                >
+                    <SlidersHorizontal size={20} />
+                </Button>
             </div>
 
             {/* Grid */}
             <div className="pantryRecipes__grid">
                 {filteredRecipes.length === 0 ? (
                     <p className="no-results">
-                    Sorry, we couldn't find the recipe you searched.
+                        Sorry, we couldn't find the recipe you searched.
                     </p>
                 ) : (
                     filteredRecipes.map(recipe => (
-                    <RecipeItemCard
-                        key={recipe.id}
-                        name={recipe.name}
-                        image={recipe.image}
-                        rating={recipe.rating}
-                        time={recipe.time}
-                        status={recipe.status}
-                        allergens={recipe.allergens}
-                        onClick={() => navigate(`/recipes/${recipe.id}`)}
-                    />
+                        <RecipeItemCard
+                            key={recipe.id}
+                            name={recipe.name}
+                            image={recipe.image}
+                            rating={recipe.rating}
+                            time={recipe.time}
+                            status={recipe.status}
+                            allergens={recipe.allergens}
+                            onClick={() => navigate(`/recipes/${recipe.id}`)}
+                        />
                     ))
                 )}
             </div>
@@ -165,24 +183,48 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
                     </div>
                 </div>
 
+                <div className="filter__section">
+                    <h4>Category</h4>
+                    <div className="filter__chips">
+                        <FilterChip
+                            label="All"
+                            active={filters.category === null}
+                            onClick={() =>
+                                setFilters(prev => ({ ...prev, category: null }))
+                            }
+                        />
+
+                        {categories.map(cat => (
+                            <FilterChip
+                                key={cat}
+                                label={cat}
+                                active={filters.category === cat}
+                                onClick={() =>
+                                    setFilters(prev => ({ ...prev, category: cat }))
+                                }
+                            />
+                        ))}
+                    </div>
+                </div>
+
                 <div className="filter__actions">
-                    <button
-                        className="filter__reset"
+                    <Button
+                        variant="secondary"
                         onClick={() =>
                             setFilters({
                                 minRating: 0,
                                 timeRange: null,
+                                category: null,
                             })
-                        }
-                    >
-                        Reset
-                    </button>
-                    <button
-                        className="filter__apply"
+                        }>
+                        Clear All
+                    </Button>
+                    <Button
+                        variant="primary"
                         onClick={() => setShowFilters(false)}
                     >
                         Apply
-                    </button>
+                    </Button>
                 </div>
             </FilterDrawer>
         </div>

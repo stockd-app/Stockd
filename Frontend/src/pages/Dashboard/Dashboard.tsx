@@ -25,6 +25,7 @@ export interface Recipe {
   rating?: number;
   time?: string;     // e.g. "35m" (For UI display)
   rawTime?: string;  // e.g. "PT35M" (For filtering purposes)
+  category?: string; // e.g. "Beverages" (For filtering purposes)
   status?: string;
   allergens?: string[];
 }
@@ -38,6 +39,7 @@ export interface RecipeFilters {
     min: number | null;
     max: number | null;
   } | null;
+  categories: string;
 }
 
 
@@ -173,7 +175,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
 
     fetchRecommendations();
   }, [userId]);
-  
+
   /**
    * Handle confirmation of selected allergens from the modal
    * @param selected 
@@ -225,7 +227,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         />
       </div>
 
-      {/* <FoodCategorySection /> */}
+      <FoodCategorySection />
 
       <RecipeItemSection
         title="Based On Your Pantry"
@@ -238,7 +240,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         emptySubtitle={"Add More Ingredients To Your Pantry To Unlock New Recipes!"}
       />
 
-      <RecipeItemSection title="You May Not Have All The Ingredients"
+      <RecipeItemSection title="Some Ingredients Needed"
         items={filteredIncompleteRecipes}
         onItemClick={(recipeId: number) => {
           navigate(`/recipes/${recipeId}`);
@@ -257,7 +259,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         emptyTitle={"No Liked Recipe Recommendations Yet!"}
         emptySubtitle={"Like A Few Recipes To Get Personalized Recommendations!"}
       />
-      <RecipeItemSection title="Collaborative Recipes Recommended"
+      <RecipeItemSection title="Other Users Have Tried These"
         items={filteredCollaborativeRecipes}
         onItemClick={(recipeId: number) => {
           navigate(`/recipes/${recipeId}`);

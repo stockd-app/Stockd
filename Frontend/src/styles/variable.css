@@ -1,19 +1,108 @@
 :root {
-    --color-primary: #4BC7A7;
+    /* Default = Dark Mode */
+
+    /* Used primarily in buttons and etc */
+    --color-primary: #ff6a1a;
     --color-secondary: #b5e3d9;
-    --color-tertiary: #ababab;
-    --color-cyan: #3cb98c;
+    --color-tertiary: #626262;
+
     --color-light-blue: #dcefea;
     --color-deep-blue: #3E5481;
-    --color-dark-blue: #005a4c;
-    --color-white: #ffffff;
-    --color-light: #f1f3f4;
+    --color-dark-blue: #3977d3;
+
+    --color-bg: #242020;
+    --color-bg-overlay: rgba(51, 51, 51, 0.6);
+
     --color-grey: #e0e0e0;
-    --color-dark-grey: #888;
-    --color-dark: #333;
+    --color-dark-grey: #2C2626;
+    --color-change-mode: #221e1e;
     --color-red: #ff5a5f;
     --color-light-red: #ffeaea;
     --color-green: #4caf50;
-    --color-light-red: #fff1f1;
-    --color-dark-red: #FF5A60;
+
+    --color-dark-text: #312b2b;
+    --color-main-text: #ffffff;
+    --color-grey-text: #d8d8d8;
+    --color-button-text: #ffffff;
+    --color-light: #f1f3f4;
+    --color-light-recipe: #f1f3f4;
+    --color-input-overlay: rgba(51, 51, 51, 0.6);
+
+    /* ============================================  
+       values for scaling:
+       - 0.875 = Small
+       - 1.0   = Medium (default)
+       - 1.125 = Large
+       - 1.25  = Extra Large
+    */
+    --text-scale: 1;
+}
+
+html {
+    font-size: calc(16px * var(--text-scale)) !important;
+}
+
+/* ensure body inherits the scaled font size */
+body {
+    font-size: 1rem !important;
+}
+
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+div,
+a,
+button,
+input,
+textarea,
+select,
+label,
+li,
+td,
+th {
+    font-size: 1em !important;
+}
+
+.no-scale,
+.no-scale * {
+    font-size: 16px !important;
+}
+
+.no-scale-sm,
+.no-scale-sm * {
+    font-size: 14px !important;
+}
+
+.no-scale-base,
+.no-scale-base * {
+    font-size: 16px !important;
+}
+
+.no-scale-lg,
+.no-scale-lg * {
+    font-size: 18px !important;
+}
+
+.no-scale-xl,
+.no-scale-xl * {
+    font-size: 20px !important;
+}
+
+body[data-theme="light"] {
+    --color-bg: #F7F7F7;
+    --color-bg-overlay: rgba(51, 51, 51, 0.6);
+
+    --color-light: #d6d8d9;
+    --color-dark-grey: #EFEFEF;
+    --color-dark-text: #000000;
+    --color-main-text: #000000;
+    --color-grey-text: #272727;
+    --color-button-text: #ffffff;
+    --color-input-overlay: rgba(255, 255, 255, 0.6);
 }

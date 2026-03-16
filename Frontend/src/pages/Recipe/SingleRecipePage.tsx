@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getRecipeById, getLikedRecipes,getPantryItems,completeRecipe } from "../../services/api";
+import { getRecipeById, getLikedRecipes, getPantryItems, completeRecipe } from "../../services/api";
 import { getIngredientIcon } from "../../utils/ingredientIconMap";
 import { Clock, Star, ArrowLeft } from "lucide-react";
 import image_placeholder from "../../assets/images/error_handling/image_placeholder.png";
@@ -9,13 +9,14 @@ import { parseQuantity, resolveIngredientDisplay } from "../../utils/ingredientU
 import LikeButton from "../../components/LikeButton/LikeButton";
 import { API_ROUTES } from "../../config/consts";
 import { useNotification } from "../../components/Notification/NotificationContext";
-import { NOTIFICATION_MESSAGES, NOTIFICATION_TYPES } from "../../config/consts";
-
+import { formatQuantityUnit } from "../../utils/unitStandardizer";
+import { NOTIFICATION_MESSAGES, NOTIFICATION_TYPES, GetNutritionItems } from "../../config/consts";
+import Button from "../../components/Button/Button";
 
 import "./singlerecipepage.css";
 
 const normalize = (s: string) =>
-  s.toLowerCase().replace(/[^a-z\s]/g, "").trim();
+    s.toLowerCase().replace(/[^a-z\s]/g, "").trim();
 
 const SingleRecipePage: React.FC = () => {
     const { id } = useParams();
@@ -31,7 +32,8 @@ const SingleRecipePage: React.FC = () => {
     const [likedLoading, setLikedLoading] = useState(false);
     const [pantryNames, setPantryNames] = useState<string[]>([]);
     const [missingIngredients, setMissingIngredients] = useState<string[]>([]);
-    const [addedToGrocery, setAddedToGrocery] = useState<Set<string>>(new Set());
+    const [addedToGrocery, setAddedToGrocery] = useState<Map<string, number>>(new Map());
+    const [useMetric, setUseMetric] = useState(true);
     const difficulty = recipe?.Keywords?.find((kw: string) => ["easy", "medium", "hard"].includes(kw.toLowerCase())) ?? "—";
     const isInPantry = (ingredient: string, pantry: string[]) => {
         const normIng = normalize(ingredient);
@@ -100,30 +102,30 @@ const SingleRecipePage: React.FC = () => {
         };
         run();
     }, [recipe?.RecipeId]);
-    
+
     const handleCompleteRecipe = async () => {
         try {
             const result = await completeRecipe(recipe.RecipeId);
             console.log("Recipe completed:", result);
-            notify( NOTIFICATION_MESSAGES.RECIPE_COMPLETED,NOTIFICATION_TYPES.RECIPE_COMPLETED);
-            setTimeout(() => { navigate("/dashboard");}, 2000); 
+            notify(NOTIFICATION_MESSAGES.RECIPE_COMPLETED, NOTIFICATION_TYPES.RECIPE_COMPLETED);
+            setTimeout(() => { navigate("/dashboard"); }, 2000);
         } catch (err) {
             console.error("Failed to complete recipe", err);
-            notify( NOTIFICATION_MESSAGES.ERROR,NOTIFICATION_TYPES.ERROR);
+            notify(NOTIFICATION_MESSAGES.ERROR, NOTIFICATION_TYPES.ERROR);
         }
-        };
+    };
 
     useEffect(() => {
-    if (!userId) return;
+        if (!userId) return;
 
-    const run = async () => {
+        const run = async () => {
             try {
                 const res = await getPantryItems(userId);
                 const pantryItems = res?.grouped_items?.Pantry || [];
                 const names = pantryItems
-                .map((i: any) => i?.name)     
-                .filter(Boolean)              
-                .map((name: string) => normalize(name));
+                    .map((i: any) => i?.name)
+                    .filter(Boolean)
+                    .map((name: string) => normalize(name));
                 console.log("Pantry normalized names:", names);
                 setPantryNames(names);
             } catch (e) {
@@ -135,88 +137,156 @@ const SingleRecipePage: React.FC = () => {
     }, [userId]);
 
     useEffect(() => {
-    if (!recipe) return;
+        if (!recipe) return;
 
-    const missing = recipe.RecipeIngredientParts.filter((part: string) => {
-        const norm = normalize(part);
+        const missing = recipe.RecipeIngredientParts.filter((part: string) => {
+            const norm = normalize(part);
 
-        return !pantryNames.some(
-            (p) => norm.includes(p) || p.includes(norm)
+            return !pantryNames.some(
+                (p) => norm.includes(p) || p.includes(norm)
             );
         });
 
         setMissingIngredients(missing);
     }, [recipe, pantryNames]);
 
-    const addToGroceryList = async (
-    name: string,
-    qty: number,
-    unit: string
-  ) => {
-    if (!userId || !accessToken) return;
+    const addToGroceryList = async (name: string, qty: number, unit: string) => {
+        if (!userId || !accessToken) return;
 
-    if (isInPantry(name, pantryNames)) {
-        console.warn("Item already in pantry, skip adding:", name);
-        return;
-    }
+        try {
+            const res = await fetch(API_ROUTES.ADD_UPDATE_GROCERY_ITEM, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    items: [
+                        {
+                            item_name: name,
+                            quantity_value: qty || 1,
+                            quantity_unit: unit || "pcs",
+                        },
+                    ],
+                }),
+            });
 
-    if (addedToGrocery.has(name)) {
-        return;
-    }
-    try {
-      await fetch(API_ROUTES.ADD_UPDATE_GROCERY_ITEM, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user_id: userId,
-          items: [
-            {
-              item_name: name,
-              quantity_value: qty || 1,
-              quantity_unit: unit || "pcs",
-            },
-          ],
-        }),
-      });
+            const data = await res.json();
+            const groceryId = data.items?.[0]?.id;
+            setAddedToGrocery(prev => {
+                const newMap = new Map(prev);
+                newMap.set(normalize(name), groceryId);
+                return newMap;
+            });
 
-      setAddedToGrocery((prev) => new Set(prev).add(name));
-    } catch (e) {
-      console.error("Failed to add grocery item", e);
-    }
-  };
+            localStorage.setItem("groceryBadge", "true");
+            window.dispatchEvent(new Event("grocery-updated"));
+
+        } catch (e) {
+            console.error("Failed to add grocery item", e);
+        }
+    };
+
+    const removeFromGroceryList = async (name: string) => {
+        const itemId = addedToGrocery.get(normalize(name));
+        if (!itemId || !accessToken) return;
+
+        try {
+            await fetch(API_ROUTES.DELETE_GROCERY_ITEM, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    grocery_item_ids: [itemId],
+                }),
+            });
+
+            setAddedToGrocery(prev => {
+                const newMap = new Map(prev);
+                newMap.delete(normalize(name));
+                if (newMap.size === 0) {
+                    localStorage.setItem("groceryBadge", "false");
+                    window.dispatchEvent(new Event("grocery-cleared"));
+                }
+                return newMap;
+            });
+
+        } catch (e) {
+            console.error("Failed to delete grocery item", e);
+        }
+    };
+
+    useEffect(() => {
+        const fetchGroceryItems = async () => {
+            if (!userId || !accessToken) return;
+
+            try {
+                const res = await fetch(`${API_ROUTES.GET_GROCERY_ITEMS}/${userId}`, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
+
+                const data = await res.json();
+
+                const groceryMap = new Map<string, number>();
+
+                data.items.forEach((item: any) => {
+                    groceryMap.set(normalize(item.item_name), item.id);
+                });
+
+                setAddedToGrocery(groceryMap);
+
+            } catch (err) {
+                console.error("Failed to fetch grocery items", err);
+            }
+        };
+
+        fetchGroceryItems();
+    }, [userId]);
 
     if (loading) return <div>Loading...</div>;
     if (!recipe) return <div>Recipe not found</div>;
 
     const imageUrl = recipe.Images?.[0] || image_placeholder;
+    const nutritionItems = GetNutritionItems(recipe);
 
     return (
         <div className="recipe__page">
+            <div className="recipe__hero">
+                <Button
+                    variant="back"
+                    className="recipe__back recipe__back__overlay"
+                    onClick={() => navigate(-1)}
+                    aria-label="Back" />
+                <img className="recipe__hero-img" src={imageUrl} alt={recipe.Name} />
+                <LikeButton
+                    recipeId={recipe.RecipeId}
+                    initialLiked={initialLiked}
+                    onLikedChange={(v) => setInitialLiked(v)}
+                />
+            </div>
             <div className="recipe__container">
-                <div className="recipe__hero">
-                    <button
-                        className="recipe__back recipe__back__overlay"
-                        onClick={() => navigate(-1)}
-                        aria-label="Back" >
-                        <ArrowLeft size={22} />
-                    </button>
-                    <img className="recipe__hero-img" src={imageUrl} alt={recipe.Name} />
-                </div>
                 <div className="recipe__content">
                     <div className="recipe__titleRow">
                         <h1 className="recipe__title">{recipe.Name}</h1>
-                        <LikeButton
-                            recipeId={recipe.RecipeId}
-                            initialLiked={initialLiked}
-                            onLikedChange={(v) => setInitialLiked(v)}
-                        />
                     </div>
-                    <span>
-                        <Star size={16} color="#FFD700" fill="#FFD700" /> {recipe.AggregatedRating}
-                    </span>
+                    <div className="recipe__ratingRow">
+                        <span className="recipe__rating">
+                            {Array.from({ length: 5 }, (_, index) => (
+                                <Star
+                                    key={index}
+                                    size={16}
+                                    color={index < recipe.AggregatedRating ? "#FFD700" : "#CCCCCC"}
+                                    fill={index < recipe.AggregatedRating ? "#FFD700" : "none"}
+                                />
+                            ))}
+                            <span className="rating-number">{recipe.AggregatedRating}</span>
+                        </span>
+                    </div>
                     <div className="recipe__meta__cards">
                         <div className="recipe__meta__card">
                             <div className="recipe__meta__value">
@@ -236,57 +306,156 @@ const SingleRecipePage: React.FC = () => {
                     </div>
                     <p className="recipe__description">{recipe.Description}</p>
 
+                    <div className="recipe__nutrition">
+                        <h2 className="recipe__NutritionTitle">Nutritional Information</h2>
+                        <div className="recipe__nutritionGrid">
+                            {nutritionItems.map((item) => (
+                                <div key={item.label} className="recipe__nutritionCard">
+                                    <div className="recipe__nutritionTop">
+                                        {item.icon && (
+                                            <img
+                                                src={item.icon}
+                                                alt={item.label}
+                                                className="recipe__nutritionIcon"
+                                            />
+                                        )}
+                                        <span className="recipe__nutritionLabel">{item.label}</span>
+                                    </div>
+                                    <span className="recipe__nutritionValue">
+                                        {item.value ?? "N/A"} {item.value != null ? item.unit : ""}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
                     <section className="recipe__section">
-                        <h2 className="recipe__section__title">Ingredients</h2>
+                        <div className="recipe__section__header">
+                            <h2 className="recipe__section__title">Ingredients</h2>
+                            <div className="recipe__unit__toggle">
+                                <button
+                                    className={`recipe__unit__btn ${!useMetric ? 'active' : ''}`}
+                                    onClick={() => setUseMetric(false)}
+                                    title="Show US measurements"
+                                >
+                                    US
+                                </button>
+                                <button
+                                    className={`recipe__unit__btn ${useMetric ? 'active' : ''}`}
+                                    onClick={() => setUseMetric(true)}
+                                    title="Show UK/Irish measurements"
+                                >
+                                    UK
+                                </button>
+                            </div>
+                        </div>
                         <ul className="recipe__ingredients">
-                            {recipe.RecipeIngredientParts?.map((part: string, i: number) => {
-                                const rawQty = recipe.RecipeIngredientQuantities?.[i];
-                                const qtyParsed = parseQuantity(rawQty);
-                                const { qty, unit } = resolveIngredientDisplay(part, qtyParsed);
-                                const isAdded = addedToGrocery.has(part);
-                                const inPantry = isInPantry(part, pantryNames);
+                            {/* Use standardized ingredients if available, otherwise fall back to original */}
+                            {(recipe.ingredients_standardized && recipe.ingredients_standardized.length > 0
+                                ? recipe.ingredients_standardized
+                                : recipe.RecipeIngredientParts?.map((part: string, i: number) => {
+                                    const rawQty = recipe.RecipeIngredientQuantities?.[i];
+                                    const qtyParsed = parseQuantity(rawQty);
+                                    const { qty, unit } = resolveIngredientDisplay(part, qtyParsed);
+                                    return { name: part, quantity: qty, unit: unit };
+                                  })
+                            )?.map((ingredient: any, i: number) => {
+                                const ingredientName = ingredient.name || ingredient.original || "";
+                                
+                                // Determine which units to display based on toggle
+                                let qty, unit, displayQtyUnit, showFullOriginal = false;
+                                
+                                if (useMetric) {
+                                    qty = ingredient.quantity || 1;
+                                    unit = ingredient.unit || "piece";
+                                    displayQtyUnit = formatQuantityUnit(qty, unit);
+                                } else {
+                                    if (ingredient.original) {
+                                        displayQtyUnit = ingredient.original;
+                                        showFullOriginal = true;
+                                        const match = ingredient.original.match(/^([\d./\s]+)/);
+                                        qty = match ? parseFloat(match[1]) : 1;
+                                        unit = "";
+                                    } else {
+                                        const originalIndex = recipe.RecipeIngredientParts?.indexOf(ingredientName);
+                                        if (originalIndex !== -1 && recipe.RecipeIngredientQuantities?.[originalIndex]) {
+                                            const rawQty = recipe.RecipeIngredientQuantities[originalIndex];
+                                            const qtyParsed = parseQuantity(rawQty);
+                                            const resolved = resolveIngredientDisplay(ingredientName, qtyParsed);
+                                            qty = resolved.qty;
+                                            unit = resolved.unit;
+                                            displayQtyUnit = `${qty} ${unit}`;
+                                        } else {
+                                            qty = ingredient.quantity || 1;
+                                            unit = ingredient.unit || "piece";
+                                            displayQtyUnit = `${qty} ${unit}`;
+                                        }
+                                    }
+                                }
+                                
+                                const isAdded = addedToGrocery.has(normalize(ingredientName));
+                                const inPantry = isInPantry(ingredientName, pantryNames);
                                 const checkboxDisabled = inPantry;
 
                                 return (
-                                    <li key={i} className="recipe__ingredient">
-                                        <input
-                                            type="checkbox"
-                                            className="ingredient__checkbox"
-                                            checked={isAdded || inPantry}
-                                            disabled={checkboxDisabled}
-                                            onChange={() => {
-                                            if (!checkboxDisabled) {
-                                                addToGroceryList(part, qty, unit);
-                                            }
-                                            }}
-                                            title={
-                                            inPantry
-                                                ? "Already in pantry"
-                                                : isAdded
-                                                ? "Added to grocery list"
-                                                : "Add to grocery list"
-                                            }
-                                        />
-                                        <img
-                                            src={getIngredientIcon(part)}
-                                            alt={part}
-                                            className="recipe__ingredient__icon"
-                                        />
-                                        <div className="ingredient__text">
-                                            {/* <span className="recipe__ingredient__qty">
-                                                {qty} {unit}
-                                            </span> */}
-                                            <span className="ingredient__amount">
-                                                <span className="ingredient__qty">{qty}</span>
-                                                <span className="ingredient__unit">{unit}</span>
-                                            </span>
-                                            
-                                        </div>
-                                        <span className="recipe__ingredient__name">{part}</span>
-                                        
-                                        {inPantry && <span className="ingredient__status">In Pantry</span>}
-                                        {isAdded && <span className="ingredient__status">Added</span>}
-                                    </li>
+                                  <li key={i} className="recipe__ingredient">
+                                    <input
+                                      type="checkbox"
+                                      className="ingredient__checkbox"
+                                      checked={isAdded || inPantry}
+                                      disabled={checkboxDisabled}
+                                      onChange={() => {
+                                        if (checkboxDisabled) return;
+
+                                        if (isAdded) {
+                                          removeFromGroceryList(ingredientName);
+                                        } else {
+                                          addToGroceryList(ingredientName, qty, unit);
+                                        }
+                                      }}
+                                      title={
+                                        inPantry
+                                          ? "Already in pantry"
+                                          : isAdded
+                                            ? "Added to grocery list"
+                                            : "Add to grocery list"
+                                      }
+                                    />
+                                    <img
+                                      src={getIngredientIcon(ingredientName)}
+                                      alt={ingredientName}
+                                      className="recipe__ingredient__icon"
+                                    />
+                                    <div className="ingredient__text">
+                                      {showFullOriginal ? (
+                                        // When showing original US format, display the full string
+                                        <span className="ingredient__full">
+                                          {displayQtyUnit}
+                                        </span>
+                                      ) : (
+                                        // When showing metric, display quantity separately
+                                        <span className="ingredient__amount">
+                                          <span className="ingredient__qty">{qty}</span>
+                                          <span className="ingredient__unit">{unit}</span>
+                                        </span>
+                                      )}
+                                    </div>
+                                    {!showFullOriginal && (
+                                      <span className="recipe__ingredient__name">
+                                        {ingredientName}
+                                      </span>
+                                    )}
+                                    {inPantry && (
+                                      <span className="ingredient__status">
+                                        In Pantry
+                                      </span>
+                                    )}
+                                    {isAdded && (
+                                      <span className="ingredient__status">
+                                        Added
+                                      </span>
+                                    )}
+                                  </li>
                                 );
                             })}
                         </ul>
@@ -306,9 +475,9 @@ const SingleRecipePage: React.FC = () => {
                     </section>
                     {missingIngredients.length === 0 && (
                         <div className="recipe__complete">
-                            <button className="complete__button" onClick={handleCompleteRecipe}>
-                            Complete Recipe
-                            </button>
+                            <Button variant="primary" onClick={handleCompleteRecipe}>
+                                Complete Recipe
+                            </Button>
                         </div>
                     )}
                 </div>
@@ -318,3 +487,4 @@ const SingleRecipePage: React.FC = () => {
 };
 
 export default SingleRecipePage;
+
