@@ -48,6 +48,17 @@
     max-width: 150px;
 }
 
+.recipeitemcard__image_container {
+    position: relative;
+}
+
+.recipeitemcard__like_button_wrapper {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    z-index: 2;
+}
+
 .recipeitemcard__allergens {
     display: flex;
     flex-wrap: wrap;

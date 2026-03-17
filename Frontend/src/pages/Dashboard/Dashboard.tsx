@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getSubsetRecipes, getIncompleteRecipes, updateUserAllergens, getRecommendLikeRecipes, getCollaborativeRecipes } from "../../services/api";
+import { getSubsetRecipes, getIncompleteRecipes, updateUserAllergens, getRecommendLikeRecipes, getCollaborativeRecipes, getLikedRecipes } from "../../services/api";
 import { applyAllergenFilter, formatRecipes } from "../../utils/utils";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import FoodCategorySection from "../../components/FoodCategoryCard/FoodCategorySection";
@@ -89,7 +89,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
   const [collaborativeRecipes, setCollaborativeRecipes] = useState<Recipe[]>([]);
   const [filteredCollaborativeRecipes, setFilteredCollaborativeRecipes] = useState<Recipe[]>([]);
 
-
+  const [likedRecipeIds, setLikedRecipeIds] = useState<Set<number>>(new Set());
 
   const navigate = useNavigate();
 
@@ -122,12 +122,16 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     const fetchRecommendations = async () => {
       try {
         console.log("Attempt fetch recommendation pantry")
-        const [subsetData, incompleteData, likedData, collaborativeData] = await Promise.all([
+        const [subsetData, incompleteData, likedData, collaborativeData, likedRes] = await Promise.all([
           getSubsetRecipes(userId, 5),
           getIncompleteRecipes(userId, 5),
           getRecommendLikeRecipes(userId, 5),
           getCollaborativeRecipes(userId, 5),
+          getLikedRecipes(),
         ]);
+        const likedIds = new Set<number>();
+        likedRes.liked_recipes.forEach((item: any) => likedIds.add(item.recipe.RecipeId));
+        setLikedRecipeIds(likedIds);
         console.log("Cookable subset pantry recommendations:", subsetData.content_based);
         console.log("Incomplete ingredient pantry recommendations:", incompleteData.content_based);
         console.log("Liked recipe recommendations:", likedData.content_based);
@@ -160,14 +164,17 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
             ? applyAllergenFilter(formattedCollaborative)
             : formattedCollaborative;
 
-        setSubsetRecipes(visibleSubsetRecipe);
-        setIncompleteRecipes(visibleIncmpltIngrdRecipe);
-        setLikedRecommendedRecipes(visibleLikedRecipes);
-        setFilteredSubsetRecipes(visibleSubsetRecipe);
-        setFilteredIncompleteRecipes(visibleIncmpltIngrdRecipe);
-        setFilteredLikedRecommendedRecipes(visibleLikedRecipes);
-        setCollaborativeRecipes(visibleCollaborative);
-        setFilteredCollaborativeRecipes(visibleCollaborative);
+        const markLiked = (recipes: Recipe[]) =>
+          recipes.map(r => ({ ...r, liked: likedIds.has(r.id) }));
+
+        setSubsetRecipes(markLiked(visibleSubsetRecipe));
+        setIncompleteRecipes(markLiked(visibleIncmpltIngrdRecipe));
+        setLikedRecommendedRecipes(markLiked(visibleLikedRecipes));
+        setFilteredSubsetRecipes(markLiked(visibleSubsetRecipe));
+        setFilteredIncompleteRecipes(markLiked(visibleIncmpltIngrdRecipe));
+        setFilteredLikedRecommendedRecipes(markLiked(visibleLikedRecipes));
+        setCollaborativeRecipes(markLiked(visibleCollaborative));
+        setFilteredCollaborativeRecipes(markLiked(visibleCollaborative));
       } catch (err) {
         console.error("Error fetching recommendations:", err);
       }
