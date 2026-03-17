@@ -1083,7 +1083,7 @@ async def get_liked_recipes(request: Request, user=Depends(require_google_token)
                 result.append(recipe_data)
             except HTTPException:
                 continue
-
+        result.reverse()
         return {"liked_recipes": result}
 
     except SQLAlchemyError as e:

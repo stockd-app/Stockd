@@ -94,7 +94,7 @@ export const formatRecipes = (recipes: any[]) =>
             rating: Number(recipe.AggregatedRating) || 0.0,
             rawTime: recipe.PrepTime,
             category: recipe.RecipeCategory || "Uncategorised",
-            time: formatPrepTime(recipe.PrepTime),
+            time: formatPrepTime(recipe.TotalTime),
             allergens: recipe.Allergens ?? [],
         };
     });

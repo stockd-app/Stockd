@@ -51,6 +51,8 @@
 .recipeitemcard__allergens {
     display: flex;
     flex-wrap: wrap;
+    gap: 0.8em;
+    text-transform: capitalize;
 }
 
 .recipeitemcard__allergen {
