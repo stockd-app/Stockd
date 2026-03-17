@@ -2,6 +2,8 @@ import PantryRecipeListPage from "../PantryRecipeListPage/PantryRecipeListPage";
 import { getRecommendedRecipes } from "../../services/api";
 import { useParams } from "react-router-dom";
 
+const recipeCache: Record<string, any> = {};
+
 const RecommendedRecipeRecPage = () => {
     const { category } = useParams<{ category: string }>();
 
@@ -9,27 +11,31 @@ const RecommendedRecipeRecPage = () => {
         return <div>Error: No category selected</div>;
     }
 
-    // Fetch function that filters by category
     const fetchRecipesForCategory = async (userId: number) => {
-        const data = await getRecommendedRecipes(userId, 100);
-        const recipes = data.recommendations || [];
+        const key = `${userId}_${category.toLowerCase()}`;
 
-        const key = category?.toLowerCase() || "";
+        if (recipeCache[key]) {
+            return recipeCache[key];
+        }
+
+        const data = await getRecommendedRecipes(userId, 500);
+        const recipes = data.recommendations || [];
 
         const filtered = recipes.filter((recipe: any) => {
             const recipeCategory = recipe.RecipeCategory?.toLowerCase() || "";
             const keywords = recipe.Keywords?.map((k: string) => k.toLowerCase()) || [];
-
-            return recipeCategory.includes(key) || keywords.some((k: string) => k.includes(key));
+            return recipeCategory.includes(category.toLowerCase()) || keywords.some((k: string | string[]) => k.includes(category.toLowerCase()));
         });
 
-        return { content_based: filtered };
+        // Save in cache
+        recipeCache[key] = { content_based: filtered };
+        return recipeCache[key];
     };
 
     return (
         <PantryRecipeListPage
-            title={`Recommended ${category?.charAt(0).toUpperCase() + category?.slice(1)} Recipes`}
-            fetchRecipes={(userId) => fetchRecipesForCategory(userId)}
+            title={`Explore ${category.charAt(0).toUpperCase() + category.slice(1)} Recipes`}
+            fetchRecipes={fetchRecipesForCategory}
         />
     );
 };
