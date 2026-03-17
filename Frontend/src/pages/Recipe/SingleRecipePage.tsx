@@ -12,6 +12,7 @@ import { useNotification } from "../../components/Notification/NotificationConte
 import { formatQuantityUnit } from "../../utils/unitStandardizer";
 import { NOTIFICATION_MESSAGES, NOTIFICATION_TYPES, GetNutritionItems } from "../../config/consts";
 import Button from "../../components/Button/Button";
+import { buildNutritionDisplayItems, getNutritionOverview } from "../../utils/nutritionVisual";
 
 import "./singlerecipepage.css";
 
@@ -33,6 +34,7 @@ const SingleRecipePage: React.FC = () => {
     const [pantryNames, setPantryNames] = useState<string[]>([]);
     const [missingIngredients, setMissingIngredients] = useState<string[]>([]);
     const [addedToGrocery, setAddedToGrocery] = useState<Map<string, number>>(new Map());
+    const [showMoreNutrition, setShowMoreNutrition] = useState(false);
     const [useMetric, setUseMetric] = useState(true);
     const difficulty = recipe?.Keywords?.find((kw: string) => ["easy", "medium", "hard"].includes(kw.toLowerCase())) ?? "—";
     const isInPantry = (ingredient: string, pantry: string[]) => {
@@ -253,6 +255,12 @@ const SingleRecipePage: React.FC = () => {
 
     const imageUrl = recipe.Images?.[0] || image_placeholder;
     const nutritionItems = GetNutritionItems(recipe);
+    const nutritionDisplayItems = buildNutritionDisplayItems(
+        nutritionItems,
+        recipe?.RecipeServings
+    );
+
+    const nutritionOverview = getNutritionOverview(nutritionDisplayItems);
 
     return (
         <div className="recipe__page">
@@ -305,30 +313,6 @@ const SingleRecipePage: React.FC = () => {
                         </div>
                     </div>
                     <p className="recipe__description">{recipe.Description}</p>
-
-                    <div className="recipe__nutrition">
-                        <h2 className="recipe__NutritionTitle">Nutritional Information</h2>
-                        <div className="recipe__nutritionGrid">
-                            {nutritionItems.map((item) => (
-                                <div key={item.label} className="recipe__nutritionCard">
-                                    <div className="recipe__nutritionTop">
-                                        {item.icon && (
-                                            <img
-                                                src={item.icon}
-                                                alt={item.label}
-                                                className="recipe__nutritionIcon"
-                                            />
-                                        )}
-                                        <span className="recipe__nutritionLabel">{item.label}</span>
-                                    </div>
-                                    <span className="recipe__nutritionValue">
-                                        {item.value ?? "N/A"} {item.value != null ? item.unit : ""}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
                     <section className="recipe__section">
                         <div className="recipe__section__header">
                             <h2 className="recipe__section__title">Ingredients</h2>
@@ -358,13 +342,13 @@ const SingleRecipePage: React.FC = () => {
                                     const qtyParsed = parseQuantity(rawQty);
                                     const { qty, unit } = resolveIngredientDisplay(part, qtyParsed);
                                     return { name: part, quantity: qty, unit: unit };
-                                  })
+                                })
                             )?.map((ingredient: any, i: number) => {
                                 const ingredientName = ingredient.name || ingredient.original || "";
-                                
+
                                 // Determine which units to display based on toggle
                                 let qty, unit, displayQtyUnit, showFullOriginal = false;
-                                
+
                                 if (useMetric) {
                                     qty = ingredient.quantity || 1;
                                     unit = ingredient.unit || "piece";
@@ -392,75 +376,74 @@ const SingleRecipePage: React.FC = () => {
                                         }
                                     }
                                 }
-                                
+
                                 const isAdded = addedToGrocery.has(normalize(ingredientName));
                                 const inPantry = isInPantry(ingredientName, pantryNames);
                                 const checkboxDisabled = inPantry;
 
                                 return (
-                                  <li key={i} className="recipe__ingredient">
-                                    <input
-                                      type="checkbox"
-                                      className="ingredient__checkbox"
-                                      checked={isAdded || inPantry}
-                                      disabled={checkboxDisabled}
-                                      onChange={() => {
-                                        if (checkboxDisabled) return;
+                                    <li key={i} className="recipe__ingredient">
+                                        <input
+                                            type="checkbox"
+                                            className="ingredient__checkbox"
+                                            checked={isAdded || inPantry}
+                                            disabled={checkboxDisabled}
+                                            onChange={() => {
+                                                if (checkboxDisabled) return;
 
-                                        if (isAdded) {
-                                          removeFromGroceryList(ingredientName);
-                                        } else {
-                                          addToGroceryList(ingredientName, qty, unit);
-                                        }
-                                      }}
-                                      title={
-                                        inPantry
-                                          ? "Already in pantry"
-                                          : isAdded
-                                            ? "Added to grocery list"
-                                            : "Add to grocery list"
-                                      }
-                                    />
-                                    <img
-                                      src={getIngredientIcon(ingredientName)}
-                                      alt={ingredientName}
-                                      className="recipe__ingredient__icon"
-                                    />
-                                    <div className="ingredient__text">
-                                      {showFullOriginal ? (
-                                        // When showing original US format, display the full string
-                                        <span className="ingredient__full">
-                                          {displayQtyUnit}
-                                        </span>
-                                      ) : (
-                                        // When showing metric, display quantity separately
-                                        <span className="ingredient__amount">
-                                          <span className="ingredient__qty">{qty}</span>
-                                          <span className="ingredient__unit">{unit}</span>
-                                        </span>
-                                      )}
-                                    </div>
-                                    {!showFullOriginal && (
-                                      <span className="recipe__ingredient__name">
-                                        {ingredientName}
-                                      </span>
-                                    )}
-                                    {inPantry && (
-                                      <span className="ingredient__status">
-                                        In Pantry
-                                      </span>
-                                    )}
-                                    {isAdded && (
-                                      <span className="ingredient__status">
-                                        Added
-                                      </span>
-                                    )}
-                                  </li>
+                                                if (isAdded) {
+                                                    removeFromGroceryList(ingredientName);
+                                                } else {
+                                                    addToGroceryList(ingredientName, qty, unit);
+                                                }
+                                            }}
+                                            title={
+                                                inPantry
+                                                    ? "Already in pantry"
+                                                    : isAdded
+                                                        ? "Added to grocery list"
+                                                        : "Add to grocery list"
+                                            }
+                                        />
+                                        <img
+                                            src={getIngredientIcon(ingredientName)}
+                                            alt={ingredientName}
+                                            className="recipe__ingredient__icon"
+                                        />
+                                        <div className="ingredient__text">
+                                            {showFullOriginal ? (
+                                                // When showing original US format, display the full string
+                                                <span className="ingredient__full">
+                                                    {displayQtyUnit}
+                                                </span>
+                                            ) : (
+                                                // When showing metric, display quantity separately
+                                                <span className="ingredient__amount">
+                                                    <span className="ingredient__qty">{qty}</span>
+                                                    <span className="ingredient__unit">{unit}</span>
+                                                </span>
+                                            )}
+                                        </div>
+                                        {!showFullOriginal && (
+                                            <span className="recipe__ingredient__name">
+                                                {ingredientName}
+                                            </span>
+                                        )}
+                                        {inPantry && (
+                                            <span className="ingredient__status">
+                                                In Pantry
+                                            </span>
+                                        )}
+                                        {isAdded && (
+                                            <span className="ingredient__status">
+                                                Added
+                                            </span>
+                                        )}
+                                    </li>
                                 );
                             })}
                         </ul>
                     </section>
-
                     <section className="recipe__section">
                         <h2 className="recipe__section__title">Instructions</h2>
                         <ol className="recipe__instructions">
@@ -472,6 +455,163 @@ const SingleRecipePage: React.FC = () => {
                                 <li>No instructions available.</li>
                             )}
                         </ol>
+                    </section>
+                    <section className="recipe__section recipe__nutrition">
+                        <h2 className="recipe__section__title recipe__nutrition__title">
+                            Nutritional Information
+                        </h2>
+
+                        <div className="recipe__nutrition__overview">
+                            <p className="recipe__nutrition__overview__subtitle">
+                                Recipe nutrition overview
+                            </p>
+
+                            <div className="recipe__nutrition__overview__main">
+                                {nutritionOverview.caloriesIcon && (
+                                    <img
+                                        src={nutritionOverview.caloriesIcon}
+                                        alt="Calories"
+                                        className="recipe__nutrition__overview__icon"
+                                    />
+                                )}
+
+                                <span className="recipe__nutrition__overview__value">
+                                    {nutritionOverview.caloriesValue}
+                                </span>
+
+                                <span className="recipe__nutrition__overview__unit">
+                                    {nutritionOverview.caloriesUnit}
+                                </span>
+                            </div>
+
+                            <p className="recipe__nutrition__overview__text">
+                                {nutritionOverview.caloriesPercent} of daily calorie target
+                            </p>
+
+                            <div className="recipe__nutrition__overview__meta">
+                                <div className="recipe__nutrition__overview__meta__card">
+                                    <span className="recipe__nutrition__overview__meta__label">
+                                        Target
+                                    </span>
+                                    <span className="recipe__nutrition__overview__meta__value">
+                                        {nutritionOverview.caloriesTarget}
+                                    </span>
+                                </div>
+
+                                <div className="recipe__nutrition__overview__meta__card">
+                                    <span className="recipe__nutrition__overview__meta__label">
+                                        Level
+                                    </span>
+                                    <span
+                                        className={`recipe__nutrition__overview__meta__value recipe__nutrition__level recipe__nutrition__level__${nutritionOverview.level.toLowerCase()}`}
+                                    >
+                                        {nutritionOverview.level}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="recipe__nutrition__ring__wrap">
+                                <div
+                                    className="recipe__nutrition__ring"
+                                    style={
+                                        {
+                                            ["--progress" as any]: `${nutritionOverview.ringPercent}%`,
+                                        } as React.CSSProperties
+                                    }
+                                >
+                                    <div className="recipe__nutrition__ring__inner">
+                                        <span className="recipe__nutrition__ring__number">
+                                            {nutritionOverview.caloriesPercent}
+                                        </span>
+                                        <span className="recipe__nutrition__ring__label">
+                                            target
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                className="recipe__nutrition__button"
+                                onClick={() => setShowMoreNutrition((prev) => !prev)}
+                            >
+                                {showMoreNutrition ? "See less" : "See more"}
+                            </button>
+                        </div>
+
+                        {showMoreNutrition && (
+                            <div className="recipe__nutrition__tableWrap">
+                                <div className="recipe__nutrition__tableHeader">
+                                    <span className="recipe__nutrition__tableTitle">Nutrition breakdown</span>
+                                    <span className="recipe__nutrition__tableSubtitle">Per recipe estimate</span>
+                                </div>
+
+                                <div className="recipe__nutrition__table">
+                                    {nutritionDisplayItems
+                                        .filter((item) => item.label !== "Calories")
+                                        .map((item) => (
+                                            <div
+                                                key={item.label}
+                                                className="recipe__nutrition__tableRow"
+                                            >
+                                                <div className="recipe__nutrition__tableCell recipe__nutrition__tableCell__name">
+                                                    <div className="recipe__nutrition__tableCell__nameWrap">
+                                                        {item.icon && (
+                                                            <img
+                                                                src={item.icon}
+                                                                alt={item.label}
+                                                                className="recipe__nutrition__tableIcon"
+                                                            />
+                                                        )}
+                                                        <span className="recipe__nutrition__tableLabel">
+                                                            {item.label}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="recipe__nutrition__tableCell">
+                                                    <span className="recipe__nutrition__tableValue">
+                                                        {item.formattedValue}
+                                                        {item.unit}
+                                                    </span>
+                                                </div>
+
+                                                <div className="recipe__nutrition__tableCell">
+                                                    <span className="recipe__nutrition__tableTarget">
+                                                        {item.targetLabel}
+                                                    </span>
+                                                </div>
+
+                                                <div className="recipe__nutrition__tableCell">
+                                                    <div className="recipe__nutrition__tableProgress">
+                                                        <div className="recipe__nutrition__tableProgress__track">
+                                                            <div
+                                                                className={`recipe__nutrition__tableProgress__fill recipe__nutrition__tableProgress__fill__${item.level}`}
+                                                                style={{ width: item.percentText }}
+                                                            />
+                                                        </div>
+                                                        <span className="recipe__nutrition__tablePercent">
+                                                            {item.percentText}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="recipe__nutrition__tableCell">
+                                                    <span
+                                                        className={`recipe__nutrition__tableBadge recipe__nutrition__tableBadge__${item.level}`}
+                                                    >
+                                                        {item.level === "low"
+                                                            ? "Low"
+                                                            : item.level === "medium"
+                                                                ? "Medium"
+                                                                : "High"}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
+                            </div>
+                        )}
                     </section>
                     {missingIngredients.length === 0 && (
                         <div className="recipe__complete">

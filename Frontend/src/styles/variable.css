@@ -28,6 +28,11 @@
     --color-light-recipe: #f1f3f4;
     --color-input-overlay: rgba(51, 51, 51, 0.6);
 
+    --color-nutrition-level-low: #16a34a;
+    --color-nutrition-level-medium: #ca8a04;
+    --color-nutrition-level-high: #dc2626;
+
+
     /* ============================================  
        values for scaling:
        - 0.875 = Small
