@@ -227,7 +227,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         />
       </div>
 
-      <FoodCategorySection />
+      <FoodCategorySection userId={userId} />
 
       <RecipeItemSection
         title="Based On Your Pantry"

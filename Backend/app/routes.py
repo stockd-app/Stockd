@@ -1165,6 +1165,33 @@ def get_user_liked_recipes(user_id: int):
         return [r[0] for r in rows]
     finally:
         db.close()
+        
+@router.get("/recommendations/all/{user_id}")
+async def get_all_recommendations(user_id: int, top_n: int = 5):
+    pantry_items = get_user_pantry(user_id)
+
+    payload = {
+        "user_id": user_id,
+        "pantry_items": pantry_items,
+        "top_n": top_n,
+        "mode": "content"
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.post(f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend",json=payload,)
+            resp.raise_for_status()
+            data = resp.json()
+
+        except Exception as e:
+            print(f"[WARN] Collaborative recommender failed for user {user_id}: {e}")
+            data = {
+                "status": "success",
+                "type": "all",
+                "recommendations": []
+            }
+
+    return data
 
 @router.get("/recommendations/collaborative/{user_id}")
 async def get_collaborative_recommendations(user_id: int, top_n: int = 5):
