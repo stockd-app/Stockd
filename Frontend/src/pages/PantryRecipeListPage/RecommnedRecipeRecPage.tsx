@@ -1,4 +1,3 @@
-import React from "react";
 import PantryRecipeListPage from "../PantryRecipeListPage/PantryRecipeListPage";
 import { getRecommendedRecipes } from "../../services/api";
 import { useParams } from "react-router-dom";
