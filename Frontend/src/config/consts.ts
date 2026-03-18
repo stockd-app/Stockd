@@ -1,16 +1,4 @@
 import { Check, Pencil, Trash2, Heart, HeartOff, CircleCheckBig, CircleAlert } from "lucide-react";
-// Common Allergens Icons (Separation for readability)
-import {
-  Wheat,
-  Milk,
-  Fish,
-  Egg,
-  Nut,
-  Bean,
-  Leaf,
-  Shell,
-  AlertTriangle,
-} from "lucide-react";
 
 // Backend API base URL
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
@@ -130,18 +118,18 @@ export const TIME_RANGES = [
 ];
 
 export const COMMON_ALLERGENS = [
-  { label: "Celery", value: "celery", icon: Leaf },
-  { label: "Crustacean", value: "crustacean", icon: Shell },
-  { label: "Egg", value: "egg", icon: Egg },
-  { label: "Fish & Seafood", value: "fish, sea food", icon: Fish },
-  { label: "Gluten", value: "gluten", icon: Wheat },
-  { label: "Lupine", value: "lupine", icon: Bean },
-  { label: "Milk", value: "milk", icon: Milk },
-  { label: "Mustard", value: "mustard", icon: AlertTriangle },
-  { label: "Peanut", value: "peanut", icon: Nut },
-  { label: "Sesame", value: "sesame", icon: Bean },
-  { label: "Soy", value: "soy", icon: Bean },
-  { label: "Tree Nut", value: "tree-nut", icon: Nut },
+  { label: "Celery", value: "celery", icon: "https://cdn-icons-png.flaticon.com/512/4824/4824453.png" },
+  { label: "Crustacean", value: "crustacean", icon: "https://cdn-icons-png.flaticon.com/512/5473/5473993.png" },
+  { label: "Egg", value: "egg", icon: "https://cdn-icons-png.flaticon.com/512/5222/5222963.png" },
+  { label: "Fish & Seafood", value: "fish, sea food", icon: "https://cdn-icons-png.flaticon.com/512/7780/7780156.png" },
+  { label: "Gluten", value: "gluten", icon: "https://cdn-icons-png.flaticon.com/512/1586/1586066.png" },
+  { label: "Lupine", value: "lupine", icon: "https://cdn-icons-png.flaticon.com/512/6201/6201909.png" },
+  { label: "Milk", value: "milk", icon: "https://cdn-icons-png.flaticon.com/512/869/869664.png" },
+  { label: "Mustard", value: "mustard", icon: "https://cdn-icons-png.flaticon.com/512/1811/1811990.png" },
+  { label: "Peanut", value: "peanut", icon: "https://cdn-icons-png.flaticon.com/512/9849/9849878.png" },
+  { label: "Sesame", value: "sesame", icon: "https://cdn-icons-png.flaticon.com/512/6113/6113539.png" },
+  { label: "Soy", value: "soy", icon: "https://cdn-icons-png.flaticon.com/512/6113/6113692.png" },
+  { label: "Tree Nut", value: "tree-nut", icon: "https://cdn-icons-png.flaticon.com/512/1348/1348784.png" },
 ] as const;
 
 export const GetNutritionItems = (recipe: any) => [

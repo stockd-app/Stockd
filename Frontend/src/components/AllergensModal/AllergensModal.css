@@ -125,3 +125,8 @@
 .modal__confirm:active {
   transform: scale(0.98);
 }
+
+.modal__icon {
+  width: 24px;
+  height: 24px;
+}

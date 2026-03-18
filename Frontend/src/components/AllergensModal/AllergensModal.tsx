@@ -39,7 +39,7 @@ const AllergensModal: React.FC<Props> = ({
         <p>Select any allergens you want us to avoid.</p>
 
         <div className="modal__list">
-          {COMMON_ALLERGENS.map(({ label, value, icon: Icon }) => (
+          {COMMON_ALLERGENS.map(({ label, value, icon }) => (
             <label key={value} className="modal__item">
               <input
                 type="checkbox"
@@ -48,7 +48,8 @@ const AllergensModal: React.FC<Props> = ({
               />
 
               <div className="modal__item-content">
-                <Icon size={18} />
+                {/* <Icon size={18} /> */}
+                <img src={icon} alt={label} className="modal__icon" />
                 <span>{label}</span>
               </div>
             </label>
