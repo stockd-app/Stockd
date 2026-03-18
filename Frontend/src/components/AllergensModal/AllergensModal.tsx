@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Button from "../Button/Button";
 import { X } from "lucide-react";
 import { COMMON_ALLERGENS } from "../../config/consts";
@@ -17,6 +17,14 @@ const AllergensModal: React.FC<Props> = ({
   initial = []
 }) => {
   const [selected, setSelected] = useState<string[]>(initial);
+  const allAllergenValues = useMemo(
+    () => COMMON_ALLERGENS.map((item) => item.value),
+    []
+  );
+
+  const isNotSureChecked =
+    allAllergenValues.length > 0 &&
+    allAllergenValues.every((value) => selected.includes(value));
 
   const toggle = (allergen: string) => {
     setSelected((prev) =>
@@ -24,6 +32,15 @@ const AllergensModal: React.FC<Props> = ({
         ? prev.filter((a) => a !== allergen)
         : [...prev, allergen]
     );
+  };
+  const toggleNotSure = () => {
+    setSelected((prev) => {
+      const isAllSelected =
+        allAllergenValues.length > 0 &&
+        allAllergenValues.every((value) => prev.includes(value));
+
+      return isAllSelected ? [] : allAllergenValues;
+    });
   };
 
   return (
@@ -54,6 +71,18 @@ const AllergensModal: React.FC<Props> = ({
               </div>
             </label>
           ))}
+          <div className="modal__divider" />
+          <label className="modal__item modal__item__not__sure">
+            <input
+              type="checkbox"
+              checked={isNotSureChecked}
+              onChange={toggleNotSure}
+            />
+
+            <div className="modal__item-content">
+              <span>Not sure about allergens</span>
+            </div>
+          </label>
         </div>
 
         <Button
