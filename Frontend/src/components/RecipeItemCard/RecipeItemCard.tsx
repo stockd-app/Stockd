@@ -1,27 +1,51 @@
 import React from "react";
 import { Clock, Star } from "lucide-react";
-
+import LikeButton from "../LikeButton/LikeButton";
 import "./recipeitemcard.css";
 
 interface RecipeItemCardProps {
+    recipeId: number;
     name: string;
     image: string;
     rating?: number;
     time?: string;
     status?: string;
     allergens?: string[];
+    initialLiked?: boolean;
     onClick?: () => void;
+    onLikedChange?: (liked: boolean) => void;
 }
 
-const RecipeItemCard: React.FC<RecipeItemCardProps> = ({ name, image, rating, time, status, allergens, onClick, }) => {
+const RecipeItemCard: React.FC<RecipeItemCardProps> = ({
+    recipeId,
+    name,
+    image,
+    rating,
+    time,
+    status,
+    allergens,
+    initialLiked,
+    onClick,
+    onLikedChange,
+}) => {
     const statusClass =
         status && status.toLowerCase().includes("missing")
             ? "status status--missing"
             : "status status--available";
+
     return (
         <div className={`recipeitemcard`} onClick={onClick}>
             <div className="recipeitemcard__image_container">
                 <img src={image} alt={name} className="recipeitemcard__image" />
+
+                <div className="recipeitemcard__like_button_wrapper" onClick={(e) => e.stopPropagation()}>
+                    <LikeButton
+                        recipeId={recipeId}
+                        initialLiked={initialLiked}
+                        size={28}
+                        onLikedChange={onLikedChange}
+                    />
+                </div>
             </div>
 
             <div className="recipeitemcard__info">
@@ -50,9 +74,7 @@ const RecipeItemCard: React.FC<RecipeItemCardProps> = ({ name, image, rating, ti
                     </div>
                 )}
 
-                {status && (
-                    <span className={statusClass}>{status}</span>
-                )}
+                {status && <span className={statusClass}>{status}</span>}
             </div>
         </div>
     );
