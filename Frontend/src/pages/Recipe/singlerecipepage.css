@@ -440,3 +440,486 @@
     font-size: 20px;
   }
 }
+
+/* ===== Nutrition info ===== */
+.recipe__nutrition {
+  margin-top: 24px;
+}
+
+.recipe__nutrition__title {
+  margin-bottom: 16px;
+  color: var(--color-main-text);
+}
+
+.recipe__nutrition__overview {
+  background: var(--color-dark-grey);
+  border: 1px solid var(--color-grey);
+  border-radius: 28px;
+  padding: 24px 20px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+}
+
+.recipe__nutrition__overview__subtitle {
+  margin: 0 0 18px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-grey-text);
+}
+
+.recipe__nutrition__overview__main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.recipe__nutrition__overview__icon {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.recipe__nutrition__overview__value {
+  font-size: 32px !important;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-main-text);
+}
+
+.recipe__nutrition__overview__unit {
+  font-size: 25px !important;
+  font-weight: 700;
+  color: var(--color-grey-text);
+}
+
+.recipe__nutrition__overview__text {
+  margin: 18px 0 0;
+  font-size: 16px;
+  color: var(--color-grey-text);
+}
+
+.recipe__nutrition__overview__meta {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.recipe__nutrition__overview__meta__card {
+  background: var(--color-bg);
+  border-radius: 20px;
+  padding: 18px 16px;
+}
+
+.recipe__nutrition__overview__meta__label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-grey-text);
+}
+
+.recipe__nutrition__overview__meta__value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-main-text);
+}
+
+.recipe__nutrition__level__low {
+  color: var(--color-nutrition-level-low);
+}
+
+.recipe__nutrition__level__medium {
+  color: var(--color-nutrition-level-medium);
+}
+
+.recipe__nutrition__level__high {
+  color: var(--color-nutrition-level-high);
+}
+
+.recipe__nutrition__ring__wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 26px;
+}
+
+.recipe__nutrition__ring {
+  --progress: 0%;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: conic-gradient(#58c36a var(--progress), #dbe7dc 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recipe__nutrition__ring__inner {
+  width: 126px;
+  height: 126px;
+  border-radius: 50%;
+  background: var(--color-dark-grey);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.recipe__nutrition__ring__number {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-main-text);
+  line-height: 1;
+}
+
+.recipe__nutrition__ring__label {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--color-grey-text);
+}
+
+.recipe__nutrition__button {
+  width: 100%;
+  margin-top: 22px;
+  border: none;
+  border-radius: 16px;
+  padding: 14px 16px;
+  background-color: var(--color-primary);
+  color: var(--color-button-text);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.recipe__nutrition__button:hover {
+  opacity: 0.94;
+}
+
+.recipe__nutrition__button:active {
+  transform: scale(0.98);
+}
+
+.recipe__nutrition__tableWrap {
+  margin-top: 18px;
+  background: var(--color-dark-grey);
+  border: 1px solid var(--color-grey);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.04);
+}
+
+.recipe__nutrition__tableHeader {
+  padding: 18px 20px 10px;
+  border-bottom: 1px solid var(--color-grey);
+  background: var(--color-bg);
+}
+
+.recipe__nutrition__tableTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-main-text);
+}
+
+.recipe__nutrition__tableSubtitle {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--color-grey-text);
+}
+
+.recipe__nutrition__table {
+  width: 100%;
+}
+
+.recipe__nutrition__tableRow {
+  display: grid;
+  grid-template-columns: 1.5fr 0.8fr 0.8fr 1.4fr 0.8fr;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #ececec;
+}
+
+.recipe__nutrition__tableRow:last-child {
+  border-bottom: none;
+}
+
+.recipe__nutrition__tableRow__head .recipe__nutrition__tableCell {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-grey-text);
+}
+
+.recipe__nutrition__tableCell {
+  min-width: 0;
+  font-size: 14px;
+  color: var(--color-main-text);
+}
+
+.recipe__nutrition__tableCell__name {
+  display: flex;
+  align-items: center;
+}
+
+.recipe__nutrition__tableCell__nameWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.recipe__nutrition__tableIcon {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.recipe__nutrition__tableLabel {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-main-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recipe__nutrition__tableValue {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-main-text);
+}
+
+.recipe__nutrition__tableTarget {
+  font-size: 14px;
+  color: var(--color-grey-text);
+}
+
+.recipe__nutrition__tableProgress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.recipe__nutrition__tableProgress__track {
+  flex: 1;
+  min-width: 80px;
+  height: 10px;
+  background: var(--color-grey);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.recipe__nutrition__tableProgress__fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.35s ease;
+}
+
+.recipe__nutrition__tableProgress__fill__low {
+  background:var(--color-nutrition-level-low)
+}
+
+.recipe__nutrition__tableProgress__fill__medium {
+  background: var(--color-nutrition-level-medium);
+
+}
+
+.recipe__nutrition__tableProgress__fill__high {
+  background: var(--color-nutrition-level-high);
+}
+
+.recipe__nutrition__tablePercent {
+  min-width: 42px;
+  font-size: 13px;
+  color: var(--color-grey-text);
+  text-align: right;
+}
+
+.recipe__nutrition__tableBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.recipe__nutrition__tableBadge__low {
+  background: rgba(34, 197, 94, 0.298);
+  color: var(--color-nutrition-level-low);
+}
+
+.recipe__nutrition__tableBadge__medium {
+  background: rgba(250, 204, 21, 0.404);
+  color: var(--color-nutrition-level-medium);
+}
+
+.recipe__nutrition__tableBadge__high {
+  background: rgba(239, 68, 68, 0.288);
+  color: var(--color-nutrition-level-high);
+}
+
+@media (max-width: 768px) {
+   .recipe__nutrition__overview {
+    padding: 20px 16px;
+    border-radius: 24px;
+  }
+
+  .recipe__nutrition__overview__value {
+    font-size: 28px;
+  }
+
+  .recipe__nutrition__overview__unit {
+    font-size: 18px;
+  }
+
+  .recipe__nutrition__overview__meta {
+    grid-template-columns: 1fr;
+  }
+
+  .recipe__nutrition__ring {
+    width: 150px;
+    height: 150px;
+  }
+
+  .recipe__nutrition__ring__inner {
+    width: 108px;
+    height: 108px;
+  }
+
+  .recipe__nutrition__ring__number {
+    font-size: 20px;
+  }
+
+  .recipe__nutrition__card {
+    padding: 18px 16px;
+  }
+
+  .recipe__nutrition__card__label {
+    font-size: 17px;
+  }
+
+  .recipe__nutrition__card__value {
+    font-size: 17px;
+  }
+
+  /* .recipe__nutrition__tableWrap {
+    overflow-x: auto;
+  } */
+
+  .recipe__nutrition__table {
+    min-width: 680px;
+  }
+
+  .recipe__nutrition__tableWrap {
+    overflow: hidden;
+    border-radius: 20px;
+  }
+
+  .recipe__nutrition__tableHeader {
+    padding: 16px 16px 10px;
+  }
+
+  .recipe__nutrition__tableTitle {
+    font-size: 15px;
+  }
+
+  .recipe__nutrition__table {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .recipe__nutrition__tableRow {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "name badge"
+      "amount target"
+      "progress progress"
+      "percent percent";
+    gap: 7px 12px;
+    align-items: center;
+    padding: 16px;
+  }
+
+  .recipe__nutrition__tableCell {
+    min-width: 0;
+  }
+
+  .recipe__nutrition__tableRow > .recipe__nutrition__tableCell:nth-child(1) {
+    grid-area: name;
+  }
+
+  .recipe__nutrition__tableRow > .recipe__nutrition__tableCell:nth-child(2) {
+    grid-area: amount;
+  }
+
+  .recipe__nutrition__tableRow > .recipe__nutrition__tableCell:nth-child(3) {
+    grid-area: target;
+    justify-self: end;
+    text-align: right;
+  }
+
+  .recipe__nutrition__tableRow > .recipe__nutrition__tableCell:nth-child(4) {
+    grid-area: progress;
+  }
+
+  .recipe__nutrition__tableRow > .recipe__nutrition__tableCell:nth-child(5) {
+    grid-area: badge;
+    justify-self: end;
+  }
+
+  .recipe__nutrition__tableCell__nameWrap {
+    gap: 8px;
+  }
+
+  .recipe__nutrition__tableIcon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .recipe__nutrition__tableLabel {
+    font-size: 16px;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+
+  .recipe__nutrition__tableValue {
+    font-size: 16px;
+  }
+
+  .recipe__nutrition__tableTarget {
+    font-size: 14px;
+     color: var(--color-grey-text);
+  }
+
+  .recipe__nutrition__tableProgress {
+    display: block;
+  }
+
+  .recipe__nutrition__tableProgress__track {
+    width: 100%;
+    min-width: 0;
+    height: 10px;
+  }
+
+  .recipe__nutrition__tablePercent {
+    display: block;
+    min-width: 0;
+    margin-top: 8px;
+    text-align: left;
+    font-size: 13px;
+    color: var(--color-grey-text);
+  }
+
+  .recipe__nutrition__tableBadge {
+    min-width: 82px;
+    padding: 5px 5px;
+    font-size: 12px;
+  }
+}
