@@ -25,7 +25,7 @@
 }
 
 .grocery-list__title {
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--color-main-text);
   margin: 0;
@@ -40,7 +40,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
 }
 
@@ -51,7 +51,7 @@
   padding: 12px 16px;
   margin: 12px 12px 0 12px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 0.875rem;
   border-left: 4px solid #c00;
   animation: slideDown 0.3s ease;
 }
@@ -62,7 +62,7 @@
   padding: 12px 16px;
   margin: 12px 12px 0 12px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 0.875rem;
   border-left: 4px solid #c00;
   animation: slideDown 0.3s ease;
 }
@@ -95,7 +95,7 @@
   padding: 12px 16px;
   border: none;
   border-radius: 10px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -177,7 +177,7 @@
 }
 
 .grocery-list__form-group label {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: var(--color-main-text);
   text-transform: uppercase;
@@ -191,7 +191,7 @@
   background-color: var(--color-input-overlay);
   color: var(--color-main-text);
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-family: inherit;
   outline: none;
   transition: border-color 0.2s ease;
@@ -228,14 +228,14 @@
 }
 
 .grocery-list__empty p {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 600;
   margin: 0 0 8px 0;
   color: var(--color-main-text);
 }
 
 .grocery-list__empty small {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--color-grey-text);
 }
 
@@ -245,7 +245,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 1rem;
   color: var(--color-grey-text);
 }
 
@@ -271,7 +271,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-main-text);
 }
@@ -288,7 +288,7 @@
 }
 
 .grocery-list__category-title {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 700;
   color: var(--color-main-text);
   text-transform: uppercase;
@@ -339,7 +339,7 @@
 }
 
 .grocery-list__item-name {
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 600;
   color: var(--color-main-text);
   margin-bottom: 4px;
@@ -347,7 +347,7 @@
 }
 
 .grocery-list__item-quantity {
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--color-grey-text);
 }
 
@@ -403,7 +403,7 @@
   background: none;
   text-align: left;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--color-main-text);
   transition: all 0.2s ease;
   font-weight: 500;

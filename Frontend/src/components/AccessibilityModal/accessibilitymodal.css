@@ -31,28 +31,28 @@
 }
 
 .accessibility__modal .accessibility__preview-text[data-scale="0.875"] {
-    font-size: 0.875rem;
+    font-size: 14px;
     color: var(--color-main-text);
     line-height: 1.6;
     margin: 0;
 }
 
 .accessibility__modal .accessibility__preview-text[data-scale="1"] {
-    font-size: 1rem;
+    font-size: 16px;
     color: var(--color-main-text);
     line-height: 1.6;
     margin: 0;
 }
 
 .accessibility__modal .accessibility__preview-text[data-scale="1.125"] {
-    font-size: 1.125rem;
+    font-size: 18px;
     color: var(--color-main-text);
     line-height: 1.6;
     margin: 0;
 }
 
 .accessibility__modal .accessibility__preview-text[data-scale="1.25"] {
-    font-size: 1.25rem;
+    font-size: 20px;
     color: var(--color-main-text);
     line-height: 1.6;
     margin: 0;
@@ -150,19 +150,41 @@
 }
 
 .accessibility__modal .accessibility__option:nth-child(1) .accessibility__option-preview {
-    font-size: 0.875rem;
+    font-size: 0.875rem !important;
 }
 
 .accessibility__modal .accessibility__option:nth-child(2) .accessibility__option-preview {
-    font-size: 1rem;
+    font-size: 1rem !important;
 }
 
 .accessibility__modal .accessibility__option:nth-child(3) .accessibility__option-preview {
-    font-size: 1.125rem;
+    font-size: 1.125rem !important;
 }
 
 .accessibility__modal .accessibility__option:nth-child(4) .accessibility__option-preview {
-    font-size: 1.25rem;
+    font-size: 1.25rem !important;
+}
+
+.accessibility__preview-text {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--color-text);
+}
+
+.accessibility__modal .accessibility__preview-text[data-scale="0.875"] {
+    font-size: 14px !important;
+}
+
+.accessibility__modal .accessibility__preview-text[data-scale="1"] {
+    font-size: 16px !important;
+}
+
+.accessibility__modal .accessibility__preview-text[data-scale="1.125"] {
+    font-size: 18px !important;
+}
+
+.accessibility__modal .accessibility__preview-text[data-scale="1.25"] {
+    font-size: 20px !important;
 }
 
 .accessibility__preview {
@@ -220,8 +242,20 @@
         font-size: 0.9375rem;
     }
 
-    .accessibility__modal .accessibility__preview-text {
-        font-size: 0.9375rem;
+    .accessibility__modal .accessibility__preview-text[data-scale="0.875"] {
+        font-size: 14px;
+    }
+
+    .accessibility__modal .accessibility__preview-text[data-scale="1"] {
+        font-size: 16px;
+    }
+
+    .accessibility__modal .accessibility__preview-text[data-scale="1.125"] {
+        font-size: 18px;
+    }
+
+    .accessibility__modal .accessibility__preview-text[data-scale="1.25"] {
+        font-size: 20px;
     }
 
 }
