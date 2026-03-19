@@ -22,6 +22,12 @@
     overflow: hidden;
     height: 160px;
     cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.explore__card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .explore__large__card {
@@ -33,23 +39,40 @@
     height: 160px;
 }
 
+.explore__card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(43, 43, 43, 0.45); 
+    transition: background 0.3s ease;
+}
+
+.explore__card:hover::after {
+    background: rgba(0, 0, 0, 0.3); 
+}
+
 .explore__image {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.explore__card:hover .explore__image {
+    transform: scale(1.05);
 }
 
 .explore__text {
     position: absolute;
-    bottom: -6px;
-    left: 12px;
-    color: var(--color-dark-text);
+    bottom: -10px;
+    left: 6px;
+    color: #fff;
     font-size: 18px;
     font-weight: 700;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.7);
+    z-index: 2;
 }
 
-/* small screen(mobile) */
 @media (max-width: 600px) {
     .explore__large__card {
         height: 210px;  

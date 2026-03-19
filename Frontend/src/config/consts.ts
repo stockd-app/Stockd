@@ -24,6 +24,7 @@ export const API_ROUTES = {
   GET_PANTRY: `${API_BASE_URL}/pantry_items`,
   ADD_UPDATE_PANTRY_ITEM: `${API_BASE_URL}/add_update_pantry_items`,
   DELETE_PANTRY_ITEMS: `${API_BASE_URL}/pantry_items/delete`,
+  GET_ALL_RECOMMENDED_RECIPES: `${API_BASE_URL}/recommendations/all`,  // Caller will append `user_id`
   GET_SUBSET_PANTRY_RECIPES: `${API_BASE_URL}/recommendations/subset`,  // Caller will append `user_id`
   GET_INCOMPLETE_PANTRY_RECIPES: `${API_BASE_URL}/recommendations/pantry`,   // Caller will append `user_id`
   GET_RECOMMEND_LIKED_RECIPES: `${API_BASE_URL}/recommendations/liked-categories`,   // Caller will append `user_id`
