@@ -1,14 +1,14 @@
 from sqlalchemy import or_
 from app.database.database import SessionLocal
 from app.database.models import FoodImageCache, PantryItem
-from app.utils.openfoodfacts import get_product_image_from_openfoodfacts
+from app.utils.pexels import get_product_image_from_pexels
 
 
 def fetch_food_images(item_ids: list[int]):
     """
     Fetch and update food images for pantry items
     - First check the FoodImageCache for existing images
-    - If not found, queries OpenFoodFacts for the image
+    - If not found, queries Pexels for the image
     """
     db = SessionLocal()
     
@@ -45,7 +45,7 @@ def fetch_food_images(item_ids: list[int]):
             item.item_image = cached.image_url
             continue
 
-        image = get_product_image_from_openfoodfacts(item.normalized_name)
+        image = get_product_image_from_pexels(item.normalized_name)
 
         if image:
             db.add(
@@ -62,7 +62,7 @@ def fetch_food_images(item_ids: list[int]):
 def get_existing_image(db, user_id: int, normalized_name: str):
     """
     Check if there's an existing image for the given normalized name in the user's pantry items.
-    This avoids duplicate calls to OpenFoodFacts. 
+    This avoids duplicate calls to Pexels. 
     If an image exists, it returns the URL; otherwise, it returns None.
     """
     print(f"Checking for existing image for '{normalized_name}' in user {user_id}'s pantry...")

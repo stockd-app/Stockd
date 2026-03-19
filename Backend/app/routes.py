@@ -28,7 +28,6 @@ from fastapi import APIRouter, HTTPException
 from app.asprise_api import send_receipt_to_asprise
 from app.utils.receipt_parser import parse_asprise_response
 from app.utils.ai_classifier import classify_receipt_items
-from app.utils.openfoodfacts import get_product_image_from_openfoodfacts
 from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
 from app.database.models import (
@@ -46,14 +45,12 @@ from app.database.models import (
     GroceryItemsDeleteRequest,
     GroceryItemMarkRequest,
 )
-from app.utils.ai_recommender import get_recipe_recommendations
 from app.utils.sanitizer import (
     sanitize_text,
     sanitize_quantity,
     sanitize_url,
     sanitize_google_url,
 )
-from typing import List
 
 load_dotenv()
 
@@ -78,7 +75,7 @@ async def upload_receipt(
     2. Fetch existing items from DB classifications
     3. Classify missing items using the AI model, if no missing items, skip this step
     4. Return the processed items to frontend
-    5. Start background task to fetch images from OpenFoodFacts
+    5. Start background task to fetch images from Pexels
     """
     db = SessionLocal()
     try:
@@ -186,7 +183,6 @@ async def upload_receipt(
                     cached_map[normalized] = classification
 
             # Use cached_map to populate user's pantry items
-            processed_items = []
             for norm_name, raw_name in normalized_items.items():
                 classification = cached_map.get(norm_name)
 
@@ -241,7 +237,7 @@ async def confirm_receipt_items(
     """
     After the user confirms the detected receipt items, this endpoint will:
     1. Add or update the confirmed items in the user's pantry
-    2. Start background task to fetch images for these items from OpenFoodFacts
+    2. Start background task to fetch images for these items from Pexels
     3. Return success response with count of saved items
     4. Handle errors gracefully and rollback DB if needed
     5. Possible errors:
@@ -292,7 +288,7 @@ async def confirm_receipt_items(
         print("Processed all items: ", time.strftime("%Y-%m-%d %H:%M:%S"))
         db.commit()
 
-        # Background task to fetch images from OpenFoodFacts
+        # Background task to fetch images from Pexels
         if items_needing_images:
             background_tasks.add_task(fetch_food_images, items_needing_images)
         print("End of /confirm_receipt_items: ", time.strftime("%Y-%m-%d %H:%M:%S"))
