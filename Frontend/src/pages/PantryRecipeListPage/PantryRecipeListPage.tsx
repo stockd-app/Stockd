@@ -10,6 +10,7 @@ import RecipeListCard from "../../components/RecipeListCard/RecipeListCard";
 import Button from "../../components/Button/Button";
 
 import "./pantryrecipelistpage.css";
+import { getLikedRecipes, toggleLikeRecipe } from "../../services/api";
 
 interface PantryRecipeListPageProps {
     title: string;
@@ -28,6 +29,7 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
 
     // Recipes displayed after applying UI-level filters (rating, time, etc.)
     const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
+    const [likedRecipeIds, setLikedRecipeIds] = useState<Set<number>>(new Set());
 
     const [showFilters, setShowFilters] = useState(false);
 
@@ -56,6 +58,12 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
 
             setRecipes(visible);
             setFilteredRecipes(visible);
+
+            const likedRes = await getLikedRecipes();
+            const likedIds = new Set<number>();
+            likedRes.liked_recipes.forEach((item: any) => likedIds.add(item.recipe.RecipeId));
+
+            setLikedRecipeIds(likedIds);
         };
         load();
     }, []);
@@ -132,12 +140,22 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
                     filteredRecipes.map(recipe => (
                         <RecipeListCard
                             key={recipe.id}
+                            recipeId={recipe.id}
                             name={recipe.name}
                             image={recipe.image}
                             rating={recipe.rating}
                             time={recipe.time}
                             status={recipe.status}
                             allergens={recipe.allergens}
+                            initialLiked={likedRecipeIds.has(recipe.id)}
+                            onLikedChange={(liked) => {
+                                setLikedRecipeIds(prev => {
+                                    const next = new Set(prev);
+                                    if (liked) next.add(recipe.id);
+                                    else next.delete(recipe.id);
+                                    return next;
+                                });
+                            }}
                             onClick={() => navigate(`/recipes/${recipe.id}`)}
                         />
                     ))
