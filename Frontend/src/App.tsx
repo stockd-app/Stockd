@@ -152,7 +152,7 @@ const App: React.FC = () => {
           element={user ? <PantryPantryPage /> : <Navigate to="/" replace />}
         />
         <Route
-          path="/pantry-Refrigerator"
+          path="/pantry-fridge"
           element={user ? <PantryFridgePage /> : <Navigate to="/" replace />}
         />
         <Route

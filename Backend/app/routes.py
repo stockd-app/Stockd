@@ -20,7 +20,7 @@ from google.auth.exceptions import InvalidValue
 from pymysql import IntegrityError
 from sqlalchemy.exc import SQLAlchemyError
 from app.utils.normalize_food_name import normalize_food_name
-from app.utils.resolve_food_images import fetch_food_images
+from app.utils.resolve_food_images import fetch_food_images, get_existing_image
 from app.dependencies.limiter import limiter
 from app.utils.crypto import hash_email
 import httpx
@@ -33,7 +33,8 @@ from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
 from app.database.models import (
     ItemClassification,
-    LikedRecipe, PantryItemsDeleteRequest,
+    LikedRecipe,
+    PantryItemsDeleteRequest,
     PantryItemsRequest,
     Recipe,
     RefreshTokenRequest,
@@ -46,7 +47,12 @@ from app.database.models import (
     GroceryItemMarkRequest,
 )
 from app.utils.ai_recommender import get_recipe_recommendations
-from app.utils.sanitizer import sanitize_text, sanitize_quantity, sanitize_url, sanitize_google_url
+from app.utils.sanitizer import (
+    sanitize_text,
+    sanitize_quantity,
+    sanitize_url,
+    sanitize_google_url,
+)
 from typing import List
 
 load_dotenv()
@@ -96,13 +102,15 @@ async def upload_receipt(
                     "grouped_items": {},
                     "total_items": 0,
                 }
-                
-            print("Fetching existing items classifications from DB: ", time.strftime("%Y-%m-%d %H:%M:%S"))
+
+            print(
+                "Fetching existing items classifications from DB: ",
+                time.strftime("%Y-%m-%d %H:%M:%S"),
+            )
             normalized_items = {
-                normalize_food_name(name): name
-                for name in parsed["items"].keys()
+                normalize_food_name(name): name for name in parsed["items"].keys()
             }
-            
+
             cached = (
                 db.query(ItemClassification)
                 .filter(ItemClassification.normalized_name.in_(normalized_items.keys()))
@@ -112,7 +120,7 @@ async def upload_receipt(
             cached_map = {}
             for c in cached:
                 cached_map[c.normalized_name] = c
-            
+
             missing_items = {}
             for norm, raw in normalized_items.items():
                 if norm not in cached_map:
@@ -120,18 +128,23 @@ async def upload_receipt(
 
             ai_results = {}
             if missing_items:
-                print("Sending missing items to AI classifier: ", time.strftime("%Y-%m-%d %H:%M:%S"))
-                ai_items_payload = {name: parsed["items"][name] for name in missing_items.values()}
+                print(
+                    "Sending missing items to AI classifier: ",
+                    time.strftime("%Y-%m-%d %H:%M:%S"),
+                )
+                ai_items_payload = {
+                    name: parsed["items"][name] for name in missing_items.values()
+                }
                 print("AI items payload: ", ai_items_payload)
                 ai_payload = {
                     "store": parsed.get("store", "Unknown"),
-                    "items": ai_items_payload
+                    "items": ai_items_payload,
                 }
                 ai_data = classify_receipt_items(ai_payload)
                 ai_results = ai_data.get("results", {})
-            
+
             print("Received classified results: ", time.strftime("%Y-%m-%d %H:%M:%S"))
-            
+
             for raw_name, item_data in ai_results.items():
                 normalized = normalize_food_name(raw_name)
 
@@ -166,7 +179,7 @@ async def upload_receipt(
                         normalized_name=normalized,
                         is_food=is_food,
                         category=category,
-                        storage=storage
+                        storage=storage,
                     )
                     db.add(classification)
                     db.flush()
@@ -191,12 +204,14 @@ async def upload_receipt(
                 }
 
                 all_detected_items.append(detected_item)
-                
+
         print("Processed all items: ", time.strftime("%Y-%m-%d %H:%M:%S"))
         db.commit()
 
-        print("Returning detected items for confirmation:",
-              time.strftime("%Y-%m-%d %H:%M:%S"))
+        print(
+            "Returning detected items for confirmation:",
+            time.strftime("%Y-%m-%d %H:%M:%S"),
+        )
 
         print("End of /upload-receipt: ", time.strftime("%Y-%m-%d %H:%M:%S"))
         return {
@@ -213,6 +228,7 @@ async def upload_receipt(
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
+
 
 @router.post("/confirm-receipt-items", tags=["OCR"])
 @limiter.limit("5/minute")
@@ -236,6 +252,7 @@ async def confirm_receipt_items(
     db = SessionLocal()
     try:
         saved_items = []
+        items_needing_images = []
 
         for item in items:
             norm_name = item["normalized_name"]
@@ -252,6 +269,8 @@ async def confirm_receipt_items(
                 saved_items.append(existing_item)
                 continue
 
+            existing_image = get_existing_image(db, user.id, norm_name)
+
             # Create new PantryItem
             new_item = PantryItem(
                 user_id=user.id,
@@ -261,16 +280,21 @@ async def confirm_receipt_items(
                 storage=sanitize_text(item.get("storage", "Pantry")),
                 quantity_value=quantity,
                 quantity_unit="",
+                item_image=existing_image or "",
             )
             db.add(new_item)
             db.flush()
             saved_items.append(new_item)
 
+            if not existing_image:
+                items_needing_images.append(new_item.id)
+
         print("Processed all items: ", time.strftime("%Y-%m-%d %H:%M:%S"))
         db.commit()
 
         # Background task to fetch images from OpenFoodFacts
-        background_tasks.add_task(fetch_food_images, user.id)
+        if items_needing_images:
+            background_tasks.add_task(fetch_food_images, items_needing_images)
         print("End of /confirm_receipt_items: ", time.strftime("%Y-%m-%d %H:%M:%S"))
         return {
             "status": "success",
@@ -282,6 +306,7 @@ async def confirm_receipt_items(
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
+
 
 @router.post("/auth/refresh")
 async def refresh_google_token(request: RefreshTokenRequest):
@@ -307,6 +332,7 @@ async def refresh_google_token(request: RefreshTokenRequest):
             raise HTTPException(status_code=400, detail="Token refresh failed")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error refreshing token: {str(e)}")
+
 
 @router.post("/auth/google", tags=["Google OAuth"])
 @limiter.limit("10/minute")
@@ -632,7 +658,12 @@ async def get_pantry_items(user_id: int, user=Depends(require_google_token)):
         if not db_user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        items = db.query(PantryItem).filter(PantryItem.user_id == user_id).all()
+        items = (
+            db.query(PantryItem)
+            .filter(PantryItem.user_id == user_id)
+            .order_by(PantryItem.added_on.desc())
+            .all()
+        )
 
         # Group items by storage
         grouped_items = {}
@@ -673,6 +704,7 @@ async def get_pantry_items(user_id: int, user=Depends(require_google_token)):
 async def add_update_pantry_items(
     request: Request,
     request_data: PantryItemsRequest,
+    background_tasks: BackgroundTasks,
     user=Depends(require_google_token),
 ):
     """
@@ -704,14 +736,20 @@ async def add_update_pantry_items(
             raise HTTPException(status_code=404, detail="User not found")
 
         processed_items = []
+        items_needing_images = []
+
         for item in request_data.items:
             # Replace blanks or None with default values
-            item_name = sanitize_text(item.item_name) if item.item_name else "Unnamed Item"
-            quantity_value = (
-                sanitize_quantity(item.quantity_value)
+            item_name = (
+                sanitize_text(item.item_name) if item.item_name else "Unnamed Item"
             )
-            quantity_unit = sanitize_text(item.quantity_unit) if item.quantity_unit else "pcs"
-            category = sanitize_text(item.category) if item.category else "Uncategorized"
+            quantity_value = sanitize_quantity(item.quantity_value)
+            quantity_unit = (
+                sanitize_text(item.quantity_unit) if item.quantity_unit else "pcs"
+            )
+            category = (
+                sanitize_text(item.category) if item.category else "Uncategorized"
+            )
             storage = sanitize_text(item.storage) if item.storage else "Pantry"
             item_image = sanitize_url(item.item_image)
 
@@ -732,24 +770,35 @@ async def add_update_pantry_items(
                 existing_item.quantity_unit = quantity_unit
                 existing_item.category = category
                 existing_item.storage = storage
-                existing_item.item_image = item_image
+                if item_image:
+                    existing_item.item_image = item_image
                 processed_items.append(existing_item)
             else:
+                norm_name = normalize_food_name(item_name)
+                existing_image = get_existing_image(db, user.id, norm_name)
                 # Add new item
                 new_item = PantryItem(
                     user_id=request_data.user_id,
                     item_name=item_name,
+                    normalized_name=norm_name,
                     quantity_value=quantity_value,
                     quantity_unit=quantity_unit,
                     category=category,
                     storage=storage,
-                    item_image=item_image,
+                    item_image=existing_image or "",
                     added_on=datetime.datetime.utcnow(),
                 )
                 db.add(new_item)
+                db.flush()
                 processed_items.append(new_item)
+                if not existing_image:
+                    items_needing_images.append(new_item.id)
 
         db.commit()
+
+        if items_needing_images:
+            print("BG task for images: ", items_needing_images  )
+            background_tasks.add_task(fetch_food_images, items_needing_images)
 
         return {
             "status": "success",
@@ -776,10 +825,15 @@ async def add_update_pantry_items(
 
     finally:
         db.close()
-        
+
+
 @router.delete("/pantry_items/delete", tags=["Pantry"])
 @limiter.limit("10/minute")
-async def delete_pantry_items(request: Request, request_data: PantryItemsDeleteRequest, user=Depends(require_google_token)):
+async def delete_pantry_items(
+    request: Request,
+    request_data: PantryItemsDeleteRequest,
+    user=Depends(require_google_token),
+):
     """
     Delete multiple pantry items by their IDs.
     Example JSON body:
@@ -806,21 +860,24 @@ async def delete_pantry_items(request: Request, request_data: PantryItemsDeleteR
 
         for item in items_to_delete:
             db.delete(item)
-        
+
         db.commit()
 
         return {
             "status": "success",
             "deleted_ids": deleted_ids,
-            "message": f"Deleted {len(deleted_ids)} pantry items successfully"
+            "message": f"Deleted {len(deleted_ids)} pantry items successfully",
         }
 
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Failed to delete pantry items: {str(e)}")
-    
+        raise HTTPException(
+            status_code=500, detail=f"Failed to delete pantry items: {str(e)}"
+        )
+
     finally:
         db.close()
+
 
 def tokenize(text: str | None) -> str:
     """
@@ -832,7 +889,7 @@ def tokenize(text: str | None) -> str:
         return set()
     text = text.lower()
     text = re.sub(r"[^a-z\s]", "", text)
-    
+
     tokens = set()
     for word in text.split():
         # berries -> berry
@@ -850,6 +907,7 @@ def tokenize(text: str | None) -> str:
         tokens.add(word)
 
     return tokens
+
 
 @router.post("/recipes/{recipe_id}/complete", tags=["Recipes"])
 @limiter.limit("10/minute")
@@ -869,7 +927,7 @@ async def complete_recipe(
     unmatched = []
 
     try:
-        # Fetch recipe from dataset 
+        # Fetch recipe from dataset
         recipe_data = await fetch_recipe_from_ai(recipe_id)
         recipe_obj = recipe_data.get("recipe", {})
 
@@ -881,16 +939,11 @@ async def complete_recipe(
 
         if not ingredients:
             raise HTTPException(
-                status_code=404,
-                detail="No ingredients found for this recipe (dataset)"
+                status_code=404, detail="No ingredients found for this recipe (dataset)"
             )
 
         # Get user pantry
-        pantry_items = (
-            db.query(PantryItem)
-            .filter(PantryItem.user_id == user.id)
-            .all()
-        )
+        pantry_items = db.query(PantryItem).filter(PantryItem.user_id == user.id).all()
 
         # ingredient → match pantry → reduce quantity
         for ingredient in ingredients:
@@ -904,17 +957,19 @@ async def complete_recipe(
                 if not pantry_tokens:
                     continue
                 print("PANTRY:", pantry_tokens)
-               
+
                 overlap = ingredient_tokens & pantry_tokens
                 if overlap:
                     print("--------- “”MATCH“” ---------")
                     pantry_item.quantity_value -= 1
                     matched = True
-                    consumed.append({
-                        "ingredient": ingredient,
-                        "pantry_item": pantry_item.item_name,
-                        "remaining": pantry_item.quantity_value,
-                    })
+                    consumed.append(
+                        {
+                            "ingredient": ingredient,
+                            "pantry_item": pantry_item.item_name,
+                            "remaining": pantry_item.quantity_value,
+                        }
+                    )
                     if pantry_item.quantity_value <= 0:
                         db.delete(pantry_item)
 
@@ -943,12 +998,12 @@ async def complete_recipe(
     except Exception as e:
         db.rollback()
         raise HTTPException(
-            status_code=500,
-            detail=f"Failed to complete recipe: {str(e)}"
+            status_code=500, detail=f"Failed to complete recipe: {str(e)}"
         )
 
     finally:
         db.close()
+
 
 async def fetch_recipe_from_ai(recipe_id: int) -> dict:
     """
@@ -959,34 +1014,37 @@ async def fetch_recipe_from_ai(recipe_id: int) -> dict:
         try:
             resp = await client.post(
                 f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recipe-by-id",
-                json={"recipe_id": recipe_id}
+                json={"recipe_id": recipe_id},
             )
             print(resp)
             resp.raise_for_status()
             return resp.json()
 
         except httpx.HTTPStatusError:
-            raise HTTPException(
-                status_code=resp.status_code,
-                detail=resp.text
-            )
+            raise HTTPException(status_code=resp.status_code, detail=resp.text)
 
         except Exception as e:
             raise HTTPException(
-                status_code=500,
-                detail=f"Error contacting recipe AI service: {str(e)}"
+                status_code=500, detail=f"Error contacting recipe AI service: {str(e)}"
             )
+
 
 # Parse duration format
 def parse_duration(duration_str):
     if not duration_str or not duration_str.strip():
         return None
-    cleaned = duration_str.replace("PT", "").replace("H", "").replace("M", "").replace("S", "")
+    cleaned = (
+        duration_str.replace("PT", "")
+        .replace("H", "")
+        .replace("M", "")
+        .replace("S", "")
+    )
     try:
         return int(cleaned) if cleaned else None
     except ValueError:
         return None
-    
+
+
 @router.post("/recipes/{recipe_id}/like", tags=["Recipes"])
 @limiter.limit("10/minute")
 async def toggle_like_recipe(
@@ -1003,29 +1061,57 @@ async def toggle_like_recipe(
     try:
         # Check if recipe exists in database by dataset_recipe_id
         recipe = db.query(Recipe).filter(Recipe.dataset_recipe_id == recipe_id).first()
-        
+
         # If recipe doesn't exist in database, fetch from AI and create it
         if not recipe:
             try:
                 recipe_data = await fetch_recipe_from_ai(recipe_id)
                 recipe_obj = recipe_data.get("recipe", {})
-                   
+
                 # Join RecipeInstructions array into a single string
                 instructions = recipe_obj.get("RecipeInstructions", [])
-                steps_text = "\n".join(instructions) if isinstance(instructions, list) else str(instructions)
-                
+                steps_text = (
+                    "\n".join(instructions)
+                    if isinstance(instructions, list)
+                    else str(instructions)
+                )
+
                 recipe = Recipe(
                     dataset_recipe_id=recipe_id,
                     recipe_name=recipe_obj.get("Name", "Unknown Recipe"),
-                    recipe_image=recipe_obj.get("Images", [None])[0] if recipe_obj.get("Images") else None,
+                    recipe_image=(
+                        recipe_obj.get("Images", [None])[0]
+                        if recipe_obj.get("Images")
+                        else None
+                    ),
                     steps=recipe_obj.get("Description", ""),
-                    prep_time=int(recipe_obj.get("PrepTime", "0").replace("PT", "").replace("M", "").replace("H", "")) if recipe_obj.get("PrepTime") else None,
-                    cook_time=int(recipe_obj.get("CookTime", "0").replace("PT", "").replace("M", "").replace("H", "")) if recipe_obj.get("CookTime") else None,
+                    prep_time=(
+                        int(
+                            recipe_obj.get("PrepTime", "0")
+                            .replace("PT", "")
+                            .replace("M", "")
+                            .replace("H", "")
+                        )
+                        if recipe_obj.get("PrepTime")
+                        else None
+                    ),
+                    cook_time=(
+                        int(
+                            recipe_obj.get("CookTime", "0")
+                            .replace("PT", "")
+                            .replace("M", "")
+                            .replace("H", "")
+                        )
+                        if recipe_obj.get("CookTime")
+                        else None
+                    ),
                 )
                 db.add(recipe)
                 db.commit()
             except HTTPException:
-                raise HTTPException(status_code=404, detail="Recipe not found in dataset")
+                raise HTTPException(
+                    status_code=404, detail="Recipe not found in dataset"
+                )
 
         existing_like = (
             db.query(LikedRecipe)
@@ -1093,6 +1179,7 @@ async def get_liked_recipes(request: Request, user=Depends(require_google_token)
     finally:
         db.close()
 
+
 @router.get("/recommendations/pantry/{user_id}")
 async def get_pantry_recommendations(user_id: int, top_n: int = 10):
 
@@ -1119,7 +1206,9 @@ async def get_pantry_recommendations(user_id: int, top_n: int = 10):
 
     merged = []
     for r in recipes:
-        db_record = next((x for x in db_recipes if x.dataset_recipe_id == r["RecipeId"]), None)
+        db_record = next(
+            (x for x in db_recipes if x.dataset_recipe_id == r["RecipeId"]), None
+        )
         merged.append(
             {
                 **r,
@@ -1137,13 +1226,17 @@ def get_user_pantry(user_id: int):
     finally:
         db.close()
 
+
 def get_user_pantry_exact_match(user_id: int):
     db = SessionLocal()
     try:
-        items = db.query(PantryItem.item_name).filter(PantryItem.user_id == user_id).all()
+        items = (
+            db.query(PantryItem.item_name).filter(PantryItem.user_id == user_id).all()
+        )
         return [item[0] for item in items]
     finally:
         db.close()
+
 
 def get_all_user_ids():
     db = SessionLocal()
@@ -1152,6 +1245,7 @@ def get_all_user_ids():
         return [u.id for u in users]
     finally:
         db.close()
+
 
 def get_user_liked_recipes(user_id: int):
     db = SessionLocal()
@@ -1165,7 +1259,8 @@ def get_user_liked_recipes(user_id: int):
         return [r[0] for r in rows]
     finally:
         db.close()
-        
+
+
 @router.get("/recommendations/all/{user_id}")
 async def get_all_recommendations(user_id: int, top_n: int = 5):
     pantry_items = get_user_pantry(user_id)
@@ -1174,34 +1269,31 @@ async def get_all_recommendations(user_id: int, top_n: int = 5):
         "user_id": user_id,
         "pantry_items": pantry_items,
         "top_n": top_n,
-        "mode": "content"
+        "mode": "content",
     }
 
     async with httpx.AsyncClient() as client:
         try:
-            resp = await client.post(f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend",json=payload,)
+            resp = await client.post(
+                f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend",
+                json=payload,
+            )
             resp.raise_for_status()
             data = resp.json()
 
         except Exception as e:
             print(f"[WARN] Collaborative recommender failed for user {user_id}: {e}")
-            data = {
-                "status": "success",
-                "type": "all",
-                "recommendations": []
-            }
+            data = {"status": "success", "type": "all", "recommendations": []}
 
     return data
+
 
 @router.get("/recommendations/collaborative/{user_id}")
 async def get_collaborative_recommendations(user_id: int, top_n: int = 5):
     pantry_items = get_user_pantry(user_id)
     all_user_ids = get_all_user_ids()
 
-    user_likes = {
-        uid: get_user_liked_recipes(uid)
-        for uid in all_user_ids
-    }
+    user_likes = {uid: get_user_liked_recipes(uid) for uid in all_user_ids}
 
     payload = {
         "user_id": user_id,
@@ -1214,7 +1306,10 @@ async def get_collaborative_recommendations(user_id: int, top_n: int = 5):
 
     async with httpx.AsyncClient() as client:
         try:
-            resp = await client.post(f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend",json=payload,)
+            resp = await client.post(
+                f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend",
+                json=payload,
+            )
             resp.raise_for_status()
             data = resp.json()
 
@@ -1222,19 +1317,14 @@ async def get_collaborative_recommendations(user_id: int, top_n: int = 5):
                 data = {
                     "status": "success",
                     "type": "collaborative",
-                    "recommendations": []
+                    "recommendations": [],
                 }
 
         except Exception as e:
             print(f"[WARN] Collaborative recommender failed for user {user_id}: {e}")
-            data = {
-                "status": "success",
-                "type": "collaborative",
-                "recommendations": []
-            }
+            data = {"status": "success", "type": "collaborative", "recommendations": []}
 
     return data
-
 
 
 @router.get("/recipes/search", tags=["Recipes"])
@@ -1254,40 +1344,38 @@ async def search_recipes_route(request: Request, query: str, limit: int = 20):
         try:
             ai_response = await client.post(
                 f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/search-recipes",
-                json={
-                    "query": safe_query,
-                    "limit": limit
-                }
+                json={"query": safe_query, "limit": limit},
             )
 
             ai_response.raise_for_status()
             data = ai_response.json()
 
-             # 🔑 HANDLE ALL VALID SHAPES
+            # 🔑 HANDLE ALL VALID SHAPES
             if isinstance(data, list):
-                return { "content_based": data }
+                return {"content_based": data}
 
             if isinstance(data, dict):
                 if "content_based" in data:
-                    return { "content_based": data["content_based"] }
+                    return {"content_based": data["content_based"]}
                 if "results" in data:
-                    return { "content_based": data["results"] }
+                    return {"content_based": data["results"]}
 
             # No results, but not an error
-            return { "content_based": [] }
+            return {"content_based": []}
 
         except httpx.ReadTimeout:
-            return { "content_based": [] }
+            return {"content_based": []}
 
         except httpx.RequestError:
-            return { "content_based": [] }
+            return {"content_based": []}
 
         except httpx.HTTPStatusError:
-            return { "content_based": [] }
+            return {"content_based": []}
 
         except Exception:
-            return { "content_based": [] }
-    
+            return {"content_based": []}
+
+
 @router.get("/recipes/{recipe_id}", tags=["Recipes"])
 async def get_recipe_by_id_route(recipe_id: int):
     """
@@ -1295,10 +1383,11 @@ async def get_recipe_by_id_route(recipe_id: int):
     """
     return await fetch_recipe_from_ai(recipe_id)
 
+
 @router.post("/user/post-allergens", tags=["Users"])
 @limiter.limit("10/minute")
 async def update_user_allergens(
-    request: Request, 
+    request: Request,
     data: UserAllergensRequest,
     user=Depends(require_google_token),
 ):
@@ -1332,6 +1421,7 @@ async def update_user_allergens(
     finally:
         db.close()
 
+
 @router.get("/user/get-allergens", tags=["Users"])
 async def get_user_allergens(request: Request, user=Depends(require_google_token)):
     """
@@ -1359,19 +1449,16 @@ def fetch_grocery_items(user_id: int):
         if not user:
             return None, None
 
-        items = (
-            db.query(GroceryItem)
-            .filter(GroceryItem.user_id == user_id)
-            .all()
-        )
+        items = db.query(GroceryItem).filter(GroceryItem.user_id == user_id).all()
         return user, items
     finally:
         db.close()
 
+
 @router.get("/grocery_items/{user_id}", tags=["Grocery"])
 async def get_grocery_items(user_id: int):
     """Get all grocery items for a specific user and return unpurchased count."""
-    user, grocery_items =  fetch_grocery_items(user_id)
+    user, grocery_items = fetch_grocery_items(user_id)
 
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -1395,9 +1482,7 @@ async def get_grocery_items(user_id: int):
         for item in grocery_items
     ]
 
-    unpurchased_count = sum(
-        1 for item in grocery_items if not item.is_purchased
-    )
+    unpurchased_count = sum(1 for item in grocery_items if not item.is_purchased)
 
     return {
         "status": "success",
@@ -1405,6 +1490,7 @@ async def get_grocery_items(user_id: int):
         "items": items,
         "total_unpurchased": unpurchased_count,
     }
+
 
 @router.post("/add_update_grocery_items", tags=["Grocery"])
 @limiter.limit("10/minute")
@@ -1427,7 +1513,7 @@ async def add_update_grocery_items(
 
         for item in request_data.items:
             existing_item = None
-            
+
             if item.id:
                 existing_item = (
                     db.query(GroceryItem)
@@ -1490,6 +1576,7 @@ async def add_update_grocery_items(
     finally:
         db.close()
 
+
 @router.delete("/grocery_items/delete", tags=["Grocery"])
 @limiter.limit("10/minute")
 async def delete_grocery_items(
@@ -1503,24 +1590,24 @@ async def delete_grocery_items(
     try:
         deleted_count = 0
         not_found = []
-        
+
         for item_id in request_data.grocery_item_ids:
-            grocery_item = db.query(GroceryItem).filter(
-                GroceryItem.id == item_id
-            ).first()
-            
+            grocery_item = (
+                db.query(GroceryItem).filter(GroceryItem.id == item_id).first()
+            )
+
             if grocery_item:
                 db.delete(grocery_item)
                 deleted_count += 1
             else:
                 not_found.append(item_id)
-        
+
         db.commit()
-        
+
         return {
             "status": "success",
             "deleted_count": deleted_count,
-            "not_found": not_found
+            "not_found": not_found,
         }
     except Exception as e:
         db.rollback()
@@ -1529,13 +1616,15 @@ async def delete_grocery_items(
         db.close()
 
 
-def move_grocery_item_to_pantry(db, grocery_item: GroceryItem):
+def move_grocery_item_to_pantry(
+    db, grocery_item: GroceryItem):
     """
     Helper function to move a grocery item to pantry.
     Creates a PantryItem from a purchased GroceryItem.
     """
     norm_name = normalize_food_name(grocery_item.item_name)
-    
+    items_needing_images = []
+
     # Check if item already exists in pantry
     existing_item = (
         db.query(PantryItem)
@@ -1543,13 +1632,14 @@ def move_grocery_item_to_pantry(db, grocery_item: GroceryItem):
         .filter(PantryItem.normalized_name == norm_name)
         .first()
     )
-    
+
     if existing_item:
         # Update quantity if exists
         existing_item.quantity_value += grocery_item.quantity_value
         existing_item.quantity_unit = grocery_item.quantity_unit or "pcs"
         return existing_item
-    
+
+    existing_image = get_existing_image(db, grocery_item.user_id, norm_name)
     # Create new PantryItem
     pantry_item = PantryItem(
         user_id=grocery_item.user_id,
@@ -1559,40 +1649,44 @@ def move_grocery_item_to_pantry(db, grocery_item: GroceryItem):
         quantity_unit=grocery_item.quantity_unit or "pcs",
         category="Groceries",
         storage="Pantry",
+        item_image=existing_image or "",
     )
     db.add(pantry_item)
     db.flush()
-    return pantry_item
+    
+    if not existing_image:
+        items_needing_images.append(pantry_item.id)
+    
+    return pantry_item, items_needing_images
 
 
 @router.patch("/grocery_items/{item_id}/mark-purchased", tags=["Grocery"])
-async def mark_grocery_item_purchased(item_id: int):
+async def mark_grocery_item_purchased(item_id: int, background_tasks: BackgroundTasks):
     """
     Mark a specific grocery item as purchased and move it to pantry.
     """
     db = SessionLocal()
     try:
-        grocery_item = (
-            db.query(GroceryItem)
-            .filter(GroceryItem.id == item_id)
-            .first()
-        )
-        
+        grocery_item = db.query(GroceryItem).filter(GroceryItem.id == item_id).first()
+
         if not grocery_item:
             raise HTTPException(status_code=404, detail="Grocery item not found")
-        
+
         # Move to pantry
-        pantry_item = move_grocery_item_to_pantry(db, grocery_item)
-        
+        pantry_item, items_needing_images = move_grocery_item_to_pantry(db, grocery_item)
+
         # Delete from grocery list
         db.delete(grocery_item)
         db.commit()
         
+        if items_needing_images:
+            background_tasks.add_task(fetch_food_images, items_needing_images)
+
         return {
             "status": "success",
             "message": "Item moved to pantry",
             "item_id": item_id,
-            "pantry_item_id": pantry_item.id
+            "pantry_item_id": pantry_item.id,
         }
     except HTTPException:
         db.rollback()
@@ -1605,7 +1699,7 @@ async def mark_grocery_item_purchased(item_id: int):
 
 
 @router.patch("/grocery_items/mark-all-purchased", tags=["Grocery"])
-async def mark_all_grocery_items_purchased(user_id: int):
+async def mark_all_grocery_items_purchased(user_id: int, background_tasks: BackgroundTasks):
     """
     Mark all grocery items as purchased and move them to pantry for a user.
     """
@@ -1615,26 +1709,30 @@ async def mark_all_grocery_items_purchased(user_id: int):
         db_user = db.query(User).filter(User.id == user_id).first()
         if not db_user:
             raise HTTPException(status_code=404, detail="User not found")
-        
+
         # Get all unpurchased items
         grocery_items = (
-            db.query(GroceryItem)
-            .filter(GroceryItem.user_id == user_id)
-            .all()
+            db.query(GroceryItem).filter(GroceryItem.user_id == user_id).all()
         )
         
+        all_items_needing_images = []
+
         # Move each item to pantry
         for item in grocery_items:
-            move_grocery_item_to_pantry(db, item)
+            pantry_item, items_needing_images = move_grocery_item_to_pantry(db, item)
+            all_items_needing_images.extend(items_needing_images)  
             db.delete(item)
-        
+
         db.commit()
         
+        if all_items_needing_images:
+            background_tasks.add_task(fetch_food_images, all_items_needing_images)
+
         return {
             "status": "success",
             "message": "All items moved to pantry",
             "user_id": user_id,
-            "moved_count": len(grocery_items)
+            "moved_count": len(grocery_items),
         }
     except HTTPException:
         db.rollback()
@@ -1644,26 +1742,24 @@ async def mark_all_grocery_items_purchased(user_id: int):
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
+
+
 @router.get("/recommendations/subset/{user_id}")
 async def get_subset_recommendations(user_id: int):
     pantry_items = get_user_pantry_exact_match(user_id)
 
-    payload = {
-        "user_id": user_id,
-        "pantry_items": pantry_items,
-        "top_n": 20
-    }
+    payload = {"user_id": user_id, "pantry_items": pantry_items, "top_n": 20}
 
     async with httpx.AsyncClient() as client:
         resp = await client.post(
-            f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend/subset",
-            json=payload
+            f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend/subset", json=payload
         )
         resp.raise_for_status()
 
     data = resp.json()
 
     return {"status": "success", "content_based": data.get("recommendations", data)}
+
 
 @router.get("/recommendations/liked-categories/{user_id}")
 async def get_liked_category_recommendations(user_id: int, top_n: int = 10):
@@ -1689,13 +1785,13 @@ async def get_liked_category_recommendations(user_id: int, top_n: int = 10):
         "user_id": user_id,
         "user_likes": {str(user_id): liked_recipe_ids},
         "top_n": top_n,
-        "pantry_items": []
+        "pantry_items": [],
     }
 
     async with httpx.AsyncClient() as client:
         resp = await client.post(
             f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend/by-liked-categories",
-            json=payload
+            json=payload,
         )
         resp.raise_for_status()
         data = resp.json()
