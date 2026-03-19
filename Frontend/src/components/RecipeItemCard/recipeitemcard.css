@@ -37,7 +37,7 @@
 }
 
 .recipeitemcard__name {
-    font-size: 15px;
+    font-size: 0.9375rem; 
     font-weight: 700;
     color: var(--color-main-text);
     line-height: 1.2;
@@ -69,7 +69,7 @@
 .recipeitemcard__allergen {
     background: var(--color-light-red);
     color: var(--color-red);
-    font-size: 12px;
+    font-size: 0.75rem;
     padding: 2px 8px;
     border-radius: 12px;
     font-weight: 500;
@@ -80,7 +80,7 @@
     color: var(--color-green);
     padding: 3px 10px;
     border-radius: 12px;
-    font-size: 12px;
+    font-size: 0.75rem; 
     font-weight: 700;
     width: fit-content;
     align-items: center;
@@ -91,7 +91,7 @@
     color: #d88a2d;
     padding: 3px 10px;
     border-radius: 12px;
-    font-size: 12px;
+    font-size: 0.75rem;
     font-weight: 700;
     width: fit-content;
     align-items: center;
@@ -110,7 +110,7 @@
     justify-content: space-around;
     gap: 20px;
     margin-top: 5px;
-    font-size: 14px;
+    font-size: 0.875rem;
 }
 
 .recipeitemcard__meta_item svg {

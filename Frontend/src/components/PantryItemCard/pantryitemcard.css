@@ -49,13 +49,13 @@
 }
 
 .pantryitemcard__name {
-    font-size: 14px;
+    font-size: 0.875rem; 
     font-weight: 800;
 }
 
 .pantryitemcard__qty {
     color: var(--color-grey-text);
-    font-size: 14px;
+    font-size: 0.875rem; 
 }
 
 .pantryitemcard:hover .pantryitemcard__qty {
