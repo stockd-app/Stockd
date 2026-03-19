@@ -1,13 +1,14 @@
 @import "@/styles/variable.css";
 
 .pantryitemcard {
-    width: 140px;
+    /* width: 140px; */
     flex-shrink: 0;
-    border-radius: 15px;
-    overflow: hidden;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
-    cursor: pointer;
     background: var(--color-dark-grey);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    cursor: pointer;
+    overflow: hidden;
 }
 
 .pantryitemcard:hover {
@@ -40,7 +41,7 @@
 }
 
 .pantryitemcard__info {
-    margin: 1em 1em 0 1em;
+    margin: 1em 1em 1em 1em;
     display: flex;
     justify-content: space-between;
     align-items: center;

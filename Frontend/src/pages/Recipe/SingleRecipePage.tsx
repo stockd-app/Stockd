@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getRecipeById, getLikedRecipes, getPantryItems, completeRecipe } from "../../services/api";
 import { getIngredientIcon } from "../../utils/ingredientIconMap";
 import { Clock, Star, ArrowLeft } from "lucide-react";
-import recipe_placeholder_white from "../../assets/images/error_handling/recipe_placeholder_white.png"
+import recipe_placeholder from "../../assets/images/error_handling/recipe_placeholder.png"
 import { formatPrepTime } from "../../utils/utils";
 import { parseQuantity, resolveIngredientDisplay } from "../../utils/ingredientUnit";
 import LikeButton from "../../components/LikeButton/LikeButton";
@@ -252,7 +252,7 @@ const SingleRecipePage: React.FC = () => {
     if (loading) return <div>Loading...</div>;
     if (!recipe) return <div>Recipe not found</div>;
 
-    const imageUrl = recipe.Images?.[0] || recipe_placeholder_white;
+    const imageUrl = recipe.Images?.[0] || recipe_placeholder;
     const nutritionItems = GetNutritionItems(recipe);
     const nutritionDisplayItems = buildNutritionDisplayItems(
         nutritionItems,
