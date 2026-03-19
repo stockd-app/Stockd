@@ -132,6 +132,8 @@ export const COMMON_ALLERGENS = [
   { label: "Tree Nut", value: "tree-nut", icon: "https://cdn-icons-png.flaticon.com/512/1348/1348784.png" },
 ] as const;
 
+export const NOT_SURE_ALLERGEN_ICON = "https://cdn-icons-png.flaticon.com/512/13135/13135389.png";
+
 export const GetNutritionItems = (recipe: any) => [
   { label: "Calories", value: recipe.Calories, unit: "kcal", icon: "https://cdn-icons-png.flaticon.com/512/17394/17394076.png" },
   { label: "Fat", value: recipe.FatContent, unit: "g", icon: "https://cdn-icons-png.flaticon.com/512/8131/8131971.png" },

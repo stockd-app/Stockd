@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import Button from "../Button/Button";
 import { X } from "lucide-react";
-import { COMMON_ALLERGENS } from "../../config/consts";
+import { COMMON_ALLERGENS,NOT_SURE_ALLERGEN_ICON } from "../../config/consts";
 
 import "./AllergensModal.css";
 
@@ -80,6 +80,11 @@ const AllergensModal: React.FC<Props> = ({
             />
 
             <div className="modal__item-content">
+              <img
+                src={NOT_SURE_ALLERGEN_ICON}
+                alt="Not sure about allergens"
+                className="modal__icon"
+              />
               <span>Not sure about allergens</span>
             </div>
           </label>
