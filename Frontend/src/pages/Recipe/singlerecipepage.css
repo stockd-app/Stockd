@@ -147,7 +147,7 @@
 
 .recipe__title {
   margin: 16px 0 10px;
-  font-size: clamp(26px, 2.6vw, 34px);
+  font-size: clamp(1.625rem, 2.6vw, 2.125rem);
   line-height: 1.15;
   font-weight: 800;
   color: var(--color-main-text);
