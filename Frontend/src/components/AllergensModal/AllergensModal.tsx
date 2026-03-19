@@ -88,6 +88,7 @@ const AllergensModal: React.FC<Props> = ({
         <Button
           variant="primary"
           onClick={() => onConfirm(selected)}
+          disabled={selected.length === 0}
         >
           Confirm
         </Button>
