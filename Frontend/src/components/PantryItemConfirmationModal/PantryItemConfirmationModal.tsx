@@ -3,7 +3,7 @@ import { Pencil , Trash2, Plus} from "lucide-react";
 
 import "./pantryitemconfirmationmodal.css";
 
-const UNIT_OPTIONS = ["pc", "ml", "mg", "g", "kg", "l"]; // ask harry about the ones we're using
+const UNIT_OPTIONS = ["pc", "ml", "mg", "g", "kg", "L", "lbs", "tsp", "tbsp", "cup", "oz weight", "ounces", "pints", "quarts", "gallons"];
 
 export interface ConfirmPantryItem {
     id?: number;
