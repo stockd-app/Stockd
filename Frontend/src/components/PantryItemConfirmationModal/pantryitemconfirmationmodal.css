@@ -58,7 +58,7 @@
     padding: 6px 8px;
     border-radius: 8px;
     border: 1px solid #ddd;
-    background: var(--color-bg);
+    background: #fff;
     text-align: center;
     font-size: 14px;
     color: var(--color-dark-text);
@@ -66,7 +66,7 @@
 
 .pcm__unitSelect {
     padding: 4px;
-    background: var(--color-bg);
+    background: #fff;
     color: var(--color-dark-text);
 }
 
