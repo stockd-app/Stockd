@@ -1,5 +1,5 @@
 import React from "react";
-import image_placeholder from "../../assets/images/error_handling/image_placeholder.png"
+import pantry_placeholder from "../../assets/images/error_handling/recipe_placeholder_2.png"
 import { useLongPress } from "../../utils/useLongPress";
 import { Square, SquareCheckBig } from "lucide-react";
 
@@ -9,14 +9,15 @@ interface PantryItemCardProps {
     name: string;
     qty?: string;
     image: string;
+    category: string[];
     onClick?: () => void;
     isSelecting?: boolean;
     selected?: boolean;
     onLongPress?: () => void;
 }
 
-const PantryItemCard: React.FC<PantryItemCardProps> = ({ name, qty, image, onClick, isSelecting, selected, onLongPress }) => {
-    const displayImage = image && image.trim() !== "" ? image : image_placeholder;
+const PantryItemCard: React.FC<PantryItemCardProps> = ({ name, qty, image, category, onClick, isSelecting, selected, onLongPress }) => {
+    const displayImage = image && image.trim() !== "" ? image : pantry_placeholder;
     const { handlers, wasLongPressed } = useLongPress(() => {
         onLongPress?.();
     }, 450);
@@ -48,8 +49,8 @@ const PantryItemCard: React.FC<PantryItemCardProps> = ({ name, qty, image, onCli
                     onError={(e) => {
                         // If image fails to load, use fallback
                         const target = e.target as HTMLImageElement;
-                        if (target.src !== image_placeholder) {
-                            target.src = image_placeholder;
+                        if (target.src !== pantry_placeholder) {
+                            target.src = pantry_placeholder;
                         }
                     }}
                 />
@@ -57,6 +58,13 @@ const PantryItemCard: React.FC<PantryItemCardProps> = ({ name, qty, image, onCli
             <div className="pantryitemcard__info">
                 <span className="pantryitemcard__name">{name}</span>
                 <span className="pantryitemcard__qty">{qty}</span>
+                <div className="recipelistcard__allergens">
+                    {category && category.length > 0 && category.map((a) => (
+                        <span key={a} className="recipelistcard__allergen">
+                            {a.charAt(0).toUpperCase() + a.slice(1)}
+                        </span>
+                    ))}
+                </div>
             </div>
         </div>
     );

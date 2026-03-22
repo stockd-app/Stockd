@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PantryItemSection, { type PantryItem } from "../../components/PantryItemSection/PantryItemSection"; import { getPantryItems } from "../../services/api";
+import loading_anim from "../../assets/images/loading_anim.gif";
 
 import "./pantrypage.css";
 
@@ -15,10 +16,27 @@ interface PantrySection {
 }
 
 const PantryPage: React.FC = () => {
-    const SECTION_ORDER = ["Pantry", "Refrigerator", "Freezer"];
+    const SECTION_ORDER = ["Pantry", "Fridge", "Freezer"];
     const [pantryData, setPantryData] = useState<PantrySection[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [showFallback, setShowFallback] = useState(false);
+
+    useEffect(() => {
+        let timer: ReturnType<typeof setTimeout>;;
+
+        if (isLoading) {
+            timer = setTimeout(() => {
+                setShowFallback(true);
+            }, 2500);
+        } else {
+            setShowFallback(false);
+        }
+
+        return () => {
+            if (timer) clearTimeout(timer);
+        };
+    }, [isLoading]);
 
     const navigate = useNavigate();
 
@@ -83,8 +101,25 @@ const PantryPage: React.FC = () => {
     if (isLoading) {
         return (
             <div className="pantry__container">
-                <div className="pantry__content">
-                    <p>Loading your pantry...</p>
+                <div className="pantry__centered">
+
+                    {!showFallback ? (
+                        <img
+                            src={loading_anim}
+                            alt="Loading"
+                            className="pantry__loading_image"
+                        />
+                    ) : (
+                        <div className="pantry__fallback">
+                            <p className="pantry__title">
+                                Still loading your pantry...
+                            </p>
+                            <p className="pantry__subtitle">
+                                This is taking longer than expected. Please try again.
+                            </p>
+                        </div>
+                    )}
+
                 </div>
             </div>
         );
@@ -93,8 +128,11 @@ const PantryPage: React.FC = () => {
     if (error) {
         return (
             <div className="pantry__container">
-                <div className="pantry__content">
-                    <p>{error}</p>
+                <div className="pantry__centered">
+                    <div className="pantry__fallback">
+                        <p className="pantry__title">Something went wrong</p>
+                        <p className="pantry__subtitle">{error}</p>
+                    </div>
                 </div>
             </div>
         );
@@ -104,7 +142,16 @@ const PantryPage: React.FC = () => {
         <div className="pantry__container">
             <div className="pantry__content">
                 {pantryData.length === 0 ? (
-                    <p>Your pantry is empty. Scan a receipt to add items!</p>
+                    <div className="pantry__centered">
+                        <div className="pantry__fallback">
+                            <p className="pantry__title">
+                                Your pantry is empty.
+                            </p>
+                            <p className="pantry__subtitle">
+                                Add ingredients by scanning a receipt or entering them manually.
+                            </p>
+                        </div>
+                    </div>
                 ) : (
                     pantryData.map((section) => (
                         <PantryItemSection

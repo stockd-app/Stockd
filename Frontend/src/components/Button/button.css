@@ -75,7 +75,7 @@
     right: 16px;
     background: transparent;
     color: var(--color-main-text);
-    font-size: 20px;
+    font-size: 1.25rem;
     cursor: pointer;
     padding: 0 6px;
 }

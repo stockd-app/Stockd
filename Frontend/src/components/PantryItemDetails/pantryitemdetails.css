@@ -23,6 +23,8 @@
     border-radius: 20px;
     padding: 2em;
     overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 100vh;
 }
 
 
@@ -41,7 +43,7 @@
 .pid__spacer {
     background: none;
     border: none;
-    font-size: 18px;
+    font-size: 1.125rem;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
     color: var(--color-main-text)
@@ -53,7 +55,7 @@
     left: 50%;
     transform: translateX(-50%);
     margin: 0;
-    font-size: 20px;
+    font-size: 1.25rem;
     font-weight: 800;
     color: var(--color-main-text);
     text-align: center;
@@ -76,14 +78,14 @@
 
 .pid__label {
     font-weight: 600;
-    font-size: 18px;
+    font-size: 1.125rem;
     color: var(--color-dark-grey);
 }
 
 
 .pid__input {
     width: 160px;
-    font-size: 16px;
+    font-size: 1rem;
     border: none;
     outline: none;
     text-align: center;
@@ -144,10 +146,11 @@
         max-width: 720px;
         padding: 2.5em 3em;
         border-radius: 24px;
+        max-height: calc(100vh - 80px);
     }
 
     .pid__title {
-        font-size: 28px;
+        font-size: 1.75rem;
     }
 
     .pid__body {
@@ -160,13 +163,13 @@
     }
 
     .pid__label {
-        font-size: 20px;
+        font-size: 1.25rem;
         min-width: 180px;
     }
 
     .pid__input {
         width: 220px;
-        font-size: 18px;
+        font-size: 1.125rem;
     }
 
     .pid__qty_box {
@@ -184,7 +187,7 @@
 }
 
 .pid__label {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 600;
     color: var(--color-grey-text);
 }
@@ -224,7 +227,7 @@
     padding: 12px;
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-family: inherit;
     outline: none;
     transition: border-color 0.2s ease;

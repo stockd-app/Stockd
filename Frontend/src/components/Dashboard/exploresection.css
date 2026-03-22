@@ -5,7 +5,8 @@
 }
 
 .explore__title {
-    font-size: 20px;
+    color: var(--color-main-text);
+    font-size: 1.25rem;
     font-weight: 700;
     margin: 0 0 12px 0;
 }
@@ -43,12 +44,12 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: rgba(43, 43, 43, 0.45); 
+    background: rgba(43, 43, 43, 0.45);
     transition: background 0.3s ease;
 }
 
 .explore__card:hover::after {
-    background: rgba(0, 0, 0, 0.3); 
+    background: rgba(0, 0, 0, 0.3);
 }
 
 .explore__image {
@@ -67,7 +68,7 @@
     bottom: -10px;
     left: 6px;
     color: #fff;
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: 700;
     text-shadow: 0 3px 6px rgba(0, 0, 0, 0.7);
     z-index: 2;
@@ -75,7 +76,7 @@
 
 @media (max-width: 600px) {
     .explore__large__card {
-        height: 210px;  
+        height: 210px;
     }
 
     .explore__small__card {

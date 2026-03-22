@@ -13,12 +13,17 @@
   padding: 16px;
 }
 
+.pantrySection__filter{
+  position: absolute;
+  right: 13px;
+}
+
 .pantrySection__title {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   margin: 0;
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--color-main-text);
   text-align: center;
@@ -41,7 +46,7 @@
   border-radius: 14px;
   border: 1px solid var(--color-grey);
   background-color: var(--color-bg);
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1;
   cursor: pointer;
   white-space: nowrap;
@@ -74,7 +79,7 @@
 .pantrySection__spacer {
   background: none;
   border: none;
-  font-size: 18px;
+  font-size: 1.125rem;
   cursor: pointer;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
   color: var(--color-main-text)
@@ -101,7 +106,7 @@
     width: 100%;
     min-height: 44px;
     padding: 10px 8px;
-    font-size: 12px;
+    font-size: 0.75rem;
     border-radius: 14px;
   }
 

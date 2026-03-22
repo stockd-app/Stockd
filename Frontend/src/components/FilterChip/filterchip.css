@@ -6,7 +6,7 @@
     border: none;
     background: var(--color-light);
     color: var(--color-dark-text);
-    font-size: 13px;
+    font-size: 0.8125rem;
     cursor: pointer;
     transition: background 0.2s ease;
 }
