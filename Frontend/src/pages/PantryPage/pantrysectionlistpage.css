@@ -13,6 +13,11 @@
   padding: 16px;
 }
 
+.pantrySection__filter{
+  position: absolute;
+  right: 13px;
+}
+
 .pantrySection__title {
   position: absolute;
   left: 50%;

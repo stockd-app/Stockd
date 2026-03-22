@@ -34,7 +34,7 @@ CREATE TABLE FoodImageCache (
     id INT AUTO_INCREMENT PRIMARY KEY,
     normalized_name VARCHAR(255) NOT NULL UNIQUE,
     image_url VARCHAR(255) NOT NULL,
-    source VARCHAR(100) DEFAULT 'openfoodfacts',
+    source VARCHAR(100) DEFAULT 'pexels',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
