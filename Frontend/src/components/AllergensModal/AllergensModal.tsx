@@ -43,6 +43,16 @@ const AllergensModal: React.FC<Props> = ({
     });
   };
 
+  const areArraysEqual = (a: string[], b: string[]) => {
+  if (a.length !== b.length) return false;
+
+  const sortedA = [...a].sort();
+  const sortedB = [...b].sort();
+
+  return sortedA.every((item, index) => item === sortedB[index]);
+};
+  const hasChanges = !areArraysEqual(selected, initial);
+
   return (
     <div className="modal__overlay">
       <div className="modal__content">
@@ -93,7 +103,7 @@ const AllergensModal: React.FC<Props> = ({
         <Button
           variant="primary"
           onClick={() => onConfirm(selected)}
-          disabled={selected.length === 0}
+          disabled={!hasChanges}
         >
           Confirm
         </Button>
