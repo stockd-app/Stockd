@@ -1,29 +1,48 @@
 import React from "react";
 import { Clock, Star } from "lucide-react";
+import LikeButton from "../LikeButton/LikeButton";
 
 import "./recipelistcard.css";
 
 interface RecipeListCardProps {
+    recipeId: number;
     name: string;
     image: string;
     rating?: number;
     time?: string;
     allergens?: string[];
+    initialLiked?: boolean;
+    onLikedChange?: (liked: boolean) => void;
     onClick?: () => void;
 }
 
 const RecipeListCard: React.FC<RecipeListCardProps> = ({
+    recipeId,
     name,
     image,
     rating,
     time,
     allergens,
+    initialLiked,
+    onLikedChange,
     onClick
 }) => {
     return (
         <div className="recipelistcard" onClick={onClick}>
             <div className="recipelistcard__image">
                 <img src={image} alt={name} />
+
+                <div
+                    className="recipelistcard__like_button_wrapper"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <LikeButton
+                        recipeId={recipeId}
+                        initialLiked={initialLiked}
+                        size={28}
+                        onLikedChange={onLikedChange}
+                    />
+                </div>
             </div>
 
             <div className="recipelistcard__info">

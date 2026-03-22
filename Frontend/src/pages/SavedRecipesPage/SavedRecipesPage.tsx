@@ -6,6 +6,7 @@ import { getLikedRecipes } from "../../services/api";
 import { formatPrepTime } from "../../utils/utils";
 import recipe_placeholder from "../../assets/images/error_handling/recipe_placeholder.png";
 import DOMPurify from "dompurify";
+import loading_anim from "../../assets/images/loading_anim.gif";
 import "./savedrecipespage.css";
 
 const SavedRecipesPage: React.FC = () => {
@@ -57,7 +58,13 @@ const SavedRecipesPage: React.FC = () => {
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <div className="savedRecipes__centered">
+          <img
+            src={loading_anim}
+            alt="Loading"
+            className="savedRecipes__loading"
+          />
+        </div>
       ) : recipes.length === 0 ? (
         <div className="savedRecipes__empty">
           <p>No liked recipes yet</p>
