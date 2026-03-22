@@ -16,6 +16,7 @@ interface RecipeItemSectionProps {
         time?: string;
         status?: string;
         allergens?: string[];
+        liked?: boolean;
     }[];
     onItemClick?: (id: number) => void;
     emptyTitle?: string;
@@ -63,12 +64,17 @@ const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = 
                     {items.map((item, index) => (
                         <RecipeItemCard
                             key={index}
+                            recipeId={item.id}
                             name={item.name}
                             image={item.image}
                             rating={item.rating}
                             time={item.time}
                             status={item.status}
                             allergens={item.allergens}
+                            initialLiked={item.liked ?? false}
+                            onLikedChange={(liked) => {
+                                console.log(item.id, liked);
+                            }}
                             onClick={() => onItemClick?.(item.id)}
                         />
                     ))}

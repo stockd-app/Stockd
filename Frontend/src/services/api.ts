@@ -311,6 +311,24 @@ export const loginWithGoogle = async (authCode: string) => {
 };
 
 /**
+ * Fetch all recommnded recipes 
+ * @param userId 
+ * @param topN 
+ */
+export const getRecommendedRecipes = async (userId: number, topN: number = 10) => {
+  try {
+    const url = `${API_ROUTES.GET_ALL_RECOMMENDED_RECIPES}/${userId}?top_n=${topN}`;
+
+    const res = await axios.get(url);
+
+    return res.data;
+  } catch (err: any) {
+    console.error("Failed to fetch cookable pantry recipes: ", err);
+    throw err;
+  }
+}
+
+/**
  * Fetch subset recipes based on the user's pantry
  * Recipes WILL NOT contain missing ingredients
  * @param userId 
@@ -551,8 +569,9 @@ export const toggleLikeRecipe = async (recipeId: number) => {
   let idToken = localStorage.getItem("google_id_token");
 
   try {
+    console.log(API_ROUTES.TOGGLE_LIKE_RECIPE.replace(":recipeId", String(recipeId)))
+    console.log("Toggling like for recipe ID:", recipeId)
     const res = await axios.post(
-      // API_ROUTES.TOGGLE_LIKE_RECIPE(recipeId),
       API_ROUTES.TOGGLE_LIKE_RECIPE.replace(":recipeId", String(recipeId)),
       {},
       {

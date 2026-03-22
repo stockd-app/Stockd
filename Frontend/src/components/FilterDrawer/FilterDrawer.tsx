@@ -1,4 +1,5 @@
 import React from "react";
+import Button from "../Button/Button";
 
 import "./filterdrawer.css";
 
@@ -34,7 +35,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
             <div className={`filterdrawer ${open ? "open" : ""}`}>
                 <div className="filterdrawer__header">
                     <h3>Filters</h3>
-                    <button onClick={onClose}>✕</button>
+                    <Button onClick={onClose} variant="close" />
                 </div>
 
                 <div className="filterdrawer__content">

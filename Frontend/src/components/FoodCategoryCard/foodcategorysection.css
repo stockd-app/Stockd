@@ -2,7 +2,7 @@
 
 .foodCategorySection__container {
     display: flex;
-    gap: 22px;
+    gap: 15px;
     padding: 12px 16px;
     justify-content: center;
 }
@@ -36,7 +36,7 @@
     margin-top: 10px;
     font-size: 14px;
     font-weight: 700;
-    color: #333;
+    color: var(--color-main-text);
     text-align: center;
 }
 

@@ -36,7 +36,7 @@
 
 .pantry__qty {
   font-size: 14px;
-  color: var(--color-dark-grey);
+  color: var(--color-grey-text);
 }
 
 .dashboard__info {
@@ -52,7 +52,7 @@
 .dashboard__recipe__name {
   font-size: 15px;
   font-weight: 700;
-  color: var(--color-dark);
+  color: var(--color-dark-text);
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;

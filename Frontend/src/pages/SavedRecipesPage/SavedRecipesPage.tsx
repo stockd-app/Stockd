@@ -29,6 +29,7 @@ const SavedRecipesPage: React.FC = () => {
             image: r.Images?.[0] || image_placeholder,
             rating: Number(r.AggregatedRating) || 0,
             time: formatPrepTime(r.PrepTime),
+            liked: true,
           };
         });
 
@@ -43,28 +44,37 @@ const SavedRecipesPage: React.FC = () => {
     fetchSavedRecipes();
   }, []);
 
+  const handleLikedChange = (id: number, liked: boolean) => {
+    if (!liked) {
+      setRecipes(prev => prev.filter(r => r.id !== id));
+    } 
+  };
+
   return (
     <div className="savedRecipes__container">
       <div className="savedRecipes__header">
-        <h2>Saved Recipes</h2>
+        <h2>Liked Recipes</h2>
       </div>
 
       {loading ? (
         <p>Loading...</p>
       ) : recipes.length === 0 ? (
         <div className="savedRecipes__empty">
-          <p>No saved recipes yet</p>
-          <span>Tap the bookmark icon to save recipes</span>
+          <p>No liked recipes yet</p>
+          <span>Tap the heart icon to like recipes</span>
         </div>
       ) : (
         <div className="savedRecipes__grid">
           {recipes.map(recipe => (
             <RecipeItemCard
               key={recipe.id}
+              recipeId={recipe.id}
               name={recipe.name}
               image={recipe.image}
               rating={recipe.rating}
               time={recipe.time}
+              initialLiked={recipe.liked} 
+              onLikedChange={(liked) => handleLikedChange(recipe.id, liked)}
               onClick={() => navigate(`/recipes/${recipe.id}`)}
             />
           ))}

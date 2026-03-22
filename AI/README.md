@@ -68,7 +68,13 @@ Follow the steps below to set up the environment and run the server.
    AI/Recipe_Recommender/data
 
 5. Place **`recipes.parquet`** into this newly created `data` folder.
-6. There should be a folder called canonical_db inside Recipe_Recommender. Ensure there is nothing in it (delete existinf files) as it will be generated at startup.
+6. There should be a folder called canonical_db inside Recipe_Recommender. Ensure there is nothing in it (delete existing files) as it will be generated at startup. If the change you are testing involves any code change in recipe_recommender_server.py, then you should also delete recipe_assets.pkl and recipe_index.faiss.
+7. Download the following dataset from Kaggle:
+   **Food.com Recipes with Ingredients and Tags**
+   https://www.kaggle.com/datasets/realalexanderwei/food-com-recipes-with-ingredients-and-tags
+8. Extract the folder.
+9. Rename the recipes_ingredients.csv to units.csv
+10. 5. Place **`units.csv`** into the `data` folder.
 
 Your file structure should look like:
 AI/
@@ -79,6 +85,7 @@ AI/
 │ └─canonical.faiss (after running the recipe_recommender_model once)
 ├─ data/
 │ └─ recipes.parquet
+│ └─ units.csv
 ├─ recipe_recommender_model.py
 ├─ recipe_recommender_requirements.txt
 ├─ recipe_recommender_server.py
@@ -131,6 +138,7 @@ http://<your_ip>:9001/docs for recipe recommender
 Ensure you have your correct IP address in the Backend .env file.
 If any changes are made regarding the dataset in the Recipe Recommender, it is safe to delete recipe_assets.pkl. recipe_index.faiss, anything inside canonical_db, and then re-run them. Just note they will require a few extra minutes at startup to regenerate.
 Ensure the database/XAMPP/MySQL is running and you have the latest schema.
+Ensure that your local branch is up to date with origin main.
 
 
 ## 🔐 Input Sanitization

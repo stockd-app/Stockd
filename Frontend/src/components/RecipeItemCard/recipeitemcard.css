@@ -1,13 +1,18 @@
 @import "@/styles/variable.css";
 
 .recipeitemcard {
-    /* width: 150px; */
+    /* width: 150px;  */
     flex-shrink: 0;
+    background: var(--color-dark-grey);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 7px 13px;
+    margin: 0 0 10px 5px;
+    border-radius: 15px;
 }
 
 .recipeitemcard__image_container {
     width: 100%;
-    height: 150px;
+    height: 180px;
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
@@ -28,12 +33,13 @@
     margin-bottom: 20px;
     align-items: center;
     text-align: center;
+    color: var(--color-main-text);
 }
 
 .recipeitemcard__name {
     font-size: 15px;
     font-weight: 700;
-    color: var(--color-dark);
+    color: var(--color-main-text);
     line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
@@ -42,9 +48,22 @@
     max-width: 150px;
 }
 
+.recipeitemcard__image_container {
+    position: relative;
+}
+
+.recipeitemcard__like_button_wrapper {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    z-index: 2;
+}
+
 .recipeitemcard__allergens {
     display: flex;
     flex-wrap: wrap;
+    gap: 0.8em;
+    text-transform: capitalize;
 }
 
 .recipeitemcard__allergen {

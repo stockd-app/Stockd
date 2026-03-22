@@ -128,7 +128,7 @@ ingredient_to_allergen = {}
 for allergen, variants in allergen_map.items():
     for variant in variants:
         ingredient_to_allergen[variant.lower()] = allergen
-    # Also map the main allergen itself
+    # also map the main allergen itself
     ingredient_to_allergen[allergen.lower()] = allergen
 
 df['Allergens'] = df['ingredients_list'].apply(

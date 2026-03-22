@@ -6,6 +6,8 @@ import { deleteUserAccount, handleLogout, getUserAllergens, updateUserAllergens 
 import { CONFIRM_DELETE_TEXT, CONFIRM_LOGOUT_TEXT } from "../../config/consts";
 import DOMPurify from "dompurify";
 import AllergensModal from "../../components/AllergensModal/AllergensModal";
+import FeedbackModal from "../../components/FeedbackModal/FeedbackModal";
+import AccessibilityModal from "../../components/AccessibilityModal/AccessibilityModal";
 
 import "./profile.css";
 
@@ -22,6 +24,8 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showAllergensModal, setShowAllergensModal] = useState(false);
+    const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+    const [showAccessibilityModal, setShowAccessibilityModal] = useState(false);
     const [initialAllergens, setInitialAllergens] = useState<string[]>([]);
 
     const handleDelete = async () => {
@@ -66,7 +70,7 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
 
             {/* Options */}
             <div className="profile__options">
-                <div className="profile__item">
+                <div className="profile__item" onClick={() => setShowAccessibilityModal(true)}>
                     <Accessibility className="profile__icon" size={22} />
                     <span>Accessibility</span>
                 </div>
@@ -76,7 +80,7 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
                     <span>Legal, Data and Privacy</span>
                 </div>
 
-                <div className="profile__item">
+                <div className="profile__item" onClick={() => setShowFeedbackModal(true)}>
                     <MessageSquare className="profile__icon" size={22} />
                     <span>Feedback</span>
                 </div>
@@ -105,14 +109,32 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
                 />
             )}
 
+            {/* Feedback Modal */}
+            {showFeedbackModal && (
+                <FeedbackModal
+                    onClose={() => setShowFeedbackModal(false)}
+                    userEmail={email}
+                    userName={name}
+                />
+            )}
+
+            {/* Accessibility Modal */}
+            {showAccessibilityModal && (
+                <AccessibilityModal
+                    onClose={() => setShowAccessibilityModal(false)}
+                />
+            )}
+
             {/* Logout Modal */}
             {showLogoutModal && (
                 <ConfirmModal
                     text={CONFIRM_LOGOUT_TEXT}
+                    confirmLabel="Log Out"
                     onConfirm={() => {
                         setShowLogoutModal(false);
                         handleLogout();
                     }}
+                    cancelLabel="Cancel"
                     onCancel={() => setShowLogoutModal(false)}
                 />
             )}
@@ -122,10 +144,12 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
                 <ConfirmModal
                     text={CONFIRM_DELETE_TEXT}
                     confirmLabel="Delete"
+                    confirmVariant="danger"
                     onConfirm={() => {
                         setShowDeleteModal(false);
                         handleDelete();
                     }}
+                    cancelLabel="Cancel"
                     onCancel={() => setShowDeleteModal(false)}
                 />
             )}

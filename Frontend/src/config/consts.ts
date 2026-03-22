@@ -1,5 +1,4 @@
 import { Check, Pencil, Trash2, Heart, HeartOff, CircleCheckBig, CircleAlert } from "lucide-react";
-
 // Common Allergens Icons (Separation for readability)
 import {
   Wheat,
@@ -25,6 +24,7 @@ export const API_ROUTES = {
   GET_PANTRY: `${API_BASE_URL}/pantry_items`,
   ADD_UPDATE_PANTRY_ITEM: `${API_BASE_URL}/add_update_pantry_items`,
   DELETE_PANTRY_ITEMS: `${API_BASE_URL}/pantry_items/delete`,
+  GET_ALL_RECOMMENDED_RECIPES: `${API_BASE_URL}/recommendations/all`,  // Caller will append `user_id`
   GET_SUBSET_PANTRY_RECIPES: `${API_BASE_URL}/recommendations/subset`,  // Caller will append `user_id`
   GET_INCOMPLETE_PANTRY_RECIPES: `${API_BASE_URL}/recommendations/pantry`,   // Caller will append `user_id`
   GET_RECOMMEND_LIKED_RECIPES: `${API_BASE_URL}/recommendations/liked-categories`,   // Caller will append `user_id`
@@ -55,8 +55,8 @@ export const GOOGLE_CONSTS = {
 
 export const SEARCH = "Search any recipe";
 export const LANDING_PAGE = {
-  STOCKD: "Stockd",
-  WELCOME_TEXT: "Let's join our community to cook better food!",
+  STOCKD: "STOCKD",
+  WELCOME_TEXT: "Thousands of recipes all cookable with your pantry!",
 };
 
 export const TOP_NAV_BAR = {
@@ -143,3 +143,34 @@ export const COMMON_ALLERGENS = [
   { label: "Soy", value: "soy", icon: Bean },
   { label: "Tree Nut", value: "tree-nut", icon: Nut },
 ] as const;
+
+export const GetNutritionItems = (recipe: any) => [
+  { label: "Calories", value: recipe.Calories, unit: "kcal", icon: "https://cdn-icons-png.flaticon.com/512/17394/17394076.png" },
+  { label: "Fat", value: recipe.FatContent, unit: "g", icon: "https://cdn-icons-png.flaticon.com/512/8131/8131971.png" },
+  { label: "Saturated Fat", value: recipe.SaturatedFatContent, unit: "g", icon: "https://cdn-icons-png.flaticon.com/512/17972/17972269.png" },
+  { label: "Cholesterol", value: recipe.CholesterolContent, unit: "mg", icon: "https://cdn-icons-png.flaticon.com/512/9957/9957003.png" },
+  { label: "Sodium", value: recipe.SodiumContent, unit: "mg", icon: "https://cdn-icons-png.flaticon.com/512/9757/9757208.png" },
+  { label: "Carbohydrates", value: recipe.CarbohydrateContent, unit: "g", icon: "https://cdn-icons-png.flaticon.com/512/11827/11827758.png" },
+  { label: "Sugar", value: recipe.SugarContent, unit: "g", icon: "https://cdn-icons-png.flaticon.com/512/5835/5835935.png" },
+  { label: "Protein", value: recipe.ProteinContent, unit: "g", icon: "https://cdn-icons-png.flaticon.com/512/3024/3024310.png" },
+  { label: "Fiber", value: recipe.FiberContent, unit: "g", icon: "https://cdn-icons-png.flaticon.com/512/18433/18433150.png" },
+];
+
+// Accessibility settings
+export type TextSize = "small" | "medium" | "large" | "xlarge";
+
+export interface TextSizeOption {
+  value: TextSize;
+  label: string;
+  scale: number;
+}
+
+export const TEXT_SIZE_OPTIONS: TextSizeOption[] = [
+  { value: "small", label: "Small", scale: 0.875 },
+  { value: "medium", label: "Medium", scale: 1 },
+  { value: "large", label: "Large", scale: 1.125 },
+  { value: "xlarge", label: "Extra Large", scale: 1.25 },
+];
+
+// take feedback recipients from env 
+export const FEEDBACK_RECIPIENTS = import.meta.env.STOCKD_DEVELOPER_EMAILS?.split(',') || [];

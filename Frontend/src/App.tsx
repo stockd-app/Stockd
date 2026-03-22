@@ -22,11 +22,62 @@ import IncompleteRecipeRecPage from "./pages/PantryRecipeListPage/IncompleteReci
 import LikedRecipeRecPage from "./pages/PantryRecipeListPage/LikeRecipeRecPage";
 import CollaborativeRecipeRecPage from "./pages/PantryRecipeListPage/CollaborativeRecipeRecPage";
 import SearchRecipePage from "./pages/SearchRecipePage/SearchRecipePage";
+import RecommendedRecipeRecPage from "./pages/PantryRecipeListPage/RecommnedRecipeRecPage";
 
 const App: React.FC = () => {
   const [user, setUser] = useState<string | null>(localStorage.getItem("user"));
   const [showAddItem, setShowAddItem] = useState(false);
   const location = useLocation();
+
+  // load saved text size from localstorage
+  useEffect(() => {
+    const savedTextSize = localStorage.getItem("text_size");
+    if (savedTextSize) {
+      const sizeMap: { [key: string]: number } = {
+        small: 0.875,
+        medium: 1,
+        large: 1.125,
+        xlarge: 1.25,
+      };
+      const scale = sizeMap[savedTextSize] || 1;
+      document.documentElement.style.setProperty("--text-scale", scale.toString());
+    }
+  }, []);
+
+  /**
+   * Detects the user's system theme preference (dark or light).
+   * @returns 
+   */
+  const getSystemTheme = () =>
+    window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+
+  /**
+   * Determines the initial theme to use based on localStorage or system preference.
+   */
+  const getInitialTheme = () => {
+    const saved = localStorage.getItem("theme");
+    return saved ? saved : getSystemTheme();
+  };
+
+  const [theme, setTheme] = useState(getInitialTheme);
+
+  useEffect(() => {
+    document.body.dataset.theme = theme;
+  }, [theme]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      if (!localStorage.getItem("theme")) {
+        setTheme(e.matches ? "dark" : "light");
+      }
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
 
   // Recheck whenever localStorage changes (login/logout)
   useEffect(() => {
@@ -39,12 +90,19 @@ const App: React.FC = () => {
 
   // Also recheck on route change
   useEffect(() => {
-    setUser(localStorage.getItem("user"));
+    const currentUser = localStorage.getItem("user");
+    setUser(currentUser);
+
+    if (currentUser) {
+      document.body.classList.add("has-bottom-nav");
+    } else {
+      document.body.classList.remove("has-bottom-nav");
+    }
   }, [location.pathname]);
 
   return (
     <>
-      {user && <TopNavBar />}
+      {user && <TopNavBar theme={theme} setTheme={setTheme} />}
 
       <Routes>
         {/* If user exists, go to dashboard */}
@@ -77,9 +135,13 @@ const App: React.FC = () => {
           path="/pantry-recommend-liked-recipes"
           element={user ? <LikedRecipeRecPage /> : <Navigate to="/" replace />}
         />
-        <Route 
+        <Route
           path="/pantry-collaborative-recipes"
           element={user ? <CollaborativeRecipeRecPage /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="//recommended/:category"
+          element={user ? <RecommendedRecipeRecPage /> : <Navigate to="/" replace />}
         />
         <Route
           path="/pantry"

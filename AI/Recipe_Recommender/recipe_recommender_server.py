@@ -1,11 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 import uvicorn
 from recipe_recommender_model import recommend_recipes, recommend_from_similar_users, search_recipes, get_recipe_by_id, find_semantic_subset_recipes, recommend_by_liked_categories
 from datetime import datetime
 import pandas as pd
 import numpy as np
+from unit_standardizer import standardize_recipe_ingredients
 
 class RecommendationRequest(BaseModel):
     user_id: int
@@ -35,7 +36,11 @@ class RecipeObject(BaseModel):
     Keywords: List[str] | None = None
     RecipeIngredientQuantities: List[str] | None = None
     RecipeIngredientParts: List[str] | None = None
+    ingredients_raw: List[str] | None = None
     RecipeInstructions: List[str] | None = None 
+    ingredients_raw: List[str] | None = None
+    ingredients_standardized: Optional[List[dict]] = None
+    RecipeInstructions: List[str] | None = None
     AggregatedRating: float | None = None
     ReviewCount: int | None = None
     Calories: float | None = None
@@ -100,13 +105,21 @@ def sanitize_row_for_pydantic(row_dict):
     ]
     datetime_fields = ["DatePublished"]
     list_fields = [
-        "Images", "Keywords", "RecipeIngredientQuantities",
-        "RecipeIngredientParts","RecipeInstructions"
-        "RecipeIngredientParts", "Allergens"
+        "Images",
+        "Keywords",
+        "RecipeIngredientQuantities",
+        "RecipeIngredientParts",
+        "RecipeInstructions",
+        "Allergens"
     ]
     string_fields = [
-        "Name", "AuthorName", "CookTime", "PrepTime",
-        "TotalTime", "Description", "RecipeCategory"
+        "Name",
+        "AuthorName",
+        "CookTime",
+        "PrepTime",
+        "TotalTime",
+        "Description",
+        "RecipeCategory"
     ]
 
     for f in numeric_fields:
@@ -134,6 +147,17 @@ def sanitize_row_for_pydantic(row_dict):
     sim = row_dict.get("similarity")
     if sim is None or (isinstance(sim, float) and np.isnan(sim)):
         row_dict["similarity"] = 0.0
+
+    ingredients_raw = row_dict.get("ingredients_raw")
+    if ingredients_raw and isinstance(ingredients_raw, list):
+        try:
+            standardized = standardize_recipe_ingredients(ingredients_raw)
+            row_dict["ingredients_standardized"] = standardized
+        except Exception as e:
+            print(f"Error standardizing ingredients: {e}")
+            row_dict["ingredients_standardized"] = []
+    else:
+        row_dict["ingredients_standardized"] = []
 
     return row_dict
 

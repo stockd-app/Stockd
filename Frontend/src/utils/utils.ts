@@ -93,7 +93,8 @@ export const formatRecipes = (recipes: any[]) =>
             image: imageUrl,
             rating: Number(recipe.AggregatedRating) || 0.0,
             rawTime: recipe.PrepTime,
-            time: formatPrepTime(recipe.PrepTime),
+            category: recipe.RecipeCategory || "Uncategorised",
+            time: formatPrepTime(recipe.TotalTime),
             allergens: recipe.Allergens ?? [],
         };
     });

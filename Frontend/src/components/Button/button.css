@@ -1,0 +1,103 @@
+@import "@/styles/variable.css";
+
+/* Base */
+.custom-button {
+    border: none;
+    /* transition: 0.25s ease; */
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    font-size: 0.95rem;
+}
+
+/* Primary Button */
+
+.custom-button.primary {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--color-primary);
+    color: var(--color-button-text);
+    cursor: pointer;
+}
+
+.custom-button.primary.disabled {
+    background: var(--color-tertiary);
+    color: var(--color-dark-text);
+    cursor: not-allowed;
+}
+
+.custom-button.primary:hover:not(.disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* Secondary Button */
+
+.custom-button.secondary {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--color-light);
+    color: var(--color-dark-text);
+    cursor: pointer;
+}
+
+.custom-button.secondary:hover {
+    opacity: 0.9;
+}
+
+/* Danger Button */
+
+.custom-button.danger {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--color-red);
+    color: var(--color-button-text);
+    cursor: pointer;
+}
+
+.custom-button.danger:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.custom-button.danger.disabled {
+    background: var(--color-tertiary);
+    color: var(--color-dark-text);
+    cursor: not-allowed;
+}
+
+/* Close Button */
+
+.custom-button.close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: transparent;
+    color: var(--color-main-text);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 6px;
+}
+
+.custom-button.close:hover {
+    opacity: 0.7;
+}
+
+/* Back Button */
+
+.custom-button.back {
+    background: var(--color-bg);
+    color: var(--color-main-text);
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 4px;
+}
+
+.custom-button.back:hover {
+    opacity: 0.7;
+}

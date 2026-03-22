@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Plus, MoreVertical, Check } from "lucide-react";
-import { API_ROUTES } from "../../config/consts";
+import { API_ROUTES, BOTTOM_NAV_ICON_SIZE } from "../../config/consts";
 import ConfirmModal from "../ConfirmModal/ConfirmModal";
+import Button from "../Button/Button";
+
 import "./grocery-list.css";
 
 interface GroceryItem {
@@ -221,25 +223,26 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
 
       {/* Action Buttons */}
       <div className="grocery-list__actions">
-        <button
-          className="grocery-list__btn grocery-list__btn--primary"
+        <Button
+          variant="primary"
+          className="grocery-list__btn"
           onClick={() => {
             setShowAddForm(!showAddForm);
             setEditingItemId(null);
-          }}
-        >
-          <Plus size={20} />
+          }}>
+          <Plus size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
           Add Item
-        </button>
+        </Button>
         {totalItems > 0 && (
-          <button
+          <Button
+            variant="primary"
             className="grocery-list__btn grocery-list__btn--success"
             onClick={() => setShowConfirmModal(true)}
             disabled={selectedCount === 0}
           >
-            <Check size={20} />
+            <Check size={BOTTOM_NAV_ICON_SIZE.NORMAL} />
             Add to Pantry
-          </button>
+          </Button>
         )}
       </div>
 
@@ -295,26 +298,31 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
                     setFormData({ ...formData, quantity_unit: e.target.value })
                   }
                 >
+                  <option value="piece">piece</option>
                   <option value="pcs">pcs</option>
                   <option value="kg">kg</option>
                   <option value="g">g</option>
-                  <option value="L">L</option>
+                  <option value="l">l</option>
                   <option value="ml">ml</option>
+                  <option value="tbsp">tbsp</option>
+                  <option value="tsp">tsp</option>
                   <option value="box">box</option>
                   <option value="bottle">bottle</option>
+                  <option value="can">can</option>
+                  <option value="jar">jar</option>
                 </select>
               </div>
             </div>
 
             <div className="grocery-list__form-actions">
-              <button
+              <Button
+                variant="primary"
                 type="submit"
-                className="grocery-list__btn grocery-list__btn--submit"
-              >
+                className="grocery-list__btn grocery-list__btn--submit">
                 {editingItemId ? "Update" : "Add"}
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="secondary"
                 className="grocery-list__btn grocery-list__btn--cancel"
                 onClick={() => {
                   setShowAddForm(false);
@@ -324,10 +332,9 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
                     quantity_value: null,
                     quantity_unit: "pcs",
                   });
-                }}
-              >
+                }}>
                 Cancel
-              </button>
+              </Button>
             </div>
           </form>
         </div>

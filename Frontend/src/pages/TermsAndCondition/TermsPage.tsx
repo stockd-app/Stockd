@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
 import { loginWithGoogle } from "../../services/api";
+import Button from "../../components/Button/Button";
 import StockdLogo from "../../assets/images/StockdLogo.svg";
 
 import "./termspage.css";
@@ -35,18 +36,19 @@ const TermsPage: React.FC = () => {
         <div className="terms__container">
             <div className="terms__card">
                 {/* Back Button */}
-                <button className="terms__close" onClick={() => navigate("/")}>
-                    ✕
-                </button>
+                <Button
+                    variant="close"
+                    onClick={() => navigate("/")}
+                />
 
                 {/* T&S Title */}
-                <h2 className="terms__title">Terms & Condition</h2>
+                <h2 className="terms__title">Terms & Conditions</h2>
 
                 {/* Stockd Logo */}
                 <img src={StockdLogo} alt="Stockd Logo" width={100} className="terms__logo" />
 
                 {/* Stockd Title */}
-                <h2 className="terms__stockd">Stockd</h2>
+                <h2 className="terms__stockd">STOCKD</h2>
 
                 {/* Text */}
                 <p className="terms__text">
@@ -78,13 +80,12 @@ const TermsPage: React.FC = () => {
                 </label>
 
                 {/* Continue Button */}
-                <button
+                <Button
                     disabled={!checked}
-                    className={`terms__continue ${checked ? "active" : ""}`}
                     onClick={() => login()}
                 >
-                    Continue →
-                </button>
+                    Continue
+                </Button>
 
             </div>
         </div >
