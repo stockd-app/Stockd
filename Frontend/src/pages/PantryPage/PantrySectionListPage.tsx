@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckSquare2, Square, Trash2, X } from "lucide-react";
+import { CheckSquare2, SlidersHorizontal, Square, Trash2, X } from "lucide-react";
 import PantryItemCard from "../../components/PantryItemCard/PantryItemCard";
 import PantryItemDetails from "../../components/PantryItemDetails/PantryItemDetails";
 import type { PantryItem } from "../../components/PantryItemSection/PantryItemSection";
@@ -10,10 +10,12 @@ import { CONFIRM_DELETE_PANTRY_ITEM } from "../../config/consts";
 import Button from "../../components/Button/Button";
 
 import "./pantrysectionlistpage.css";
+import FilterDrawer from "../../components/FilterDrawer/FilterDrawer";
+import FilterChip from "../../components/FilterChip/FilterChip";
 
 interface PantrySectionListPageProps {
     title: string;
-    storage: "Pantry" | "Refrigerator" | "Freezer";
+    storage: "Pantry" | "Fridge" | "Freezer";
 }
 
 const PantrySectionListPage: React.FC<PantrySectionListPageProps> = ({
@@ -28,6 +30,34 @@ const PantrySectionListPage: React.FC<PantrySectionListPageProps> = ({
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    const [showFilters, setShowFilters] = useState(false);
+    const [filteredItems, setFilteredItems] = useState<PantryItem[]>([]);
+
+    const [filters, setFilters] = useState({
+        category: null as string | null,
+    });
+
+    const categories = Array.from(
+        new Set(
+            items
+                .map(r => r.category)
+                .filter((cat): cat is string => Boolean(cat))
+        )
+    );
+
+    useEffect(() => {
+        let result = [...items];
+
+        if (filters.category) {
+            result = result.filter(
+                item =>
+                    item.category?.toLowerCase() === filters.category?.toLowerCase()
+            );
+        }
+
+        setFilteredItems(result);
+    }, [items, filters]);
 
     const loadItems = async () => {
         const user = JSON.parse(localStorage.getItem("user") || "null");
@@ -103,6 +133,15 @@ const PantrySectionListPage: React.FC<PantrySectionListPageProps> = ({
 
                     <h2 className="pantrySection__title">{title}</h2>
 
+                    <Button
+                        className="pantrySection__filter"
+                        variant=""
+                        onClick={() => setShowFilters(true)}
+                        aria-label="Open filters"
+                    >
+                        <SlidersHorizontal size={20} />
+                    </Button>
+
                     {/* Empty spacer to mirror right-side button space */}
                     <div className="pantrySection__spacer" />
                 </div>
@@ -157,12 +196,13 @@ const PantrySectionListPage: React.FC<PantrySectionListPageProps> = ({
                 )}
 
                 <div className="pantrySection__grid">
-                    {items.map(item => (
+                    {filteredItems.map(item => (
                         <PantryItemCard
                             key={item.id}
                             name={item.name}
-                            qty={item.qty}
+                            qty={item.qty.substring(1) + " " + item.unit}
                             image={item.image}
+                            category={item.category ? [item.category] : []}
                             onClick={() => {
                                 if (isSelecting) toggleSelect(item.id);
                                 else setSelectedItem(item);
@@ -204,6 +244,52 @@ const PantrySectionListPage: React.FC<PantrySectionListPageProps> = ({
                     onCancel={() => setShowConfirmDelete(false)}
                 />
             )}
+
+            {/* Filter Drawer */}
+            <FilterDrawer open={showFilters} onClose={() => setShowFilters(false)}>
+
+                <div className="filter__section">
+                    <h4>Category</h4>
+                    <div className="filter__chips">
+                        <FilterChip
+                            label="All"
+                            active={filters.category === null}
+                            onClick={() =>
+                                setFilters(prev => ({ ...prev, category: null }))
+                            }
+                        />
+
+                        {categories.map(cat => (
+                            <FilterChip
+                                key={cat}
+                                label={cat.charAt(0).toUpperCase() + cat.slice(1)}
+                                active={filters.category === cat}
+                                onClick={() =>
+                                    setFilters(prev => ({ ...prev, category: cat }))
+                                }
+                            />
+                        ))}
+                    </div>
+                </div>
+
+                <div className="filter__actions">
+                    <Button
+                        variant="secondary"
+                        onClick={() =>
+                            setFilters({
+                                category: null,
+                            })
+                        }>
+                        Clear All
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={() => setShowFilters(false)}
+                    >
+                        Apply
+                    </Button>
+                </div>
+            </FilterDrawer>
         </>
     );
 };
