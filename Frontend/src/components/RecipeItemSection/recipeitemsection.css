@@ -27,8 +27,7 @@
 .recipeItemSection__seeMore {
     flex-shrink: 0;
     font-size: 14px;
-    font-weight: 500;
-    color: var(--color-tertiary);
+    color: var(--color-main-text);
     cursor: pointer;
     user-select: none;
     transition: opacity 0.2s ease;
