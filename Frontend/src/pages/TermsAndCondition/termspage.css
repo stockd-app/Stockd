@@ -2,10 +2,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
 
 .terms__container {
+    position: fixed;
+    inset: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100dvh;
     background: var(--color-bg);
 }
 
