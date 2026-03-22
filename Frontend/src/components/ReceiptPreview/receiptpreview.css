@@ -72,7 +72,7 @@
     padding: 6px 10px;
     border-radius: 999px;
     background: var(--color-grey);
-    font-size: 12px;
+    font-size: 0.75rem;
     color: var(--color-dark-text);
     font-weight: 600;
 }
@@ -96,7 +96,7 @@
 }
 
 .rp__addHint {
-    font-size: 12px;
+    font-size: 0.75rem;
     color: var(--color-grey-text);
     line-height: 1.35;
     margin-bottom: 14px;
@@ -121,7 +121,7 @@
     gap: 6px;
 
     font-weight: 600;
-    font-size: 13px;
+    font-size: 0.8125rem;
     color: var(--color-dark-text);
 
     cursor: pointer;
@@ -208,14 +208,14 @@
         bottom: 18px;
         padding: 12px 16px;
         border-radius: 14px;
-        font-size: 15px;
+        font-size: 0.9375rem;
     }
 
     .rp__count {
         right: 16px;
         top: 16px;
         padding: 8px 12px;
-        font-size: 14px;
+        font-size: 0.875rem;
     }
 
     .rp__secondaryList {
@@ -233,7 +233,7 @@
         bottom: 16px;
         padding: 10px 12px;
         border-radius: 12px;
-        font-size: 14px;
+        font-size: 0.875rem;
     }
 
     .rp__addMore {
@@ -243,12 +243,12 @@
     }
 
     .rp__addMore h4 {
-        font-size: 22px;
+        font-size: 1.375rem;
         margin-bottom: 10px;
     }
 
     .rp__addMore p {
-        font-size: 15px;
+        font-size: 0.9375rem;
         line-height: 1.5;
         margin-bottom: 18px;
     }
@@ -261,7 +261,7 @@
         min-height: 120px;
         border-radius: 18px;
         gap: 10px;
-        font-size: 16px;
+        font-size: 1rem;
     }
 
     .rp__actionBtn svg {
@@ -274,7 +274,7 @@
         max-width: 320px;
         height: 56px;
         border-radius: 16px;
-        font-size: 18px;
+        font-size: 1.125rem;
     }
 }
 
@@ -306,7 +306,7 @@
 
 .loading__text {
     color: var(--color-main-text);
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: 600;
     text-align: center;
     padding: 0 20px;
@@ -350,14 +350,14 @@
 }
 
 .error__title {
-    font-size: 24px;
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--color-main-text);
     margin-bottom: 12px;
 }
 
 .error__message {
-    font-size: 16px;
+    font-size: 1rem;
     color: var(--color-grey-text);
     line-height: 1.5;
     margin-bottom: 24px;
@@ -371,7 +371,7 @@
     }
 
     .loading__text {
-        font-size: 20px;
+        font-size: 1.25rem;
     }
 
     .error__modal {
@@ -384,10 +384,10 @@
     }
 
     .error__title {
-        font-size: 28px;
+        font-size: 1.75rem;
     }
 
     .error__message {
-        font-size: 18px;
+        font-size: 1.125rem;
     }
 }

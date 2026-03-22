@@ -8,14 +8,14 @@
 
 .allergenPref__title {
     margin: 0;
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: 600;
     color: var(--color-main-text);
 }
 
 .allergenPref__description {
     margin: 0;
-    font-size: 14px;
+    font-size: 0.875rem;
     line-height: 1.4;
     color: var(--color-main-text);
 }
@@ -24,7 +24,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
+    font-size: 0.8125rem;
     cursor: pointer;
     color: var(--color-grey-text);
 }
