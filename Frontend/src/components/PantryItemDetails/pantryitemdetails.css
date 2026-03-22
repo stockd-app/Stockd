@@ -123,8 +123,8 @@
     border-radius: 50%;
     border: none;
     font-size: 18px;
-    background: var(--color-secondary);
     cursor: pointer;
+    color: var(--color-main-text);
 }
 
 
