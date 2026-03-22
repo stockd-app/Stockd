@@ -2,11 +2,42 @@
 
 .pantry__container {
     width: 100%;
-    padding-bottom: 90px;
     background: var(--color-bg);
     color: var(--color-main-text);
 }
 
 .pantry__content {
     padding: 16px;
+}
+
+.pantry__centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.pantry__loading_image {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+}
+
+.pantry__fallback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.pantry__title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.pantry__subtitle {
+    font-size: 14px;
+    color: var(--color-tertiary);
+    margin: 0;
 }

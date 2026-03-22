@@ -78,7 +78,7 @@
     top: calc(env(safe-area-inset-top, 20px) + 10px);
     right: calc(env(safe-area-inset-right, 20px) + 10px);
     z-index: 1000;
-    font-size: 22px;
+    font-size: 1.375rem;
     background: rgba(255, 255, 255, 0.1);
     border: 1.5px solid rgba(255, 255, 255, 0.3);
     color: white;
@@ -123,7 +123,7 @@
 
 .retake-btn,
 .use-btn {
-    font-size: 16px;
+    font-size: 1rem;
     padding: 12px 24px;
     border-radius: 8px;
     border: none;
@@ -175,6 +175,6 @@
 }
 
 .loading__text {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
 }

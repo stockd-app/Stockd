@@ -91,6 +91,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
 
   const [likedRecipeIds, setLikedRecipeIds] = useState<Set<number>>(new Set());
 
+  const [isLoadingRecipes, setIsLoadingRecipes] = useState(true);
+
   const navigate = useNavigate();
 
   const handleSearchSubmit = () => {
@@ -121,6 +123,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
 
     const fetchRecommendations = async () => {
       try {
+        setIsLoadingRecipes(true);
         console.log("Attempt fetch recommendation pantry")
         const [subsetData, incompleteData, likedData, collaborativeData, likedRes] = await Promise.all([
           getSubsetRecipes(userId, 5),
@@ -177,6 +180,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         setFilteredCollaborativeRecipes(markLiked(visibleCollaborative));
       } catch (err) {
         console.error("Error fetching recommendations:", err);
+      } finally {
+        setIsLoadingRecipes(false);
       }
     };
 
@@ -245,9 +250,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         onSeeMore={() => navigate("/pantry-subset-recipes")}
         emptyTitle={"Nothing Cookable Yet!"}
         emptySubtitle={"Add More Ingredients To Your Pantry To Unlock New Recipes!"}
+        loading={isLoadingRecipes}
       />
 
-      <RecipeItemSection title="Some Ingredients Needed"
+      <RecipeItemSection
+        title="Some Ingredients Needed"
         items={filteredIncompleteRecipes}
         onItemClick={(recipeId: number) => {
           navigate(`/recipes/${recipeId}`);
@@ -255,9 +262,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         onSeeMore={() => navigate("/pantry-incomplete-recipes")}
         emptyTitle={"Let’s Stock Your Pantry!"}
         emptySubtitle={"Add ingredients by uploading a receipt or other methods!"}
+        loading={isLoadingRecipes}
       />
 
-      <RecipeItemSection title="Based On Your Liked Recipes"
+      <RecipeItemSection
+        title="Based On Your Liked Recipes"
         items={filteredLikedRecommendedRecipes}
         onItemClick={(recipeId: number) => {
           navigate(`/recipes/${recipeId}`);
@@ -265,16 +274,18 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         onSeeMore={() => navigate("/pantry-recommend-liked-recipes")}
         emptyTitle={"No Liked Recipe Recommendations Yet!"}
         emptySubtitle={"Like A Few Recipes To Get Personalized Recommendations!"}
+        loading={isLoadingRecipes}
       />
-      <RecipeItemSection title="Other Users Have Tried These"
+      <RecipeItemSection
+        title="Other Users Have Tried These"
         items={filteredCollaborativeRecipes}
         onItemClick={(recipeId: number) => {
           navigate(`/recipes/${recipeId}`);
         }}
         onSeeMore={() => navigate("/pantry-collaborative-recipes")}
         emptyTitle={"No Collaborative Recommendations Yet!"}
-        emptySubtitle={"Cook And Like More Recipes To Improve Recommendations!"
-        }
+        emptySubtitle={"Cook And Like More Recipes To Improve Recommendations!"}
+        loading={isLoadingRecipes}
       />
       <ExploreSection />
     </div>

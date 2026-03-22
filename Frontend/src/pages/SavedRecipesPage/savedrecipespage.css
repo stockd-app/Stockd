@@ -4,7 +4,7 @@
   min-height: 100vh;
   background: var(--color-bg);
   color: var(--color-main-text);
-  padding-bottom: 40px;
+  padding-bottom: 120px;
 }
 
 .savedRecipes__header {
@@ -27,16 +27,26 @@
 }
 
 .savedRecipes__empty p {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 500;
 }
 
 .savedRecipes__empty span {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 @media (max-width: 360px) {
   .savedRecipes__grid {
     grid-template-columns: 1fr;
   }
+}
+
+.savedRecipes__centered {
+  min-height: calc(100vh - 120px);
+  /* accounts for header + bottom nav */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
