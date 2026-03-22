@@ -1,6 +1,7 @@
 import React from "react";
 import RecipeItemCard from "../RecipeItemCard/RecipeItemCard";
 import EmptyPantry from "../../assets/images/EmptyPantry.png";
+import loading_anim from "../../assets/images/loading_anim.gif";
 
 import "./recipeitemsection.css";
 
@@ -21,7 +22,7 @@ interface RecipeItemSectionProps {
     onItemClick?: (id: number) => void;
     emptyTitle?: string;
     emptySubtitle?: string;
-    emptyImage?: string;
+    loading?: boolean;
 }
 
 /**
@@ -29,7 +30,7 @@ interface RecipeItemSectionProps {
  * @param param0 
  * @returns 
  */
-const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = true, onSeeMore, items, onItemClick, emptyTitle, emptySubtitle, emptyImage }) => {
+const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = true, onSeeMore, items, onItemClick, emptyTitle, emptySubtitle, loading = false }) => {
     return (
         <div className="recipeItemSection__container">
             <div className="recipeItemSection__header">
@@ -44,16 +45,20 @@ const RecipeItemSection: React.FC<RecipeItemSectionProps> = ({ title, seeMore = 
                 )}
             </div>
 
-            {items.length === 0 ? (
+            {loading ? (
                 <div className="recipeItemSection__empty">
                     <img
-                        src={EmptyPantry}
-                        alt="Empty Pantry"
+                        src={loading_anim}
+                        alt="Loading"
                         className="recipeItemSection__empty_image"
                     />
-
+                </div>
+            ) : items.length === 0 ? (
+                <div className="recipeItemSection__empty">
                     <div className="recipeItemSection__empty_overlay">
-                        <p className="recipeItemSection__empty_text">{emptyTitle ?? "Let’s stock your pantry!"}</p>
+                        <p className="recipeItemSection__empty_text">
+                            {emptyTitle ?? "Let’s stock your pantry!"}
+                        </p>
                         <p className="recipeItemSection__empty_subtext">
                             {emptySubtitle ?? "Add ingredients by uploading a receipt or manual addition."}
                         </p>

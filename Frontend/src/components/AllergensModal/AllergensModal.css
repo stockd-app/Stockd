@@ -45,7 +45,7 @@
 }
 
 .modal__header h2 {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 600;
   margin: 0;
 }
@@ -85,7 +85,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 14px;
+  font-size: 0.875rem;
   cursor: pointer;
   padding: 6px 4px;
   border-radius: 8px;

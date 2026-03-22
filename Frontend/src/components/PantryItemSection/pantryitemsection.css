@@ -28,7 +28,7 @@
   border-radius: 14px;
   border: 1px solid var(--color-grey);
   background-color: var(--color-bg);
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1;
   cursor: pointer;
   white-space: nowrap;
@@ -79,7 +79,7 @@
     width: 100%;
     min-height: 44px;
     padding: 10px 8px;
-    font-size: 12px;
+    font-size: 0.75rem;
     border-radius: 14px;
   }
 

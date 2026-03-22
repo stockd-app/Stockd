@@ -32,7 +32,7 @@
   border: none;
   outline: none;
   width: 100%;
-  font-size: 17px;
+  font-size: 1.0625rem;
   color: var(--color-dark-text);
   background: transparent;
 }
@@ -59,7 +59,7 @@
 
   .searchbar__input {
     padding: 16px 20px;
-    font-size: 16px;
+    font-size: 1rem;
     max-width: 700px;
   }
 }
@@ -91,7 +91,7 @@
   }
 
   .searchbar__input {
-    font-size: 16px;
+    font-size: 1rem;
   }
 
   .searchbar__icon {

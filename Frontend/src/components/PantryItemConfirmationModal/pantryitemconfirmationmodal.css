@@ -31,8 +31,43 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--color-grey);
+    margin-bottom: 12px;
+}
+
+.pcm__nameSection {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pcm__editBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.pcm__controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.pcm__qtyInput {
+    width: 40px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #fff;
+    text-align: center;
+    font-size: 14px;
+    color: var(--color-dark-text);
+}
+
+.pcm__unitSelect {
+    padding: 4px;
+    background: #fff;
+    color: var(--color-dark-text);
 }
 
 .pcm__name {
@@ -77,4 +112,38 @@
     border: none;
     padding: 8px 16px;
     border-radius: 8px;
+}
+
+.pcm__deleteBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #d11a2a;
+    display: flex;
+    align-items: center;
+}
+
+.pcm__deleteBtn:hover {
+    color: #a10f1f;
+}
+
+.pcm__addRow {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.pcm__addBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: 1px dashed #ccc;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.pcm__addBtn:hover {
+    background-color: #f7f7f7;
 }

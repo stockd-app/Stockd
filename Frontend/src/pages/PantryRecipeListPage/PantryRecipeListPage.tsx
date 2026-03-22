@@ -6,11 +6,12 @@ import { applyAllergenFilter, formatRecipes, isoDurationToMinutes, isSameRange }
 import { TIME_RANGES } from "../../config/consts";
 import FilterDrawer from "../../components/FilterDrawer/FilterDrawer";
 import FilterChip from "../../components/FilterChip/FilterChip";
-import RecipeItemCard from "../../components/RecipeItemCard/RecipeItemCard";
+import RecipeListCard from "../../components/RecipeListCard/RecipeListCard";
 import Button from "../../components/Button/Button";
+import loading_anim from "../../assets/images/loading_anim.gif";
+import { getLikedRecipes, toggleLikeRecipe } from "../../services/api";
 
 import "./pantryrecipelistpage.css";
-import { getLikedRecipes, toggleLikeRecipe } from "../../services/api";
 
 interface PantryRecipeListPageProps {
     title: string;
@@ -39,6 +40,7 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
         category: null as string | null,
     });
 
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user") || "null");
@@ -48,22 +50,28 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
         }
 
         const load = async () => {
-            const data = await fetchRecipes(user.id);
-            console.log("Fetched pantry recipes:", data);
-            const formatted = formatRecipes(data.content_based || data.recommendations || []);
+            try {
+                const data = await fetchRecipes(user.id);
+                console.log("Fetched pantry recipes:", data);
+                const formatted = formatRecipes(data.content_based || data.recommendations || []);
 
-            const mode = localStorage.getItem("allergen_visibility");
-            const visible =
-                mode === "hide" ? applyAllergenFilter(formatted) : formatted;
+                const mode = localStorage.getItem("allergen_visibility");
+                const visible =
+                    mode === "hide" ? applyAllergenFilter(formatted) : formatted;
 
-            setRecipes(visible);
-            setFilteredRecipes(visible);
+                setRecipes(visible);
+                setFilteredRecipes(visible);
 
-            const likedRes = await getLikedRecipes();
-            const likedIds = new Set<number>();
-            likedRes.liked_recipes.forEach((item: any) => likedIds.add(item.recipe.RecipeId));
+                const likedRes = await getLikedRecipes();
+                const likedIds = new Set<number>();
+                likedRes.liked_recipes.forEach((item: any) => likedIds.add(item.recipe.RecipeId));
 
-            setLikedRecipeIds(likedIds);
+                setLikedRecipeIds(likedIds);
+            } catch (err) {
+                console.error("Failed to load recipes:", err);
+            } finally {
+                setIsLoading(false);
+            }
         };
         load();
     }, []);
@@ -114,13 +122,6 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
 
                 <h2 className="pantryRecipes__title">{title}</h2>
 
-                {/* <button
-                    className="filterIcon"
-                    onClick={() => setShowFilters(true)}
-                    aria-label="Open filters"
-                >
-                    <SlidersHorizontal size={20} />
-                </button> */}
                 <Button
                     variant=""
                     onClick={() => setShowFilters(true)}
@@ -132,20 +133,30 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
 
             {/* Grid */}
             <div className="pantryRecipes__grid">
-                {filteredRecipes.length === 0 ? (
-                    <p className="no-results">
-                        Sorry, we couldn't find the recipe you searched.
-                    </p>
+
+                {isLoading ? (
+                    <div className="pantryRecipes__centered">
+                        <img
+                            src={loading_anim}
+                            alt="Loading"
+                            className="pantryRecipes__loading"
+                        />
+                    </div>
+                ) : filteredRecipes.length === 0 ? (
+                    <div className="pantryRecipes__centered">
+                        <p className="no-results">
+                            Sorry, we couldn't find any recipes.
+                        </p>
+                    </div>
                 ) : (
                     filteredRecipes.map(recipe => (
-                        <RecipeItemCard
+                        <RecipeListCard
                             key={recipe.id}
                             recipeId={recipe.id}
                             name={recipe.name}
                             image={recipe.image}
                             rating={recipe.rating}
                             time={recipe.time}
-                            status={recipe.status}
                             allergens={recipe.allergens}
                             initialLiked={likedRecipeIds.has(recipe.id)}
                             onLikedChange={(liked) => {
