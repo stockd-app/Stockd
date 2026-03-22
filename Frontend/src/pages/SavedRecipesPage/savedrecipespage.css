@@ -4,7 +4,7 @@
   min-height: 100vh;
   background: var(--color-bg);
   color: var(--color-main-text);
-  padding-bottom: 40px;
+  padding-bottom: 120px;
 }
 
 .savedRecipes__header {
@@ -39,4 +39,14 @@
   .savedRecipes__grid {
     grid-template-columns: 1fr;
   }
+}
+
+.savedRecipes__centered {
+  min-height: calc(100vh - 120px);
+  /* accounts for header + bottom nav */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }

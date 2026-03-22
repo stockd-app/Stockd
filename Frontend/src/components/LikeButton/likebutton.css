@@ -1,12 +1,12 @@
 .like__button {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.6);
   border: none;
   border-radius: 999px;
-  padding: 8px;
+  padding: 3px;
   cursor: pointer;
   position: absolute;
   top: 14px;
-  right: 12px;
+  right: 14px;
 
   display: flex;
   align-items: center;
