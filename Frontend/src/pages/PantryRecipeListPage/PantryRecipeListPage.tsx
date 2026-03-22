@@ -147,17 +147,17 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
                     </div>
                 ) : filteredRecipes.length === 0 ? (
                     <div className="pantryRecipes__centered">
-                    <div className="pantryRecipes__empty">
-                    <img
-                    src={EmptyPantryImage}
-                    alt="No recipes found"
-                    className="pantryRecipes__emptyImage"
-                    />
-                    <p className="no-results">
-                          Sorry, we couldn't find any recipes. try searching something else.
-                        </p>
+                        <div className="pantryRecipes__empty">
+                            <img
+                            src={EmptyPantryImage}
+                            alt="No recipes found"
+                            className="pantryRecipes__emptyImage"
+                            />
+                            <p className="no-results">
+                            Sorry, we couldn't find any recipes. try searching something else.
+                            </p>
+                        </div>
                     </div>
-                </div>
                     
                 ) : (
                     filteredRecipes.map(recipe => (
