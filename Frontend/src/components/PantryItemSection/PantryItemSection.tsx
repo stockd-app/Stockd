@@ -147,7 +147,7 @@ const PantryItemSection: React.FC<PantryItemSectionProps> = ({ section, items, o
                         <PantryItemCard
                             key={item.id}
                             name={item.name}
-                            qty={item.qty}
+                            qty={item.qty.substring(1) + " " + item.unit}
                             image={item.image}
                             isSelecting={isSelecting}
                             selected={selectedIds.has(item.id)}
