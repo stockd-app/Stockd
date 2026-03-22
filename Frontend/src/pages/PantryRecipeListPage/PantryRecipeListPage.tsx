@@ -8,7 +8,8 @@ import FilterDrawer from "../../components/FilterDrawer/FilterDrawer";
 import FilterChip from "../../components/FilterChip/FilterChip";
 import RecipeItemCard from "../../components/RecipeItemCard/RecipeItemCard";
 import Button from "../../components/Button/Button";
-
+import EmptyPantryImage from "../../assets/images/EmptyPantry.png";
+import "@/styles/variable.css";
 import "./pantryrecipelistpage.css";
 import { getLikedRecipes, toggleLikeRecipe } from "../../services/api";
 
@@ -122,20 +123,29 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
                     <SlidersHorizontal size={20} />
                 </button> */}
                 <Button
+                    className="pantryRecipes__filterButton"
                     variant=""
                     onClick={() => setShowFilters(true)}
                     aria-label="Open filters"
                 >
-                    <SlidersHorizontal size={20} />
+                    <SlidersHorizontal size={20} className="pantryRecipes__filterIcon" />
                 </Button>
             </div>
 
             {/* Grid */}
             <div className="pantryRecipes__grid">
                 {filteredRecipes.length === 0 ? (
+                <div className="pantryRecipes__empty">
+                    <img
+                    src={EmptyPantryImage}
+                    alt="No recipes found"
+                    className="pantryRecipes__emptyImage"
+                    />
                     <p className="no-results">
-                        Sorry, we couldn't find the recipe you searched.
+                      Sorry, we couldn't find the recipe you searched. try searching something else.
                     </p>
+                </div>
+                    
                 ) : (
                     filteredRecipes.map(recipe => (
                         <RecipeItemCard
