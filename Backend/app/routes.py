@@ -733,6 +733,7 @@ async def add_update_pantry_items(
                 existing_item.category = category
                 existing_item.storage = storage
                 existing_item.item_image = item_image
+                existing_item.added_on = datetime.datetime.utcnow()
                 processed_items.append(existing_item)
             else:
                 # Add new item
