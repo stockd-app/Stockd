@@ -64,10 +64,11 @@
 }
 
 .pcm__cancel {
-    background: var(--color-grey);
+    background: var(--color-red);
     border: none;
     padding: 8px 16px;
     border-radius: 8px;
+    color: white;
 }
 
 .pcm__confirm {

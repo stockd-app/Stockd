@@ -1,6 +1,6 @@
 import React from "react";
 import RecipeItemCard from "../RecipeItemCard/RecipeItemCard";
-import EmptyPantry from "../../assets/images/EmptyPantry.jpg";
+import EmptyPantry from "../../assets/images/EmptyPantry.png";
 
 import "./recipeitemsection.css";
 
