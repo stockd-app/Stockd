@@ -32,6 +32,8 @@
     --color-nutrition-level-medium: #ca8a04;
     --color-nutrition-level-high: #dc2626;
 
+    --color-profile-shadow: #5a5a5a;
+
 
     /* ============================================  
        values for scaling:
@@ -110,4 +112,5 @@ body[data-theme="light"] {
     --color-grey-text: #272727;
     --color-button-text: #ffffff;
     --color-input-overlay: rgba(255, 255, 255, 0.6);
+    --color-profile-shadow: #cecece;
 }
