@@ -36,15 +36,23 @@ const AccessibilityModal: React.FC<AccessibilityModalProps> = ({ onClose }) => {
     };
 
     const handleDone = () => {
-        // aave to localStorage and apply the text size when Done is clicked
+        // save to localStorage and apply the text size when Done is clicked
         localStorage.setItem("text_size", selectedSize);
-
+        
         const option = TEXT_SIZE_OPTIONS.find((opt: TextSizeOption) => opt.value === selectedSize);
         if (option) {
             document.documentElement.style.setProperty("--text-scale", option.scale.toString());
         }
-
+        
         onClose();
+    };
+
+    const handleReset = () => {
+        // Reset to medium (default)
+        setSelectedSize("medium");
+        setPreviewScale(1);
+        localStorage.setItem("text_size", "medium");
+        document.documentElement.style.setProperty("--text-scale", "1");
     };
 
     return (
@@ -101,6 +109,11 @@ const AccessibilityModal: React.FC<AccessibilityModalProps> = ({ onClose }) => {
                 </div>
 
                 <div className="accessibility__footer">
+                    <Button
+                        variant="secondary"
+                        onClick={handleReset}>
+                        Reset to Default
+                    </Button>
                     <Button
                         variant="primary"
                         onClick={handleDone}>

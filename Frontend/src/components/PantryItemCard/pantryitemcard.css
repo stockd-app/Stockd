@@ -1,7 +1,7 @@
 @import "@/styles/variable.css";
 
 .pantryitemcard {
-    width: 140px;
+    width: 160px;
     padding: 1em;
     flex-shrink: 0;
     border-radius: 15px;
@@ -49,13 +49,19 @@
 }
 
 .pantryitemcard__name {
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 800;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
 }
 
 .pantryitemcard__qty {
     color: var(--color-grey-text);
-    font-size: 14px;
+    font-size: 0.875rem; 
 }
 
 .pantryitemcard:hover .pantryitemcard__qty {
