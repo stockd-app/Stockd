@@ -2,8 +2,6 @@
 
 .profile__button {
     background: var(--color-bg);
-    /* border: 1px solid rgba(0, 0, 0, 0.08);
-     */
     border: 1px solid var(--color-profile-shadow);
     color: var(--color-main-text);
     cursor: pointer;
