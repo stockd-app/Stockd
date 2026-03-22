@@ -3,7 +3,7 @@
 .pantryRecipes__container {
     min-height: 100vh;
     background: var(--color-bg);
-    padding-bottom: 40px;
+    padding-bottom: 120px;
 }
 
 .pantryRecipes__header {
@@ -63,7 +63,7 @@
 
 .pantryRecipes__grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 14px;
     padding: 16px;
 }
@@ -73,5 +73,15 @@
     text-align: center;
     margin-top: 40px;
     font-size: 1rem;
-    color: var(--color-dark-grey);
+    color: var(--color-main-text);
+}
+
+.pantryRecipes__centered {
+    grid-column: 1 / -1;
+    min-height: 60vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }

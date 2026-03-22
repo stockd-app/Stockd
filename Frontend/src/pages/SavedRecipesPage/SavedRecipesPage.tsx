@@ -4,8 +4,9 @@ import RecipeItemCard from "../../components/RecipeItemCard/RecipeItemCard";
 import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";
 import { getLikedRecipes } from "../../services/api";
 import { formatPrepTime } from "../../utils/utils";
-import image_placeholder from "../../assets/images/error_handling/image_placeholder.png";
+import recipe_placeholder from "../../assets/images/error_handling/recipe_placeholder.png";
 import DOMPurify from "dompurify";
+import loading_anim from "../../assets/images/loading_anim.gif";
 import "./savedrecipespage.css";
 
 const SavedRecipesPage: React.FC = () => {
@@ -26,7 +27,7 @@ const SavedRecipesPage: React.FC = () => {
           return {
             id: r.RecipeId,
             name: DOMPurify.sanitize(r.Name),
-            image: r.Images?.[0] || image_placeholder,
+            image: r.Images?.[0] || recipe_placeholder,
             rating: Number(r.AggregatedRating) || 0,
             time: formatPrepTime(r.PrepTime),
             liked: true,
@@ -47,7 +48,7 @@ const SavedRecipesPage: React.FC = () => {
   const handleLikedChange = (id: number, liked: boolean) => {
     if (!liked) {
       setRecipes(prev => prev.filter(r => r.id !== id));
-    } 
+    }
   };
 
   return (
@@ -57,7 +58,13 @@ const SavedRecipesPage: React.FC = () => {
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <div className="savedRecipes__centered">
+          <img
+            src={loading_anim}
+            alt="Loading"
+            className="savedRecipes__loading"
+          />
+        </div>
       ) : recipes.length === 0 ? (
         <div className="savedRecipes__empty">
           <p>No liked recipes yet</p>
@@ -73,7 +80,7 @@ const SavedRecipesPage: React.FC = () => {
               image={recipe.image}
               rating={recipe.rating}
               time={recipe.time}
-              initialLiked={recipe.liked} 
+              initialLiked={recipe.liked}
               onLikedChange={(liked) => handleLikedChange(recipe.id, liked)}
               onClick={() => navigate(`/recipes/${recipe.id}`)}
             />

@@ -5,6 +5,7 @@
 }
 
 .explore__title {
+    color: var(--color-main-text);
     font-size: 1.25rem;
     font-weight: 700;
     margin: 0 0 12px 0;
@@ -43,12 +44,12 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: rgba(43, 43, 43, 0.45); 
+    background: rgba(43, 43, 43, 0.45);
     transition: background 0.3s ease;
 }
 
 .explore__card:hover::after {
-    background: rgba(0, 0, 0, 0.3); 
+    background: rgba(0, 0, 0, 0.3);
 }
 
 .explore__image {
@@ -75,7 +76,7 @@
 
 @media (max-width: 600px) {
     .explore__large__card {
-        height: 210px;  
+        height: 210px;
     }
 
     .explore__small__card {
