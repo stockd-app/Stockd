@@ -33,45 +33,36 @@
     --color-nutrition-level-high: #dc2626;
 
 
-    /* ============================================  
-       values for scaling:
-       - 0.875 = Small
-       - 1.0   = Medium (default)
-       - 1.125 = Large
-       - 1.25  = Extra Large
+    /* ============================================
+       ACCESSIBILITY: Font Size Scaling
+       ============================================
+       Multiplier for all font sizes in the app.
+       
+       Scale values:
+       - 0.875 = Small (87.5%)
+       - 1.0   = Medium/Normal (100%) - DEFAULT
+       - 1.125 = Large (112.5%)
+       - 1.25  = Extra Large (125%)
+       
+       This scales the root font size, and all rem-based
+       sizes scale proportionally while maintaining hierarchy.
     */
     --text-scale: 1;
 }
 
+/* ============================================
+   BASE FONT SIZE SCALING
+   ============================================
+   Scale the root font size. All rem units scale from this.
+   This preserves the natural hierarchy of text sizes.
+*/
 html {
-    font-size: calc(16px * var(--text-scale)) !important;
+    font-size: calc(16px * var(--text-scale));
 }
 
-/* ensure body inherits the scaled font size */
 body {
-    font-size: 1rem !important;
-}
-
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p,
-span,
-div,
-a,
-button,
-input,
-textarea,
-select,
-label,
-li,
-td,
-th {
-    font-size: 1em !important;
+    font-size: 1rem;
+    line-height: 1.5;
 }
 
 .no-scale,

@@ -149,7 +149,7 @@
 
 .recipe__title {
   margin: 16px 0 10px;
-  font-size: clamp(26px, 2.6vw, 34px);
+  font-size: clamp(1.625rem, 2.6vw, 2.125rem);
   line-height: 1.15;
   font-weight: 800;
   color: var(--color-main-text);
@@ -177,7 +177,7 @@
   flex-wrap: wrap;
   color: #6b7280;
   color: var(--color-red);
-  font-size: 14px;
+  font-size: 0.875rem;
   margin-bottom: 14px;
 }
 
@@ -212,18 +212,18 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
 }
 
 .recipe__meta__label {
   margin-top: 4px;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .recipe__description {
   color: var(--color-main-text);
-  font-size: 17px;
+  font-size: 1.0625rem;
   line-height: 1.7;
 }
 
@@ -236,7 +236,7 @@
   font-weight: 800;
   /* color: var(--color-dark); */
   margin-bottom: 16px;
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 800;
   /* color: var(--color-dark); */
   margin-bottom: 16px;
@@ -274,14 +274,14 @@
 }
 
 .recipe__nutritionLabel {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-dark-grey);
   line-height: 1.3;
 }
 
 .recipe__nutritionValue {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 700;
   color: var(--color-dark);
   line-height: 1.2;
@@ -293,7 +293,7 @@
 }
 
 .recipe__section__title {
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 800;
   margin: 18px 0 12px;
 }
@@ -342,7 +342,7 @@
 
 .ingredient__unit {
   color: var(--color-grey-text);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .recipe__ingredient__qty {
@@ -360,7 +360,7 @@
   flex-shrink: 0;
   white-space: nowrap;
   margin-left: auto;
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--color-grey-text);
 }
 
@@ -417,12 +417,12 @@
   }
 
   .recipe__nutritionLabel {
-    font-size: 11px;
+    font-size: 0.6875rem;
     line-height: 1.2;
   }
 
   .recipe__nutritionValue {
-    font-size: 15px;
+    font-size: 0.9375rem;
     line-height: 1.2;
   }
 }
@@ -439,11 +439,11 @@
   }
 
   .recipe__nutritionLabel {
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
 
   .recipe__nutritionValue {
-    font-size: 20px;
+    font-size: 1.25rem;
   }
 }
 
@@ -467,7 +467,7 @@
 
 .recipe__nutrition__overview__subtitle {
   margin: 0 0 18px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 500;
   color: var(--color-grey-text);
 }
@@ -486,21 +486,21 @@
 }
 
 .recipe__nutrition__overview__value {
-  font-size: 32px !important;
+  font-size: 2rem;
   font-weight: 800;
   line-height: 1;
   color: var(--color-main-text);
 }
 
 .recipe__nutrition__overview__unit {
-  font-size: 25px !important;
+  font-size: 1.5625rem;
   font-weight: 700;
   color: var(--color-grey-text);
 }
 
 .recipe__nutrition__overview__text {
   margin: 18px 0 0;
-  font-size: 16px;
+  font-size: 1rem;
   color: var(--color-grey-text);
 }
 
@@ -520,13 +520,13 @@
 .recipe__nutrition__overview__meta__label {
   display: block;
   margin-bottom: 8px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--color-grey-text);
 }
 
 .recipe__nutrition__overview__meta__value {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--color-main-text);
 }
@@ -572,7 +572,7 @@
 }
 
 .recipe__nutrition__ring__number {
-  font-size: 22px;
+  font-size: 1.375rem;
   font-weight: 800;
   color: var(--color-main-text);
   line-height: 1;
@@ -580,7 +580,7 @@
 
 .recipe__nutrition__ring__label {
   margin-top: 8px;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--color-grey-text);
 }
 
@@ -592,7 +592,7 @@
   padding: 14px 16px;
   background-color: var(--color-primary);
   color: var(--color-button-text);
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 700;
   cursor: pointer;
   transition: opacity 0.2s ease, transform 0.2s ease;
@@ -622,7 +622,7 @@
 }
 
 .recipe__nutrition__tableTitle {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--color-main-text);
 }
@@ -630,7 +630,7 @@
 .recipe__nutrition__tableSubtitle {
   display: block;
   margin-top: 4px;
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--color-grey-text);
 }
 
@@ -652,14 +652,14 @@
 }
 
 .recipe__nutrition__tableRow__head .recipe__nutrition__tableCell {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 700;
   color: var(--color-grey-text);
 }
 
 .recipe__nutrition__tableCell {
   min-width: 0;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--color-main-text);
 }
 
@@ -683,7 +683,7 @@
 }
 
 .recipe__nutrition__tableLabel {
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 700;
   color: var(--color-main-text);
   white-space: nowrap;
@@ -692,13 +692,13 @@
 }
 
 .recipe__nutrition__tableValue {
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 700;
   color: var(--color-main-text);
 }
 
 .recipe__nutrition__tableTarget {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--color-grey-text);
 }
 
@@ -738,7 +738,7 @@
 
 .recipe__nutrition__tablePercent {
   min-width: 42px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--color-grey-text);
   text-align: right;
 }
@@ -750,7 +750,7 @@
   min-width: 88px;
   padding: 8px 14px;
   border-radius: 10px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 700;
 }
 
@@ -776,11 +776,11 @@
   }
 
   .recipe__nutrition__overview__value {
-    font-size: 28px;
+    font-size: 1.75rem;
   }
 
   .recipe__nutrition__overview__unit {
-    font-size: 18px;
+    font-size: 1.125rem;
   }
 
   .recipe__nutrition__overview__meta {
@@ -798,7 +798,7 @@
   }
 
   .recipe__nutrition__ring__number {
-    font-size: 20px;
+    font-size: 1.25rem;
   }
 
   .recipe__nutrition__card {
@@ -806,11 +806,11 @@
   }
 
   .recipe__nutrition__card__label {
-    font-size: 17px;
+    font-size: 1.0625rem;
   }
 
   .recipe__nutrition__card__value {
-    font-size: 17px;
+    font-size: 1.0625rem;
   }
 
   /* .recipe__nutrition__tableWrap {
@@ -831,7 +831,7 @@
   }
 
   .recipe__nutrition__tableTitle {
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
 
   .recipe__nutrition__table {
@@ -889,18 +889,18 @@
   }
 
   .recipe__nutrition__tableLabel {
-    font-size: 16px;
+    font-size: 1rem;
     white-space: normal;
     overflow: visible;
     text-overflow: unset;
   }
 
   .recipe__nutrition__tableValue {
-    font-size: 16px;
+    font-size: 1rem;
   }
 
   .recipe__nutrition__tableTarget {
-    font-size: 14px;
+    font-size: 0.875rem;
     color: var(--color-grey-text);
   }
 
@@ -919,15 +919,36 @@
     min-width: 0;
     margin-top: 8px;
     text-align: left;
-    font-size: 13px;
+    font-size: 0.8125rem;
     color: var(--color-grey-text);
   }
 
   .recipe__nutrition__tableBadge {
     min-width: 82px;
     padding: 5px 5px;
-    font-size: 12px;
+    font-size: 0.75rem;
   }
+}
+
+.recipe__source {
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-grey-text);
+  margin-bottom: 10px;
+}
+
+.recipe__source a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.recipe__source a:hover {
+  text-decoration: underline;
+}
+
+.recipe__source__bottom {
+  margin-top: 30px;
 }
 
 .recipe__source {

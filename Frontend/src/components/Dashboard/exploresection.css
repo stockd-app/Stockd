@@ -6,7 +6,7 @@
 
 .explore__title {
     color: var(--color-main-text);
-    font-size: 20px;
+    font-size: 1.25rem;
     font-weight: 700;
     margin: 0 0 12px 0;
 }
@@ -68,7 +68,7 @@
     bottom: -10px;
     left: 6px;
     color: #fff;
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: 700;
     text-shadow: 0 3px 6px rgba(0, 0, 0, 0.7);
     z-index: 2;
