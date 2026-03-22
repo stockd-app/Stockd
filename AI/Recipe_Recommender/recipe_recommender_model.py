@@ -104,7 +104,7 @@ if not os.path.exists(ALLERGENS_CSV_PATH):
 
 df = pd.read_parquet(DATA_PATH)
 df = df.copy()
-df = df.head(20000)
+df = df.head(15000)
 
 print(f"Initial dataset size: {len(df)}")
 
