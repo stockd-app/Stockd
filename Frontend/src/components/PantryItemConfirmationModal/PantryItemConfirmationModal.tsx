@@ -58,6 +58,7 @@ const PantryItemConfirmationModal: React.FC<Props> = ({
     const updateName = (index: number, name: string) => {
         const copy = [...editedItems];
         copy[index].item_name = name;
+        copy[index].normalized_name = name;
         setEditedItems(copy);
     };
 
@@ -81,6 +82,7 @@ const PantryItemConfirmationModal: React.FC<Props> = ({
 const addNewItem = () => {
     const newItem: ConfirmPantryItem = {
         item_name: "",
+        normalized_name: "",
         quantity_value: 1,
         unit: "pc",
         storage: "",
