@@ -39,7 +39,6 @@
 
 .searchbar__profile-button:hover {
   background-color: var(--color-grey);
-  /* color: var(--color-primary); */
   box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
   transform: scale(1.05);
 }
