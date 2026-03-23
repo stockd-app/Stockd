@@ -125,3 +125,15 @@
 .modal__confirm:active {
   transform: scale(0.98);
 }
+
+.modal__icon {
+  width: 24px;
+  height: 24px;
+}
+
+.modal__divider {
+  width: 100%;
+  height: 1px;
+  background: var(--color-light);
+  flex-shrink: 0;
+}
