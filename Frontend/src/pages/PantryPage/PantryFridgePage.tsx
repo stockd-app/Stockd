@@ -2,8 +2,8 @@ import PantrySectionListPage from "./PantrySectionListPage";
 
 const PantryFridgePage = () => (
     <PantrySectionListPage
-        title="Refrigerator Items"
-        storage="Refrigerator"
+        title="Fridge Items"
+        storage="Fridge"
     />
 );
 

@@ -8,6 +8,7 @@ import DOMPurify from "dompurify";
 import AllergensModal from "../../components/AllergensModal/AllergensModal";
 import FeedbackModal from "../../components/FeedbackModal/FeedbackModal";
 import AccessibilityModal from "../../components/AccessibilityModal/AccessibilityModal";
+import AllergenPreferenceModal from "../../components/AllergenPreferenceModal/AllergenPreferenceModal";
 
 import "./profile.css";
 
@@ -27,6 +28,7 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
     const [showFeedbackModal, setShowFeedbackModal] = useState(false);
     const [showAccessibilityModal, setShowAccessibilityModal] = useState(false);
     const [initialAllergens, setInitialAllergens] = useState<string[]>([]);
+    const [showAllergenFilterModal, setShowAllergenFilterModal] = useState(false);
 
     const handleDelete = async () => {
         console.log("userId to delete: ", userId)
@@ -46,14 +48,34 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
 
     const handleAllergensConfirm = async (selected: string[]) => {
         try {
+            const previousAllergens = initialAllergens || [];
+            const hasChanged = !areAllergensEqual(previousAllergens, selected);
+
             await updateUserAllergens(selected);
+
             localStorage.setItem("user_allergens", JSON.stringify(selected));
             localStorage.setItem("allergens_onboarded", "true");
+
             setShowAllergensModal(false);
+
+            if (hasChanged && selected.length > 0) {
+                localStorage.removeItem("allergen_modal_dismissed");
+                setShowAllergenFilterModal(true);
+            }
         } catch (err) {
             console.error("Failed to update allergens", err);
         }
     };
+
+    const areAllergensEqual = (a: string[], b: string[]) => {
+        if (a.length !== b.length) return false;
+
+        const sortedA = [...a].sort();
+        const sortedB = [...b].sort();
+
+        return sortedA.every((item, index) => item === sortedB[index]);
+    };
+    
 
     return (
         <div className="profile__container">
@@ -106,6 +128,17 @@ const Profile: React.FC<ProfileProps> = ({ name, email, picture, userId }) => {
                     initial={initialAllergens}
                     onConfirm={handleAllergensConfirm}
                     onClose={() => setShowAllergensModal(false)}
+                />
+            )}
+            {showAllergenFilterModal && (
+                <AllergenPreferenceModal
+                    onConfirm={(mode) => {
+                        localStorage.setItem("allergen_visibility", mode);
+                        setShowAllergenFilterModal(false);
+                    }}
+                    onCancel={() => {
+                        setShowAllergenFilterModal(false);
+                    }}
                 />
             )}
 
