@@ -298,7 +298,7 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
                     setFormData({ ...formData, quantity_unit: e.target.value })
                   }
                 >
-                  <option value="piece">piece</option>
+                  {/* <option value="piece">piece</option> */}
                   <option value="pcs">pcs</option>
                   <option value="kg">kg</option>
                   <option value="g">g</option>
