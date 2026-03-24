@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Button from "../Button/Button";
 import { X } from "lucide-react";
-import { COMMON_ALLERGENS } from "../../config/consts";
+import { COMMON_ALLERGENS,NOT_SURE_ALLERGEN_ICON } from "../../config/consts";
 
 import "./AllergensModal.css";
 
@@ -17,6 +17,14 @@ const AllergensModal: React.FC<Props> = ({
   initial = []
 }) => {
   const [selected, setSelected] = useState<string[]>(initial);
+  const allAllergenValues = useMemo(
+    () => COMMON_ALLERGENS.map((item) => item.value),
+    []
+  );
+
+  const isNotSureChecked =
+    allAllergenValues.length > 0 &&
+    allAllergenValues.every((value) => selected.includes(value));
 
   const toggle = (allergen: string) => {
     setSelected((prev) =>
@@ -25,6 +33,25 @@ const AllergensModal: React.FC<Props> = ({
         : [...prev, allergen]
     );
   };
+  const toggleNotSure = () => {
+    setSelected((prev) => {
+      const isAllSelected =
+        allAllergenValues.length > 0 &&
+        allAllergenValues.every((value) => prev.includes(value));
+
+      return isAllSelected ? [] : allAllergenValues;
+    });
+  };
+
+  const areArraysEqual = (a: string[], b: string[]) => {
+  if (a.length !== b.length) return false;
+
+  const sortedA = [...a].sort();
+  const sortedB = [...b].sort();
+
+  return sortedA.every((item, index) => item === sortedB[index]);
+};
+  const hasChanges = !areArraysEqual(selected, initial);
 
   return (
     <div className="modal__overlay">
@@ -39,7 +66,7 @@ const AllergensModal: React.FC<Props> = ({
         <p>Select any allergens you want us to avoid.</p>
 
         <div className="modal__list">
-          {COMMON_ALLERGENS.map(({ label, value, icon: Icon }) => (
+          {COMMON_ALLERGENS.map(({ label, value, icon }) => (
             <label key={value} className="modal__item">
               <input
                 type="checkbox"
@@ -48,16 +75,35 @@ const AllergensModal: React.FC<Props> = ({
               />
 
               <div className="modal__item-content">
-                <Icon size={18} />
+                {/* <Icon size={18} /> */}
+                <img src={icon} alt={label} className="modal__icon" />
                 <span>{label}</span>
               </div>
             </label>
           ))}
+          <div className="modal__divider" />
+          <label className="modal__item modal__item__not__sure">
+            <input
+              type="checkbox"
+              checked={isNotSureChecked}
+              onChange={toggleNotSure}
+            />
+
+            <div className="modal__item-content">
+              <img
+                src={NOT_SURE_ALLERGEN_ICON}
+                alt="Not sure about allergens"
+                className="modal__icon"
+              />
+              <span>Not sure about allergens</span>
+            </div>
+          </label>
         </div>
 
         <Button
           variant="primary"
           onClick={() => onConfirm(selected)}
+          disabled={!hasChanges}
         >
           Confirm
         </Button>

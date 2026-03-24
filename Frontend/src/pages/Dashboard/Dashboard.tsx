@@ -105,9 +105,12 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
    */
   useEffect(() => {
     const onboarded = localStorage.getItem("allergens_onboarded");
+    const dismissed = localStorage.getItem("allergens_modal_dismissed");
 
-    if (!onboarded) {
+    if (!onboarded && !dismissed) {
       setShowAllergensModal(true);
+    } else {
+      setShowAllergensModal(false);
     }
   }, []);
 
@@ -209,6 +212,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     }
   };
 
+  const handleAllergensModalClose = () => {
+  localStorage.setItem("allergens_modal_dismissed", "true");
+  setShowAllergensModal(false);
+};
+
   return (
 
     <div className="dashboard__container">
@@ -216,7 +224,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         <AllergensModal
           initial={JSON.parse(localStorage.getItem("user_allergens") || "[]")}
           onConfirm={handleAllergensConfirm}
-          onClose={() => setShowAllergensModal(false)}
+          onClose={handleAllergensModalClose}
         />
       )}
       {showAllergenFilterModal && (
