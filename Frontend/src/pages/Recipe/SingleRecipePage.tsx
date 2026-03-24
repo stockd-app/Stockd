@@ -312,7 +312,29 @@ const SingleRecipePage: React.FC = () => {
                             </div>
                             <div className="recipe__meta__label">Cook time</div>
                         </div>
+                        <div className="recipe__meta__card">
+                            <div className="recipe__meta__value">
+                                <Clock size={16} />
+                                {formatPrepTime(recipe.PrepTime)}
+                            </div>
+                            <div className="recipe__meta__label">Prep time</div>
+                        </div>
                     </div>
+                    {recipe.Allergens && recipe.Allergens.length > 0 && (
+                        <div className="recipe__allergens__section">
+                            <div className="recipe__allergens__header">
+                                <span className="recipe__allergens__title">Allergen Tag(s)</span>
+                            </div>
+                            <div className="recipeitemcard__allergens">
+                                {recipe.Allergens.map((allergen: string) => (
+                                    <span key={allergen} className="recipeitemcard__allergen">
+                                        {allergen}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    
                     <p className="recipe__description">{recipe.Description}</p>
                     <section className="recipe__section">
                         <div className="recipe__section__header">

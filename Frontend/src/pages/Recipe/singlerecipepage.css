@@ -221,6 +221,44 @@
   font-size: 0.8125rem;
 }
 
+.recipe__allergens__section {
+    margin: 14px 0 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.recipe__allergens__header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.recipe__allergens__title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-main-text);
+    letter-spacing: 0.2px;
+}
+
+.recipeitemcard__allergens {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.recipeitemcard__allergen {
+    padding: 5px 10px;
+    border-radius: 12px;
+    background: var(--color-light-red);
+    color: var(--color-red);
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid rgba(139, 94, 60, 0.12);
+}
+
 .recipe__description {
   color: var(--color-main-text);
   font-size: 1.0625rem;
