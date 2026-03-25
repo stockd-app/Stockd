@@ -64,7 +64,6 @@
 }
 
 .recipe__container {
-  max-width: 960px;
   background-color: var(--color-bg);
   margin: -3em auto 0 auto;
   padding: 10px 25px 110px 25px;
