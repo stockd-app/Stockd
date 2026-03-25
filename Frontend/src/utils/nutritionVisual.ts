@@ -28,7 +28,7 @@ const NUTRITION_CONFIG: Record<
   }
 > = {
   Calories: {
-    target: 800,
+    target: 2000,
     unit: "kcal",
     low: 30,
     high: 70,

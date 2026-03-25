@@ -156,9 +156,13 @@ const PantryItemDetails: React.FC<PantryItemDetailProps> = ({
                             className="pid__input select"
                         >
                             <option value="vegetable">Vegetable</option>
-                            <option value="meat">Meat</option>
                             <option value="fruit">Fruit</option>
+                            <option value="meat">Meat</option>
                             <option value="dairy">Dairy</option>
+                            <option value="staples">Staples</option>
+                            <option value="snacks">Snacks</option>
+                            <option value="drinks">Drinks</option>
+                            <option value="frozen">Frozen</option>
                         </select>
                     </div>
                     <div className="pid__row editable">

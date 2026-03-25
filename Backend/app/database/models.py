@@ -143,5 +143,5 @@ class FoodImageCache(Base):
     id = Column(Integer, primary_key=True)
     normalized_name = Column(String, unique=True, index=True)
     image_url = Column(String)
-    source = Column(String, default="openfoodfacts")
+    source = Column(String, default="pexels")
     updated_at = Column(DateTime, default=datetime.utcnow)

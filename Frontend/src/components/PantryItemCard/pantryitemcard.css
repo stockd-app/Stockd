@@ -45,6 +45,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-direction: column;
+    text-align: center;
 }
 
 .pantryitemcard__name {
