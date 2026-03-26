@@ -30,8 +30,12 @@
   margin: 0;
 }
 
+.grocery-list__form-title {
+  color: var(--color-main-text);
+}
+
 .grocery-list__badge {
-  background-color: var(--color-tertiary);
+  background-color: var(--color-profile-shadow);
   color: var(--color-dark-text);
   border-radius: 50%;
   width: 32px;
