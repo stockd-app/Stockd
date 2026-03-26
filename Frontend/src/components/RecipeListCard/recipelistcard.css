@@ -52,6 +52,7 @@
     display: flex;
     gap: 40px;
     font-size: 14px;
+    align-items: center;
 }
 
 .meta svg {
@@ -61,6 +62,7 @@
 
 .rating {
     color: #FFD700;
+    margin-left: auto;
 }
 
 .rating-number {
