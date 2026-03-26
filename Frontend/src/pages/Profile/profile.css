@@ -3,7 +3,6 @@
 .profile__container {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
     background: var(--color-bg);
     font-family: "Poppins", "Segoe UI", sans-serif;
 }
