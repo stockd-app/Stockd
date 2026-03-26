@@ -569,6 +569,23 @@
   color: var(--color-main-text);
 }
 
+.recipe__nutrition__target__input{
+  width: 55px;
+  padding: 10px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  outline: none;
+  color: var(--color-main-text);
+  background: var(--color-bg);
+}
+
+.recipe__nutrition__target__input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(255, 138, 0, 0.12);
+}
+
 .recipe__nutrition__level__low {
   color: var(--color-nutrition-level-low);
 }

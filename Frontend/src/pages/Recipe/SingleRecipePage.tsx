@@ -43,6 +43,10 @@ const SingleRecipePage: React.FC = () => {
         );
     };
     const notify = useNotification();
+    const [calorieTargetInput, setCalorieTargetInput] = useState("1000");
+    const calorieTarget = Math.max(Number(calorieTargetInput) || 0, 1);
+    const MIN_CALORIE_TARGET = 100;
+    const MAX_CALORIE_TARGET = 5000;
 
     useEffect(() => {
         if (!id) return;
@@ -256,7 +260,10 @@ const SingleRecipePage: React.FC = () => {
     const nutritionItems = GetNutritionItems(recipe);
     const nutritionDisplayItems = buildNutritionDisplayItems(
         nutritionItems,
-        recipe?.RecipeServings
+        recipe?.RecipeServings,
+        {
+            Calories: calorieTarget,
+        }
     );
 
     const nutritionOverview = getNutritionOverview(nutritionDisplayItems);
@@ -514,11 +521,32 @@ const SingleRecipePage: React.FC = () => {
                             <div className="recipe__nutrition__overview__meta">
                                 <div className="recipe__nutrition__overview__meta__card">
                                     <span className="recipe__nutrition__overview__meta__label">
-                                        Target
+                                        Adjust your daily calorie target
                                     </span>
-                                    <span className="recipe__nutrition__overview__meta__value">
+                                    {/* <span className="recipe__nutrition__overview__meta__value">
                                         {nutritionOverview.caloriesTarget}
-                                    </span>
+                                    </span> */}
+                                    <input
+                                    id="calorieTarget"
+                                    type="text"
+                                    inputMode="numeric"
+                                    value={calorieTargetInput}
+                                    onChange={(e) => {
+                                        const raw = e.target.value.replace(/\D/g, "");
+                                        const cleaned = raw.replace(/^0+(?=\d)/, "");
+                                        if (!cleaned) {
+                                            setCalorieTargetInput("");
+                                            return;
+                                        }
+                                        const numericValue = Number(cleaned);
+                                        if (numericValue > MAX_CALORIE_TARGET) {
+                                            setCalorieTargetInput(String(MAX_CALORIE_TARGET));
+                                            return;
+                                        }
+                                        setCalorieTargetInput(cleaned);
+                                    }}
+                                    className="recipe__nutrition__target__input"
+                                />
                                 </div>
 
                                 <div className="recipe__nutrition__overview__meta__card">
