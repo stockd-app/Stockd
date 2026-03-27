@@ -29,6 +29,16 @@
 
 /* Filter */
 
+.pantryRecipes__filterButton {
+  background-color: var(--color-input-overlay) !important;
+  color: var(--color-main-text) !important;
+
+}
+
+.pantryRecipes__filterIcon {
+  color: var(--color-main-text);
+}
+
 .filter__section h4 {
     font-size: 0.875rem;
     margin-bottom: 10px;
@@ -50,6 +60,10 @@
     margin-top: 30px;
 }
 
+/* .filterIcon{
+    color: var(--color-main-text);
+} */
+
 
 .backBtn,
 .filterIcon {
@@ -68,11 +82,29 @@
     padding: 16px;
 }
 
+.pantryRecipes__empty {
+  grid-column: 1 / -1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.pantryRecipes__emptyImage {
+  width: 2200px;
+  max-width: 70%;
+  height: auto;
+}
+
 .no-results {
     grid-column: 1 / -1;
     text-align: center;
     margin-top: 40px;
-    font-size: 1rem;
+    font-size: 16px;
+    font-weight: 700;
     color: var(--color-main-text);
 }
 

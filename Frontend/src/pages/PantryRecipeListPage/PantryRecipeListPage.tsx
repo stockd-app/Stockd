@@ -8,6 +8,8 @@ import FilterDrawer from "../../components/FilterDrawer/FilterDrawer";
 import FilterChip from "../../components/FilterChip/FilterChip";
 import RecipeListCard from "../../components/RecipeListCard/RecipeListCard";
 import Button from "../../components/Button/Button";
+import EmptyPantryImage from "../../assets/images/EmptyPantry.png";
+import "@/styles/variable.css";
 import loading_anim from "../../assets/images/loading_anim.gif";
 import { getLikedRecipes, toggleLikeRecipe } from "../../services/api";
 
@@ -123,11 +125,12 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
                 <h2 className="pantryRecipes__title">{title}</h2>
 
                 <Button
+                    className="pantryRecipes__filterButton"
                     variant=""
                     onClick={() => setShowFilters(true)}
                     aria-label="Open filters"
                 >
-                    <SlidersHorizontal size={20} />
+                    <SlidersHorizontal size={20} className="pantryRecipes__filterIcon" />
                 </Button>
             </div>
 
@@ -144,10 +147,18 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
                     </div>
                 ) : filteredRecipes.length === 0 ? (
                     <div className="pantryRecipes__centered">
-                        <p className="no-results">
-                            Sorry, we couldn't find any recipes.
-                        </p>
+                        <div className="pantryRecipes__empty">
+                            <img
+                            src={EmptyPantryImage}
+                            alt="No recipes found"
+                            className="pantryRecipes__emptyImage"
+                            />
+                            <p className="no-results">
+                            Sorry, we couldn't find any recipes. try searching something else.
+                            </p>
+                        </div>
                     </div>
+                    
                 ) : (
                     filteredRecipes.map(recipe => (
                         <RecipeListCard
