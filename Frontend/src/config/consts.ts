@@ -143,7 +143,7 @@ export const GetNutritionItems = (recipe: any) => [
   { label: "Carbohydrates", value: recipe.CarbohydrateContent, unit: "g", icon: "https://cdn-icons-png.flaticon.com/512/11827/11827758.png" },
   { label: "Sugar", value: recipe.SugarContent, unit: "g", icon: "https://cdn-icons-png.flaticon.com/512/5835/5835935.png" },
   { label: "Protein", value: recipe.ProteinContent, unit: "g", icon: "https://cdn-icons-png.flaticon.com/512/3024/3024310.png" },
-  { label: "Fiber", value: recipe.FiberContent, unit: "g", icon: "https://cdn-icons-png.flaticon.com/512/18433/18433150.png" },
+  { label: "Fibre", value: recipe.FiberContent, unit: "g", icon: "https://cdn-icons-png.flaticon.com/512/18433/18433150.png" },
 ];
 
 // Accessibility settings

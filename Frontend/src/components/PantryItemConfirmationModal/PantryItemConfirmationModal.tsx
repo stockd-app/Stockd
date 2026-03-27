@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Pencil , Trash2, Plus} from "lucide-react";
+import Button from "../Button/Button";
 
 import "./pantryitemconfirmationmodal.css";
 
@@ -195,15 +196,21 @@ useEffect(() => {
                 </div>
 
                 <div className="pcm__actions">
-                    <button className="pcm__cancel" onClick={onClose}>
+                    <Button
+                        variant="secondary"
+                        className="pcm__cancel"
+                        onClick={onClose}
+                    >
                         Cancel
-                    </button>
-                    <button
+                    </Button>
+
+                    <Button
+                        variant="primary"
                         className="pcm__confirm"
                         onClick={() => onConfirm(editedItems)}
                     >
                         Confirm & Save
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

@@ -30,7 +30,7 @@ const NUTRITION_CONFIG: Record<
   }
 > = {
   Calories: {
-    target: 1000,
+    target: 2000,
     unit: "kcal",
     low: 30,
     high: 70,
@@ -200,8 +200,8 @@ export const getNutritionOverview = (items: NutritionDisplayItem[]) => {
   const averagePercent =
     items.length > 0
       ? Math.round(
-          items.reduce((sum, item) => sum + item.percent, 0) / items.length
-        )
+        items.reduce((sum, item) => sum + item.percent, 0) / items.length
+      )
       : 0;
 
   const level =

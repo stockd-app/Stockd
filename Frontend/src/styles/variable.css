@@ -9,6 +9,7 @@
     --color-light-blue: #dcefea;
     --color-deep-blue: #3E5481;
     --color-dark-blue: #3977d3;
+    --color-bright-blue: #4485e6;
 
     --color-bg: #242020;
     --color-bg-overlay: rgba(51, 51, 51, 0.6);
@@ -25,12 +26,14 @@
     --color-grey-text: #d8d8d8;
     --color-button-text: #ffffff;
     --color-light: #f1f3f4;
-    --color-light-recipe: #f1f3f4;
+    --color-light-recipe: #4f4646;
     --color-input-overlay: rgba(51, 51, 51, 0.6);
 
     --color-nutrition-level-low: #16a34a;
     --color-nutrition-level-medium: #ca8a04;
     --color-nutrition-level-high: #dc2626;
+
+    --color-profile-shadow: #5a5a5a;
 
 
     /* ============================================
@@ -101,4 +104,6 @@ body[data-theme="light"] {
     --color-grey-text: #272727;
     --color-button-text: #ffffff;
     --color-input-overlay: rgba(255, 255, 255, 0.6);
+    --color-profile-shadow: #cecece;
+    --color-light-recipe: #e9e3ec;
 }

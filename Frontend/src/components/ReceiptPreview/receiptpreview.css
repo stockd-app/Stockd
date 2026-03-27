@@ -1,7 +1,6 @@
 @import "@/styles/variable.css";
 
 .rp__page {
-    min-height: 100vh;
     background: var(--color-bg);
     color: var(--color-main-text);
     padding-bottom: 80px;
