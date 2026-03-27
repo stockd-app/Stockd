@@ -768,6 +768,7 @@ async def add_update_pantry_items(
                 existing_item.storage = storage
                 if item_image:
                     existing_item.item_image = item_image
+                existing_item.added_on = datetime.datetime.utcnow()
                 processed_items.append(existing_item)
             else:
                 norm_name = normalize_food_name(item_name)

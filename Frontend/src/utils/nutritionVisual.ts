@@ -18,6 +18,8 @@ export type NutritionDisplayItem = {
   icon?: string;
 };
 
+export type NutritionTargetOverrides = Partial<Record<string, number>>;
+
 const NUTRITION_CONFIG: Record<
   string,
   {
@@ -28,7 +30,7 @@ const NUTRITION_CONFIG: Record<
   }
 > = {
   Calories: {
-    target: 800,
+    target: 2000,
     unit: "kcal",
     low: 30,
     high: 70,
@@ -132,7 +134,8 @@ const getLevel = (
 
 export const buildNutritionDisplayItems = (
   items: NutritionItem[],
-  servings?: number
+  servings?: number,
+  targetOverrides: NutritionTargetOverrides = {}
 ): NutritionDisplayItem[] => {
   const safeServings =
     servings && Number(servings) > 0 ? Number(servings) : 1;
@@ -146,7 +149,14 @@ export const buildNutritionDisplayItems = (
         rawValue === null ? null : rawValue / safeServings;
 
       const unit = item.unit || config?.unit || "";
-      const target = config?.target ?? null;
+
+      const defaultTarget = config?.target ?? null;
+      const overrideTarget = targetOverrides[item.label];
+      const target =
+        overrideTarget !== undefined && overrideTarget > 0
+          ? overrideTarget
+          : defaultTarget;
+
       const percent =
         valuePerServing !== null && target
           ? Math.min((valuePerServing / target) * 100, 100)
@@ -190,8 +200,8 @@ export const getNutritionOverview = (items: NutritionDisplayItem[]) => {
   const averagePercent =
     items.length > 0
       ? Math.round(
-          items.reduce((sum, item) => sum + item.percent, 0) / items.length
-        )
+        items.reduce((sum, item) => sum + item.percent, 0) / items.length
+      )
       : 0;
 
   const level =

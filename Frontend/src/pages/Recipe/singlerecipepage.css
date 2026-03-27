@@ -64,7 +64,6 @@
 }
 
 .recipe__container {
-  max-width: 960px;
   background-color: var(--color-bg);
   margin: -3em auto 0 auto;
   padding: 10px 25px 110px 25px;
@@ -219,6 +218,44 @@
 .recipe__meta__label {
   margin-top: 4px;
   font-size: 0.8125rem;
+}
+
+.recipe__allergens__section {
+    margin: 14px 0 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.recipe__allergens__header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.recipe__allergens__title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-main-text);
+    letter-spacing: 0.2px;
+}
+
+.recipeitemcard__allergens {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.recipeitemcard__allergen {
+    padding: 5px 10px;
+    border-radius: 12px;
+    background: var(--color-light-red);
+    color: var(--color-red);
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid rgba(139, 94, 60, 0.12);
 }
 
 .recipe__description {
@@ -529,6 +566,23 @@
   font-size: 1rem;
   font-weight: 700;
   color: var(--color-main-text);
+}
+
+.recipe__nutrition__target__input{
+  width: 55px;
+  padding: 10px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  outline: none;
+  color: var(--color-main-text);
+  background: var(--color-bg);
+}
+
+.recipe__nutrition__target__input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(255, 138, 0, 0.12);
 }
 
 .recipe__nutrition__level__low {

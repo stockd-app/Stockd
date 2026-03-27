@@ -4,6 +4,7 @@
     width: 100%;
     background: var(--color-bg);
     color: var(--color-main-text);
+    padding-bottom: 120px;;
 }
 
 .pantry__content {

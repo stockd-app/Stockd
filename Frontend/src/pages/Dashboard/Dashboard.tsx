@@ -273,8 +273,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         loading={isLoadingRecipes}
       />
 
-      <RecipeItemSection
-        title="Based On Your Liked Recipes"
+      <RecipeItemSection title="Based On Your Likes"
         items={filteredLikedRecommendedRecipes}
         onItemClick={(recipeId: number) => {
           navigate(`/recipes/${recipeId}`);
@@ -284,8 +283,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         emptySubtitle={"Like A Few Recipes To Get Personalized Recommendations!"}
         loading={isLoadingRecipes}
       />
-      <RecipeItemSection
-        title="Other Users Have Tried These"
+      <RecipeItemSection title="Other Users Have Tried"
         items={filteredCollaborativeRecipes}
         onItemClick={(recipeId: number) => {
           navigate(`/recipes/${recipeId}`);

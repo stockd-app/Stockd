@@ -37,7 +37,7 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-    background: #4e4d4d;
+    background: var(--color-profile-shadow);
 }
 
 .pantryitemcard__info {

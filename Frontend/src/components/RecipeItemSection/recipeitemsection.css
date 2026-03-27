@@ -3,6 +3,7 @@
 .recipeItemSection__container {
     padding: 0 16px;
     margin-bottom: 30px;
+    margin-bottom: 30px;
 }
 
 .recipeItemSection__header {
@@ -28,7 +29,7 @@
     flex-shrink: 0;
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--color-tertiary);
+    color: var(--color-main-text);
     cursor: pointer;
     user-select: none;
     transition: opacity 0.2s ease;
@@ -74,7 +75,7 @@
     font-size: 1.125rem;
     font-weight: 700;
     margin: 0;
-    color: var(--color-tertiary);
+    color: var(--color-bright-blue);
 }
 
 .recipeItemSection__empty_subtext {
@@ -82,5 +83,5 @@
     font-weight: 500;
     margin-top: 4px;
     line-height: 1.4;
-    color: var(--color-tertiary);
+    color: var(--color-grey-text);
 }
