@@ -1,12 +1,30 @@
-# Backend Docker Setup
+# Backend Structure
 
 ## Overview
 
-The backend is containerized using Docker running FastAPI with Uvicorn.
+The Stockd backend is built with **FastAPI** and acts as the central hub connecting the frontend, AI services, OCR, and database. It handles:
+
+- Receipt processing (via Asprise OCR and Food Classifier)
+- Pantry management
+- Personalized recipe recommendations
+- Caching for speed and scalability
+
+The backend is modular, asynchronous, and designed to scale, ensuring smooth performance even as more users join.
+
+---
+
+## 📂 Folder Structure
+- `app/models` – Database models
+- `app/routes` – API endpoints
+- `app/services` – AI orchestration, OCR, recipe recommendations
+- `app/database` – Database connection and test scripts
+- `Dockerfile` – Container build
+- `docker-compose.yml` – Container orchestration
+- `start.sh` / `stop.sh` – Scripts to start/stop the container.
 
 ## Quick Start
 
-### 1. Setup environment
+### 1️⃣ Setup environment
 ```bash
 # Copy sample env file
 cp .env-sample .env
@@ -14,13 +32,13 @@ cp .env-sample .env
 # Edit .env with your credentials
 ```
 
-### 2. Start container
+### 2️⃣ Start container
 ```bash
 chmod +x start.sh stop.sh
 ./start.sh
 ```
 
-### 3. Access the API
+### 3️⃣ Access the API
 - API: http://localhost:8000
 - Docs: http://localhost:8000/docs
 
@@ -92,6 +110,17 @@ _Note: For now, the project works without .env because default MySQL root access
 - Run: `python test_db.py`
 - You should see success message with list of tables made
 
+### Key Tables
+
+| Table | Purpose |
+|-------|---------|
+| users | Stores user profiles, roles, and allergen preferences |
+| pantry_items | Tracks ingredients with quantity and storage info |
+| liked_recipes | Records recipes liked by users |
+| item_classifications | Cached food classification data |
+| foodimagecache | Stores pantry item images for faster loading |
+| audit_logs | Logs database activity for debugging and audits |
+
 
 ## Environment Variables
 
@@ -125,3 +154,13 @@ docker-compose restart backend
 - `upload_recipe`: 5 requests per minute
 - Other routes: 10 requests per minute
 - No rate limiting on `pantry-items` and `recipe recommendation` routes, as they are frequently called by the UI and limiting them would affect user experience.
+
+### Performance & Caching
+
+| Cache Type | Purpose | Benefit |
+|------------|---------|---------|
+| Receipt Cache | Stores OCR and classification results | Avoids reprocessing identical receipts (~4–5 min → 30 sec) |
+| Pantry Image Cache | Stores frequently used food images | Faster pantry load and improved UI responsiveness |
+| Recipe & Category Cache | Stores previous recipe queries | Instant results for repeated queries, fewer API calls |
+
+*Caching significantly reduces backend load and improves user experience.*
