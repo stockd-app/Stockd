@@ -19,6 +19,10 @@ This project includes two AI microservices:
 
 The architecture shows how receipt items flow through the classification pipeline, from OCR extraction to final categorization.
 
+![Recipe Recommender Architecture](https://i.ibb.co/HTQrpBp9/aimodel2system.png)
+
+The architecture shows how user pantry input is used to fetch recipe recommendations, from data cleaning to the 4 methods of recommendation. 
+
 ---
 
 ## 🍎 Food Classifier Setup
