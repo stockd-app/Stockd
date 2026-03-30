@@ -104,6 +104,7 @@ Open browser: **http://localhost**
 3. **docker-compose.yml** - Manages the container lifecycle
 
 ## App Behaviour
+<img height="500" alt="image" src="https://i.ibb.co/v6B0PrwW/Screenshot-2026-03-30-113243.png" />
 
 ### Routing and Protected Pages
 
