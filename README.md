@@ -42,8 +42,6 @@
 
 Stockd is a comprehensive virtual pantry and recipe recommendation application designed to help users manage their food inventory efficiently, reduce food waste, and discover recipes based on available ingredients. The application combines AI-powered food classification, intelligent recipe recommendations, and an intuitive user interface to create a seamless food management experience.
 
-![System Architecture](https://mahara.dkit.ie/artefact/file/download.php?file=507448&view=143837&embedded=1&text=789619)
-
 ### Key Highlights
 
 - 🤖 **AI-Powered**: Automatic food classification and intelligent recipe matching
