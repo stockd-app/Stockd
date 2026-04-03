@@ -18,16 +18,20 @@ export default defineConfig({
       host: process.env.VITE_HMR_HOST || "localhost",
       port: 5173,
     },
+    host: "0.0.0.0",
     allowedHosts: [
       "localhost",
       "127.0.0.1",
       "*.ngrok-free.dev",
       "*.ngrok.io",
+      "stockd.live",
+      "*.stockd.live",
+      "*.trycloudflare.com",
       "unclawed-dot-interequinoctial.ngrok-free.dev",
       "terrance-neonatal-abeyantly.ngrok-free.dev",
       "parental-thwartly-averi.ngrok-free.dev",
       "cytoarchitecturally-unfiring-criselda.ngrok-free.dev",
-      "brashy-winterless-jacque.ngrok-free.dev"
+      "brashy-winterless-jacque.ngrok-free.dev",
     ],
     proxy: {
       "/api": {

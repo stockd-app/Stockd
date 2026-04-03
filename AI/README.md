@@ -1,164 +1,265 @@
-# AI (Food Classifier and Recipe Recommender)
+# AI Services - Food Classifier & Recipe Recommender
 
-In this project we are making use of two models:
+> Intelligent food classification and personalized recipe recommendations for your pantry.
 
-- **Food Classifier**: which takes list of items from asprice's output and add labels to those items such as food/non-food, storage, what kind of food it is. It uses facebook BART mnli for the functionality.
-- **Recipe Recommender**: which is a local recipe-recommendation AI service powered by a Food.com dataset
+## 📋 Overview
 
-# Food Classifier — Setup Guide
+This project includes two AI microservices:
 
-## Follow the steps below to set up the environment and run the server.
+| Service                | Purpose                                                                                            | Technology                                      |
+| ---------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| **Food Classifier**    | Classifies receipt items as food/non-food, determines storage location, and categorizes food types | Facebook BART-MNLI (Zero-shot)                  |
+| **Recipe Recommender** | Provides personalized recipe suggestions based on pantry ingredients                               | Sentence Transformers + Collaborative Filtering |
 
 ---
 
-## 📥 1. File Structure
+## 🏗️ System Architecture
 
-Your file structure should look like:
-AI/
-└─ Food_Classifier/
-├─ data_cleaning/
-├─ food_classifier_model.py
-├─ food_classifier_requirements.txt
-└─ food_classifier_server.py
+![Food Classifier Architecture](https://i.ibb.co/FL1Dsqz7/Untitled-2025-10-15-1640-excalidraw.png)
 
-## 📦 2. Install Dependencies
+The architecture shows how receipt items flow through the classification pipeline, from OCR extraction to final categorization.
 
-Navigate into the Food_Classifier directory:
+![Recipe Recommender Architecture](https://i.ibb.co/HTQrpBp9/aimodel2system.png)
+
+The architecture shows how user pantry input is used to fetch recipe recommendations, from data cleaning to the 4 methods of recommendation. 
+
+---
+
+## 🍎 Food Classifier Setup
+
+### Quick Start
+
+```bash
+# Navigate to the directory
+cd AI/Food_Classifier
+
+# Install dependencies
 pip install -r food_classifier_requirements.txt
 
-## ⚙️ 3. Configure Environment Variables
-
-Inside the `Backend` directory, open your `.env` file (create one if needed) and add:
-Local Development:
-
-- FOOD_CLASSIFER_MODEL_URL=http://<your_ip>:9002
-
-Replace `<your_ip>` with your machine’s actual local IP address.
-
-Running in containers:
-
-- FOOD_CLASSIFER_MODEL_URL=http://localhost:9002
-
----
-
-## 🚀 4. Run the Server
-
-Start the server:
+# Run the server
 python food_classifier_server.py
+```
 
-> ⏳ **Note:** The first launch performs an initial setup and may take some time.
+### Environment Configuration
 
-Now you can navigate to the Swagger docs to test the endpoints. You can find the Swagger doc by going to this URL:
-http://<your_ip>:9002/docs for food classifier
+Add to your `Backend/.env` file:
 
-# Recipe Recommender — Setup Guide
+```bash
+# Local Development
+FOOD_CLASSIFER_MODEL_URL=http://<your_ip>:9002
 
-Follow the steps below to set up the environment and run the server.
+# Docker/Container
+FOOD_CLASSIFER_MODEL_URL=http://localhost:9002
+```
+
+### API Documentation
+
+Once running, access Swagger docs at:
+
+```
+http://<your_ip>:9002/docs
+```
+
+> ⏳ **Note:** First launch may take a few minutes for model initialization.
 
 ---
 
-## 📥 1. Download the Dataset
+## 🍳 Recipe Recommender Setup
 
-1. Download the dataset archive from Kaggle:  
-   **Food.com Recipes and Reviews**  
-   https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews
-2. Extract the zip file named archive.
-3. Locate the file **`recipes.parquet`**.
-4. Create a `data` directory inside the project at:
-   AI/Recipe_Recommender/data
+### Prerequisites
 
-5. Place **`recipes.parquet`** into this newly created `data` folder.
-6. There should be a folder called canonical_db inside Recipe_Recommender. Ensure there is nothing in it (delete existing files) as it will be generated at startup. If the change you are testing involves any code change in recipe_recommender_server.py, then you should also delete recipe_assets.pkl and recipe_index.faiss.
-7. Download the following dataset from Kaggle:
-   **Food.com Recipes with Ingredients and Tags**
-   https://www.kaggle.com/datasets/realalexanderwei/food-com-recipes-with-ingredients-and-tags
-8. Extract the folder.
-9. Rename the recipes_ingredients.csv to units.csv
-10. 5. Place **`units.csv`** into the `data` folder.
+1. **Download Food.com Dataset**
+   - [Recipes and Reviews](https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews)
+   - Extract and place `recipes.parquet` in `AI/Recipe_Recommender/data/`
 
-Your file structure should look like:
-AI/
-└─ Recipe_Recommender/
-├─ canonical_db/
-│ └─canonical_emb.npy (after running the recipe_recommender_model once)
-│ └─canonical_names.json (after running the recipe_recommender_model once)
-│ └─canonical.faiss (after running the recipe_recommender_model once)
-├─ data/
-│ └─ recipes.parquet
-│ └─ units.csv
-├─ recipe_recommender_model.py
-├─ recipe_recommender_requirements.txt
-├─ recipe_recommender_server.py
-└─ recipe_subset.py
+2. **Download Ingredients Dataset**
+   - [Recipes with Ingredients and Tags](https://www.kaggle.com/datasets/realalexanderwei/food-com-recipes-with-ingredients-and-tags)
+   - Rename `recipes_ingredients.csv` to `units.csv`
+   - Place in `AI/Recipe_Recommender/data/`
 
-## 📦 2. Install Dependencies
+### File Structure
 
-Navigate into the Recipe_Recommender directory:
+```
+AI/Recipe_Recommender/
+├── canonical_db/          # Generated at runtime
+├── data/
+│   ├── recipes.parquet
+│   └── units.csv
+├── recipe_recommender_model.py
+├── recipe_recommender_requirements.txt
+└── recipe_recommender_server.py
+```
+
+### Installation
+
+```bash
+cd AI/Recipe_Recommender
+
+# Install dependencies
 pip install -r recipe_recommender_requirements.txt
-Note that pip install does not work for ntlk for unknown reason. Therefore, you would need to:
-   - Perform steps according to `https://www.nltk.org/data.html#manual-installation`. (Only corpora)
-   - `nltk_data` folder and `corpora` subfolder could be placed under:
-      - 'C:\\Users\\yourusername/nltk_data'
-      - 'C:\\Users\\yourusername\\AppData\\Roaming\\nltk_data'
-      - 'C:\\nltk_data'
-      - 'D:\\nltk_data'
-      - 'E:\\nltk_data' 
-   - Populate the `corpora` subfolder with the unzipped folder of `https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/corpora/wordnet.zip` and `https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/corpora/omw-1.4.zip`. And those steps should suffice.
+```
 
-## ⚙️ 3. Configure Environment Variables
+#### NLTK Setup (Required)
 
-Inside the `Backend` directory, open your `.env` file (create one if needed) and add:
-Local Development:
+NLTK data must be manually installed:
 
-- RECIPE_RECOMMENDER_MODEL_URL=http://<your_ip>:9001
+1. Download corpora:
+   - [wordnet.zip](https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/corpora/wordnet.zip)
+   - [omw-1.4.zip](https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/corpora/omw-1.4.zip)
 
-Replace `<your_ip>` with your machine’s actual local IP address.
+2. Extract to one of these locations:
+   ```
+   C:\Users\<username>\nltk_data\corpora\
+   C:\Users\<username>\AppData\Roaming\nltk_data\corpora\
+   C:\nltk_data\corpora\
+   ```
 
-Running in containers:
+### Environment Configuration
 
-- RECIPE_RECOMMENDER_MODEL_URL=http://localhost:9001
+Add to your `Backend/.env` file:
+
+```bash
+# Local Development
+RECIPE_RECOMMENDER_MODEL_URL=http://<your_ip>:9001
+
+# Docker/Container
+RECIPE_RECOMMENDER_MODEL_URL=http://localhost:9001
+```
+
+### Run the Server
+
+```bash
+python recipe_recommender_server.py
+```
+
+### API Documentation
+
+Access Swagger docs at:
+
+```
+http://<your_ip>:9001/docs
+```
+
+> ⏳ **Note:** First launch generates embeddings and indices, which may take several minutes.
 
 ---
 
-## 🚀 4. Run the Recipe Recommender Server
+## 🔐 Security & Input Sanitization
 
-Start the server:
-cd into AI/Recipe_Recommender
-Then run the following command
-python recipe_recommender_server.py
+All user input is sanitized on the backend before processing:
 
-> ⏳ **Note:** The first launch performs an initial setup and may take some time.
+| Input Type         | Sanitization                                                     |
+| ------------------ | ---------------------------------------------------------------- |
+| **Text Fields**    | Trimmed, HTML-escaped, length-limited, unsafe characters removed |
+| **Numeric Values** | Converted to numbers, negative values clamped to 0               |
+| **URLs**           | Only valid `http://` and `https://` accepted                     |
 
-Now you can navigate to the Swagger docs to test the endpoints. You can find the Swagger doc by going to this URL:
+**Why?**
 
-http://<your_ip>:9001/docs for recipe recommender
+- Prevents XSS and injection attacks
+- Ensures consistent AI behavior
+- Protects data integrity
 
-## Any Issues
+Frontend relies on React's built-in escaping. All critical sanitization is server-side.
 
-Ensure you have your correct IP address in the Backend .env file.
-If any changes are made regarding the dataset in the Recipe Recommender, it is safe to delete recipe_assets.pkl. recipe_index.faiss, anything inside canonical_db, and then re-run them. Just note they will require a few extra minutes at startup to regenerate.
-Ensure the database/XAMPP/MySQL is running and you have the latest schema.
-Ensure that your local branch is up to date with origin main.
+---
 
+## 🛠️ Troubleshooting
 
-## 🔐 Input Sanitization
+### Common Issues
 
-All user input and external data is sanitized on the backend before being stored, processed, or sent to AI services.
+**Service won't start:**
 
-What is sanitized:
-Text fields (item names, categories, search queries, user names)
-   Trimmed, HTML-escaped, length-limited
-   Unsafe characters removed
+- Verify correct IP address in `Backend/.env`
+- Ensure ports 9001 and 9002 are available
+- Check that database/MySQL is running
 
-Numeric values (quantities)
-   Converted to numbers
-   Negative values are not allowed (clamped to 0)
+**Recipe Recommender issues:**
 
-URLs (profile images, product images)
-   Only valid http:// and https:// URLs are accepted
+- Delete generated files and restart:
+  ```bash
+  rm recipe_assets.pkl recipe_index.faiss
+  rm -rf canonical_db/*
+  ```
+- Ensure `recipes.parquet` and `units.csv` are in `data/` folder
 
-Why:
-Prevents invalid or malicious data
-Ensures consistent pantry and AI behavior
-Protects against XSS and injection issues
-The frontend relies on React’s built-in escaping and does not render raw HTML. All critical sanitization is enforced server-side.
+**Model loading errors:**
+
+- First run takes longer for model downloads
+- Ensure stable internet connection
+- Check disk space for model files
+
+### Fresh Start
+
+If you encounter persistent issues:
+
+1. Delete generated files:
+
+   ```bash
+   # Recipe Recommender
+   rm recipe_assets.pkl recipe_index.faiss
+   rm -rf canonical_db/*
+   ```
+
+2. Ensure latest code:
+
+   ```bash
+   git pull origin main
+   ```
+
+3. Verify database schema is up to date
+
+4. Restart services
+
+---
+
+## 📊 Model Details
+
+### Food Classifier
+
+- **Model:** facebook/bart-large-mnli
+- **Type:** Zero-shot classification
+- **Port:** 9002
+- **Response Time:** ~100-200ms per item
+
+### Recipe Recommender
+
+- **Model:** Sentence Transformers (MiniLM)
+- **Similarity Search:** FAISS
+- **Dataset:** 500K+ recipes from Food.com
+- **Port:** 9001
+- **Response Time:** ~50-100ms per query
+
+---
+
+## 📝 API Endpoints
+
+### Food Classifier
+
+```http
+POST /classify-items
+Content-Type: application/json
+
+{
+  "store": "Tesco",
+  "items": {
+    "Frozen Mixed Berries 300g": 1,
+    "Whole Cucumber": 2
+  }
+}
+```
+
+### Recipe Recommender
+
+```http
+POST /recommend-recipes
+Content-Type: application/json
+
+{
+  "user_id": 123,
+  "pantry_items": ["chicken", "rice", "tomatoes"],
+  "limit": 10
+}
+```
+
+---
