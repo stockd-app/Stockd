@@ -213,9 +213,9 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
   };
 
   const handleAllergensModalClose = () => {
-  localStorage.setItem("allergens_modal_dismissed", "true");
-  setShowAllergensModal(false);
-};
+    localStorage.setItem("allergens_modal_dismissed", "true");
+    setShowAllergensModal(false);
+  };
 
   return (
 
