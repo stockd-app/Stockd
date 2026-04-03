@@ -1,6 +1,7 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ERROR_CONFIG, UNKNOWN_ERROR } from "../../config/errorConfig";
+import Button from "../../components/Button/Button";
 
 import "./googleerror.css";
 
@@ -31,12 +32,11 @@ const GoogleErrorScreen: React.FC = () => {
 
             {error.subtext && <p className="error__subtext">{error.subtext}</p>}
 
-            <button
-                className="error__retry-btn"
-                onClick={() => navigate("/")}
-            >
+            <Button
+                variant="primary"
+                onClick={() => navigate("/")}>
                 {error.buttonText}
-            </button>
+            </Button>
         </div>
     );
 };
