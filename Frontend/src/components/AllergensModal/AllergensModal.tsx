@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import Button from "../Button/Button";
 import { X } from "lucide-react";
-import { COMMON_ALLERGENS,NOT_SURE_ALLERGEN_ICON } from "../../config/consts";
+import { COMMON_ALLERGENS, NOT_SURE_ALLERGEN_ICON } from "../../config/consts";
 
 import "./AllergensModal.css";
 
@@ -16,42 +16,51 @@ const AllergensModal: React.FC<Props> = ({
   onClose,
   initial = []
 }) => {
-  const [selected, setSelected] = useState<string[]>(initial);
   const allAllergenValues = useMemo(
     () => COMMON_ALLERGENS.map((item) => item.value),
     []
   );
 
-  const isNotSureChecked =
+  const initialIsAllSelected =
     allAllergenValues.length > 0 &&
-    allAllergenValues.every((value) => selected.includes(value));
+    allAllergenValues.every((value) => initial.includes(value));
+
+  const [selected, setSelected] = useState<string[]>(initial);
+  const [isNotSureChecked, setIsNotSureChecked] = useState(initialIsAllSelected);
 
   const toggle = (allergen: string) => {
+    if (isNotSureChecked) {
+      setIsNotSureChecked(false);
+      setSelected([allergen]);
+      return;
+    }
+
     setSelected((prev) =>
       prev.includes(allergen)
         ? prev.filter((a) => a !== allergen)
         : [...prev, allergen]
     );
   };
-  const toggleNotSure = () => {
-    setSelected((prev) => {
-      const isAllSelected =
-        allAllergenValues.length > 0 &&
-        allAllergenValues.every((value) => prev.includes(value));
 
-      return isAllSelected ? [] : allAllergenValues;
+  const toggleNotSure = () => {
+    setIsNotSureChecked((prev) => {
+      const nextChecked = !prev;
+      setSelected(nextChecked ? allAllergenValues : []);
+      return nextChecked;
     });
   };
 
   const areArraysEqual = (a: string[], b: string[]) => {
-  if (a.length !== b.length) return false;
+    if (a.length !== b.length) return false;
 
-  const sortedA = [...a].sort();
-  const sortedB = [...b].sort();
+    const sortedA = [...a].sort();
+    const sortedB = [...b].sort();
 
-  return sortedA.every((item, index) => item === sortedB[index]);
-};
-  const hasChanges = !areArraysEqual(selected, initial);
+    return sortedA.every((item, index) => item === sortedB[index]);
+  };
+
+  const hasChanges =
+    !areArraysEqual(selected, initial) || isNotSureChecked !== initialIsAllSelected;
 
   return (
     <div className="modal__overlay">
@@ -70,7 +79,7 @@ const AllergensModal: React.FC<Props> = ({
             <label key={value} className="modal__item">
               <input
                 type="checkbox"
-                checked={selected.includes(value)}
+                checked={!isNotSureChecked && selected.includes(value)}
                 onChange={() => toggle(value)}
               />
 

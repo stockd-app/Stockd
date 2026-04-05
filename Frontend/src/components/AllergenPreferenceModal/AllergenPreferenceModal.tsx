@@ -31,14 +31,14 @@ const AllergenPreferenceModal: React.FC<Props> = ({ onConfirm, onCancel }) => {
                         allergens?
                     </p>
 
-                    <label className="allergenPref__checkbox">
+                    {/* <label className="allergenPref__checkbox">
                         <input
                             type="checkbox"
                             checked={dontAskAgain}
                             onChange={() => setDontAskAgain(prev => !prev)}
                         />
                         <span>Do not show this again</span>
-                    </label>
+                    </label> */}
                 </div>
             }
             confirmLabel="Hide Recipes"
