@@ -5,7 +5,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 100dvh;
+    height: 80dvh;
     padding: 0 24px;
     overflow: hidden;
     background: var(--color-bg);
@@ -45,22 +45,6 @@
     max-width: 300px;
     line-height: 1.45;
     margin: 0 0 2% 0;
-}
-
-.error__retry-btn {
-    background: var(--color-primary);
-    color: var(--color-dark-text);
-    border: none;
-    padding: 12px 32px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600;
-    transition: 0.2s;
-}
-
-.error__retry-btn:hover {
-    background: var(--color-primary);
 }
 
 @media (max-height: 700px) {

@@ -341,7 +341,7 @@ const SingleRecipePage: React.FC = () => {
                             </div>
                         </div>
                     )}
-                    
+
                     <p className="recipe__description">{recipe.Description}</p>
                     <section className="recipe__section">
                         <div className="recipe__section__header">
@@ -514,18 +514,18 @@ const SingleRecipePage: React.FC = () => {
                                 </span>
                             </div>
 
-                            <p className="recipe__nutrition__overview__text">
+                            {/* <p className="recipe__nutrition__overview__text">
                                 {nutritionOverview.caloriesPercent} of daily calorie target
-                            </p>
+                            </p> */}
 
                             <div className="recipe__nutrition__overview__meta">
-                                <div className="recipe__nutrition__overview__meta__card">
+                                {/* <div className="recipe__nutrition__overview__meta__card">
                                     <span className="recipe__nutrition__overview__meta__label">
                                         Adjust your daily calorie target
                                     </span>
-                                    {/* <span className="recipe__nutrition__overview__meta__value">
+                                    <span className="recipe__nutrition__overview__meta__value">
                                         {nutritionOverview.caloriesTarget}
-                                    </span> */}
+                                    </span>
                                     <input
                                     id="calorieTarget"
                                     type="text"
@@ -547,7 +547,7 @@ const SingleRecipePage: React.FC = () => {
                                     }}
                                     className="recipe__nutrition__target__input"
                                 />
-                                </div>
+                                </div> */}
 
                                 <div className="recipe__nutrition__overview__meta__card">
                                     <span className="recipe__nutrition__overview__meta__label">
@@ -561,7 +561,7 @@ const SingleRecipePage: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="recipe__nutrition__ring__wrap">
+                            {/* <div className="recipe__nutrition__ring__wrap">
                                 <div
                                     className="recipe__nutrition__ring"
                                     style={
@@ -579,7 +579,7 @@ const SingleRecipePage: React.FC = () => {
                                         </span>
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
 
                             <button
                                 type="button"
@@ -590,79 +590,83 @@ const SingleRecipePage: React.FC = () => {
                             </button>
                         </div>
 
-                        {showMoreNutrition && (
-                            <div className="recipe__nutrition__tableWrap">
-                                <div className="recipe__nutrition__tableHeader">
-                                    <span className="recipe__nutrition__tableTitle">Nutrition breakdown</span>
-                                    <span className="recipe__nutrition__tableSubtitle">Per recipe estimate</span>
-                                </div>
+                        <div
+                            className={`recipe__nutrition__tableWrap ${showMoreNutrition ? "expanded" : "collapsed"}`}
+                        >
+                            {showMoreNutrition && (
+                                <div className="recipe__nutrition__tableInner">
+                                    <div className="recipe__nutrition__tableHeader">
+                                        <span className="recipe__nutrition__tableTitle">Nutrition breakdown</span>
+                                        <span className="recipe__nutrition__tableSubtitle">Per recipe estimate</span>
+                                    </div>
 
-                                <div className="recipe__nutrition__table">
-                                    {nutritionDisplayItems
-                                        .filter((item) => item.label !== "Calories")
-                                        .map((item) => (
-                                            <div
-                                                key={item.label}
-                                                className="recipe__nutrition__tableRow"
-                                            >
-                                                <div className="recipe__nutrition__tableCell recipe__nutrition__tableCell__name">
-                                                    <div className="recipe__nutrition__tableCell__nameWrap">
-                                                        {item.icon && (
-                                                            <img
-                                                                src={item.icon}
-                                                                alt={item.label}
-                                                                className="recipe__nutrition__tableIcon"
-                                                            />
-                                                        )}
-                                                        <span className="recipe__nutrition__tableLabel">
-                                                            {item.label}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="recipe__nutrition__tableCell">
-                                                    <span className="recipe__nutrition__tableValue">
-                                                        {item.formattedValue}
-                                                        {item.unit}
-                                                    </span>
-                                                </div>
-
-                                                <div className="recipe__nutrition__tableCell">
-                                                    <span className="recipe__nutrition__tableTarget">
-                                                        {item.targetLabel}
-                                                    </span>
-                                                </div>
-
-                                                <div className="recipe__nutrition__tableCell">
-                                                    <div className="recipe__nutrition__tableProgress">
-                                                        <div className="recipe__nutrition__tableProgress__track">
-                                                            <div
-                                                                className={`recipe__nutrition__tableProgress__fill recipe__nutrition__tableProgress__fill__${item.level}`}
-                                                                style={{ width: item.percentText }}
-                                                            />
+                                    <div className="recipe__nutrition__table">
+                                        {nutritionDisplayItems
+                                            .filter((item) => item.label !== "Calories")
+                                            .map((item) => (
+                                                <div
+                                                    key={item.label}
+                                                    className="recipe__nutrition__tableRow"
+                                                >
+                                                    <div className="recipe__nutrition__tableCell recipe__nutrition__tableCell__name">
+                                                        <div className="recipe__nutrition__tableCell__nameWrap">
+                                                            {item.icon && (
+                                                                <img
+                                                                    src={item.icon}
+                                                                    alt={item.label}
+                                                                    className="recipe__nutrition__tableIcon"
+                                                                />
+                                                            )}
+                                                            <span className="recipe__nutrition__tableLabel">
+                                                                {item.label}
+                                                            </span>
                                                         </div>
-                                                        <span className="recipe__nutrition__tablePercent">
-                                                            {item.percentText}
+                                                    </div>
+
+                                                    <div className="recipe__nutrition__tableCell">
+                                                        <span className="recipe__nutrition__tableValue">
+                                                            {item.formattedValue}
+                                                            {item.unit}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="recipe__nutrition__tableCell">
+                                                        <span className="recipe__nutrition__tableTarget">
+                                                            {item.targetLabel}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="recipe__nutrition__tableCell">
+                                                        <div className="recipe__nutrition__tableProgress">
+                                                            <div className="recipe__nutrition__tableProgress__track">
+                                                                <div
+                                                                    className={`recipe__nutrition__tableProgress__fill recipe__nutrition__tableProgress__fill__${item.level}`}
+                                                                    style={{ width: item.percentText }}
+                                                                />
+                                                            </div>
+                                                            <span className="recipe__nutrition__tablePercent">
+                                                                {item.percentText}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="recipe__nutrition__tableCell">
+                                                        <span
+                                                            className={`recipe__nutrition__tableBadge recipe__nutrition__tableBadge__${item.level}`}
+                                                        >
+                                                            {item.level === "low"
+                                                                ? "Low"
+                                                                : item.level === "medium"
+                                                                    ? "Medium"
+                                                                    : "High"}
                                                         </span>
                                                     </div>
                                                 </div>
-
-                                                <div className="recipe__nutrition__tableCell">
-                                                    <span
-                                                        className={`recipe__nutrition__tableBadge recipe__nutrition__tableBadge__${item.level}`}
-                                                    >
-                                                        {item.level === "low"
-                                                            ? "Low"
-                                                            : item.level === "medium"
-                                                                ? "Medium"
-                                                                : "High"}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        ))}
+                                            ))}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </section>
 
                     <div className="recipe__source recipe__source__bottom">

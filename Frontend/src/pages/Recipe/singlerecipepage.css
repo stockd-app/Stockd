@@ -221,41 +221,41 @@
 }
 
 .recipe__allergens__section {
-    margin: 14px 0 24px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
+  margin: 14px 0 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
 .recipe__allergens__header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .recipe__allergens__title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--color-main-text);
-    letter-spacing: 0.2px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-main-text);
+  letter-spacing: 0.2px;
 }
 
 .recipeitemcard__allergens {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
 }
 
 .recipeitemcard__allergen {
-    padding: 5px 10px;
-    border-radius: 12px;
-    background: var(--color-light-red);
-    color: var(--color-red);
-    font-size: 12px;
-    font-weight: 500;
-    border: 1px solid rgba(139, 94, 60, 0.12);
+  padding: 5px 10px;
+  border-radius: 12px;
+  background: var(--color-light-red);
+  color: var(--color-red);
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid rgba(139, 94, 60, 0.12);
 }
 
 .recipe__description {
@@ -568,7 +568,7 @@
   color: var(--color-main-text);
 }
 
-.recipe__nutrition__target__input{
+.recipe__nutrition__target__input {
   width: 55px;
   padding: 10px 12px;
   border: 1px solid #d9d9d9;
@@ -661,6 +661,38 @@
 }
 
 .recipe__nutrition__tableWrap {
+  margin-top: 18px;
+  background: var(--color-dark-grey);
+  border: 1px solid var(--color-grey);
+  border-radius: 24px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-12px);
+  transition:
+    max-height 0.4s ease,
+    opacity 0.3s ease,
+    transform 0.35s ease,
+    margin-top 0.35s ease;
+}
+
+.recipe__nutrition__tableWrap.expanded {
+  max-height: 1500px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.recipe__nutrition__tableWrap.collapsed {
+  margin-top: 0;
+  pointer-events: none;
+}
+
+.recipe__nutrition__tableInner {
+  overflow: hidden;
+}
+
+.recipe__nutrition__tableInner {
   margin-top: 18px;
   background: var(--color-dark-grey);
   border: 1px solid var(--color-grey);
@@ -873,11 +905,6 @@
 
   .recipe__nutrition__table {
     min-width: 680px;
-  }
-
-  .recipe__nutrition__tableWrap {
-    overflow: hidden;
-    border-radius: 20px;
   }
 
   .recipe__nutrition__tableHeader {

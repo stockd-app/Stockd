@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Plus, MoreVertical, Check } from "lucide-react";
-import { API_ROUTES, BOTTOM_NAV_ICON_SIZE } from "../../config/consts";
+import { API_ROUTES, BOTTOM_NAV_ICON_SIZE, NOTIFICATION_MESSAGES, NOTIFICATION_TYPES } from "../../config/consts";
 import ConfirmModal from "../ConfirmModal/ConfirmModal";
 import Button from "../Button/Button";
+import { useNotification } from "../Notification/NotificationContext";
 
 import "./grocery-list.css";
 
@@ -27,6 +28,7 @@ interface GroceryListProps {
 }
 
 const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
+  const notify = useNotification();
   const [groceryItems, setGroceryItems] = useState<GroceryItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -39,8 +41,6 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
     quantity_value: null,
     quantity_unit: "pcs",
   });
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   // Fetch grocery items
   const fetchGroceryItems = async () => {
@@ -65,9 +65,11 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
       // API returns items as an array
       const itemsData = Array.isArray(data.items) ? data.items : [];
       setGroceryItems(itemsData);
-      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      notify(
+        err instanceof Error ? err.message : "An error occurred",
+        NOTIFICATION_TYPES.ERROR
+      );
       setGroceryItems([]);
     } finally {
       setIsLoading(false);
@@ -79,7 +81,10 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
     e.preventDefault();
 
     if (!formData.item_name.trim()) {
-      setError("Item name is required");
+      notify(
+        "Item name is required",
+        NOTIFICATION_TYPES.ERROR
+      );
       return;
     }
 
@@ -103,7 +108,14 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
 
       if (!response.ok) throw new Error("Failed to save item");
 
-      setSuccess(editingItemId ? "Item updated!" : "Item added!");
+      notify(
+        editingItemId
+          ? NOTIFICATION_MESSAGES.UPDATED
+          : NOTIFICATION_MESSAGES.ADDED,
+        editingItemId
+          ? NOTIFICATION_TYPES.UPDATED
+          : NOTIFICATION_TYPES.ADDED
+      );
       setFormData({
         item_name: "",
         quantity_value: null,
@@ -112,9 +124,11 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
       setShowAddForm(false);
       setEditingItemId(null);
       fetchGroceryItems();
-      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      notify(
+        err instanceof Error ? err.message : "An error occurred",
+        NOTIFICATION_TYPES.ERROR
+      );
     }
   };
 
@@ -136,11 +150,16 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
 
       if (!response.ok) throw new Error("Failed to delete item");
 
-      setSuccess("Item deleted!");
+      notify(
+        NOTIFICATION_MESSAGES.DELETED,
+        NOTIFICATION_TYPES.DELETED
+      );
       fetchGroceryItems();
-      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      notify(
+        err instanceof Error ? err.message : "An error occurred",
+        NOTIFICATION_TYPES.ERROR
+      );
     }
   };
 
@@ -168,12 +187,17 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
         throw new Error("Failed to move items");
       }
 
-      setSuccess("Selected items moved to pantry!");
+      notify(
+        NOTIFICATION_MESSAGES.ADDED,
+        NOTIFICATION_TYPES.ADDED
+      );
       fetchGroceryItems();
       setSelectedItemIds([]);
-      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      notify(
+        err instanceof Error ? err.message : "An error occurred",
+        NOTIFICATION_TYPES.ERROR
+      );
     }
   };
 
@@ -216,10 +240,6 @@ const GroceryList: React.FC<GroceryListProps> = ({ userId, accessToken }) => {
         <h1 className="grocery-list__title">Grocery List</h1>
         <div className="grocery-list__badge">{totalItems}</div>
       </div>
-
-      {/* Messages */}
-      {error && <div className="grocery-list__error">{error}</div>}
-      {success && <div className="grocery-list__success">{success}</div>}
 
       {/* Action Buttons */}
       <div className="grocery-list__actions">

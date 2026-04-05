@@ -38,6 +38,10 @@ body {
   box-sizing: border-box;
 }
 
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--color-primary);
+}
 
 h1 {
   font-size: 3.2em;
