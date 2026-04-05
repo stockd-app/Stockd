@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { addOrUpdatePantryItem, confirmReceiptItems, uploadReceipt } from "../../services/api";
+import { confirmReceiptItems, uploadReceipt } from "../../services/api";
 import { Trash2, Upload, Camera, ChevronLeft } from "lucide-react";
 import CameraModal from "../../components/CameraModal/CameraModal";
 import type { ConfirmPantryItem } from "../PantryItemConfirmationModal/PantryItemConfirmationModal";
@@ -8,6 +8,9 @@ import PantryItemConfirmationModal from "../PantryItemConfirmationModal/PantryIt
 import receiptGif from "../../assets/images/receipt_gif.gif";
 import try_again from "../../assets/images/error_handling/try_again.png";
 import Button from "../Button/Button";
+import { RECEIPT_UPLOAD_COOLDOWN_MS, RECEIPT_UPLOAD_LOCKOUT_KEY } from "../../config/consts";
+import { formatTimeLeft } from "../../utils/utils";
+import axios from "axios";
 
 import "./receiptpreview.css";
 
@@ -29,11 +32,46 @@ const ReceiptPreview: React.FC = () => {
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [detectedItems, setDetectedItems] = useState<ConfirmPantryItem[]>([]);
 
+    const [showRateLimitModal, setShowRateLimitModal] = useState(false);
+    const [lockoutUntil, setLockoutUntil] = useState<number | null>(() => {
+        const saved = localStorage.getItem(RECEIPT_UPLOAD_LOCKOUT_KEY);
+        return saved ? Number(saved) : null;
+    });
+    const [timeLeftMs, setTimeLeftMs] = useState(0);
+    const isLockedOut = !!lockoutUntil && lockoutUntil > Date.now();
+
     const initialImages = useMemo<ReceiptImage[]>(() => {
         return (location.state?.images as ReceiptImage[]) ?? [];
     }, [location.state]);
 
     const [images, setImages] = useState<ReceiptImage[]>(initialImages);
+
+    // Rate limit countdown
+    useEffect(() => {
+        if (!lockoutUntil) {
+            setTimeLeftMs(0);
+            return;
+        }
+
+        const updateTimeLeft = () => {
+            const remaining = lockoutUntil - Date.now();
+
+            if (remaining <= 0) {
+                setTimeLeftMs(0);
+                setLockoutUntil(null);
+                localStorage.removeItem(RECEIPT_UPLOAD_LOCKOUT_KEY);
+                setShowRateLimitModal(false);
+                return;
+            }
+
+            setTimeLeftMs(remaining);
+        };
+
+        updateTimeLeft();
+        const interval = setInterval(updateTimeLeft, 1000);
+
+        return () => clearInterval(interval);
+    }, [lockoutUntil]);
 
     // Cleanup blob URLs
     useEffect(() => {
@@ -41,6 +79,14 @@ const ReceiptPreview: React.FC = () => {
             images.forEach((img) => URL.revokeObjectURL(img.url));
         };
     }, []);
+
+    // Start lockout after successful upload or API rate limit hit
+    const startLockout = () => {
+        const until = Date.now() + RECEIPT_UPLOAD_COOLDOWN_MS;
+        setLockoutUntil(until);
+        localStorage.setItem(RECEIPT_UPLOAD_LOCKOUT_KEY, until.toString());
+        setShowRateLimitModal(true);
+    };
 
     // Gallery 
     const handleGallerySelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,6 +122,11 @@ const ReceiptPreview: React.FC = () => {
 
     // Recogntion
     const handleRecognition = async () => {
+        if (isLockedOut) {
+            setShowRateLimitModal(true);
+            return;
+        }
+
         try {
             const files = images.map((img) => img.file);
             if (!files.length) return;
@@ -114,6 +165,14 @@ const ReceiptPreview: React.FC = () => {
             setShowConfirmation(true);
         } catch (err) {
             console.error("Recognition failed:", err);
+            if (axios.isAxiosError(err)) {
+                const status = err.response?.status;
+
+                if (status === 429) {
+                    startLockout();
+                    return;
+                }
+            }
             setScanError(true);
         } finally {
             setIsUploading(false);
@@ -213,7 +272,7 @@ const ReceiptPreview: React.FC = () => {
                 </div>
                 <Button
                     className="rp__recognition"
-                    disabled={!images.length || isUploading}
+                    disabled={!images.length || isUploading || isLockedOut}
                     onClick={handleRecognition}>
                     {isUploading ? "Processing..." : "Scan Receipt(s)"}
                 </Button>
@@ -249,6 +308,26 @@ const ReceiptPreview: React.FC = () => {
                             Sorry, we couldn't parse your receipt. Please try again later.
                         </p>
                         <Button onClick={() => setScanError(false)}>
+                            Close
+                        </Button>
+                    </div>
+                </div>
+            )}
+
+            {showRateLimitModal && (
+                <div className="error__overlay" onClick={() => setShowRateLimitModal(false)}>
+                    <div className="error__modal" onClick={(e) => e.stopPropagation()}>
+                        <img
+                            src={try_again}
+                            alt="Upload temporarily unavailable"
+                            className="error__image"
+                        />
+                        <h3 className="error__title">Too many upload attempts</h3>
+                        <p className="error__message">
+                            You can’t upload another receipt right now. Please wait{" "}
+                            <strong>{formatTimeLeft(timeLeftMs)}</strong> before trying again.
+                        </p>
+                        <Button onClick={() => setShowRateLimitModal(false)}>
                             Close
                         </Button>
                     </div>

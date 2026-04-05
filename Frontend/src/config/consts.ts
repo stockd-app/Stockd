@@ -164,3 +164,7 @@ export const TEXT_SIZE_OPTIONS: TextSizeOption[] = [
 
 // take feedback recipients from env 
 export const FEEDBACK_RECIPIENTS = import.meta.env.STOCKD_DEVELOPER_EMAILS?.split(',') || [];
+
+// Cooldown period for receipt uploads (5 minutes)
+export const RECEIPT_UPLOAD_COOLDOWN_MS = 5 * 60 * 1000;
+export const RECEIPT_UPLOAD_LOCKOUT_KEY = "receipt_upload_lockout_until";
