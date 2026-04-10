@@ -29,7 +29,6 @@ const PantrySectionListPage: React.FC<PantrySectionListPageProps> = ({
     const [isSelecting, setIsSelecting] = useState(false);
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
 
     const [showFilters, setShowFilters] = useState(false);
     const [filteredItems, setFilteredItems] = useState<PantryItem[]>([]);
@@ -83,12 +82,6 @@ const PantrySectionListPage: React.FC<PantrySectionListPageProps> = ({
 
     const clearSelection = () => setSelectedIds(new Set());
 
-    const enterSelectMode = (id?: number) => {
-        setIsSelecting(true);
-        if (typeof id === "number") {
-            setSelectedIds(new Set([id]));
-        }
-    };
 
     const exitSelectMode = () => {
         setIsSelecting(false);
@@ -108,7 +101,6 @@ const PantrySectionListPage: React.FC<PantrySectionListPageProps> = ({
         }
 
         try {
-            setIsDeleting(true);
             await deletePantryItems(ids);
 
             setShowConfirmDelete(false);
@@ -118,8 +110,6 @@ const PantrySectionListPage: React.FC<PantrySectionListPageProps> = ({
         } catch (e) {
             console.error("Failed to delete pantry items:", e);
             alert("Failed to delete items, please try again.");
-        } finally {
-            setIsDeleting(false);
         }
     }
 
@@ -135,7 +125,6 @@ const PantrySectionListPage: React.FC<PantrySectionListPageProps> = ({
 
                     <Button
                         className="pantrySection__filter"
-                        variant=""
                         onClick={() => setShowFilters(true)}
                         aria-label="Open filters"
                     >

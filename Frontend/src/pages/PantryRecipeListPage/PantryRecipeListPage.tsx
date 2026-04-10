@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SlidersHorizontal, ArrowLeft } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 import type { Recipe } from "../Dashboard/Dashboard";
 import { applyAllergenFilter, formatRecipes, isoDurationToMinutes, isSameRange } from "../../utils/utils";
 import { TIME_RANGES } from "../../config/consts";
@@ -11,7 +11,7 @@ import Button from "../../components/Button/Button";
 import EmptyPantryImage from "../../assets/images/EmptyPantry.png";
 import "@/styles/variable.css";
 import loading_anim from "../../assets/images/loading_anim.gif";
-import { getLikedRecipes, toggleLikeRecipe } from "../../services/api";
+import { getLikedRecipes } from "../../services/api";
 
 import "./pantryrecipelistpage.css";
 
@@ -126,7 +126,6 @@ const PantryRecipeListPage: React.FC<PantryRecipeListPageProps> = ({ title, fetc
 
                 <Button
                     className="pantryRecipes__filterButton"
-                    variant=""
                     onClick={() => setShowFilters(true)}
                     aria-label="Open filters"
                 >

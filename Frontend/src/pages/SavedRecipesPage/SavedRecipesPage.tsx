@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import RecipeItemCard from "../../components/RecipeItemCard/RecipeItemCard";
 import BottomNavBar from "../../components/NavigationBar/BottomNavBar/BottomNavBar";

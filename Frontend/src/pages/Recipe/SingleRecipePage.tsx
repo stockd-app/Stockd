@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getRecipeById, getLikedRecipes, getPantryItems, completeRecipe } from "../../services/api";
 import { getIngredientIcon } from "../../utils/ingredientIconMap";
-import { Clock, Star, ArrowLeft } from "lucide-react";
+import { Clock, Star } from "lucide-react";
 import recipe_placeholder from "../../assets/images/error_handling/recipe_placeholder.png"
 import { formatPrepTime } from "../../utils/utils";
 import { parseQuantity, resolveIngredientDisplay } from "../../utils/ingredientUnit";
@@ -30,7 +30,6 @@ const SingleRecipePage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     //`initialLiked` will no longer be undefined.
     const [initialLiked, setInitialLiked] = useState(false);
-    const [likedLoading, setLikedLoading] = useState(false);
     const [pantryNames, setPantryNames] = useState<string[]>([]);
     const [missingIngredients, setMissingIngredients] = useState<string[]>([]);
     const [addedToGrocery, setAddedToGrocery] = useState<Map<string, number>>(new Map());
@@ -43,10 +42,7 @@ const SingleRecipePage: React.FC = () => {
         );
     };
     const notify = useNotification();
-    const [calorieTargetInput, setCalorieTargetInput] = useState("1000");
-    const calorieTarget = Math.max(Number(calorieTargetInput) || 0, 1);
-    const MIN_CALORIE_TARGET = 100;
-    const MAX_CALORIE_TARGET = 5000;
+    const calorieTarget = Math.max(Number("1000") || 0, 1);
 
     useEffect(() => {
         if (!id) return;
@@ -84,7 +80,6 @@ const SingleRecipePage: React.FC = () => {
             if (!recipe?.RecipeId) return;
 
             try {
-                setLikedLoading(true);
                 const res = await getLikedRecipes();
                 const likedList = res?.liked_recipes ?? [];
 
@@ -101,8 +96,6 @@ const SingleRecipePage: React.FC = () => {
             } catch (e) {
                 console.error("Failed to fetch liked recipes", e);
                 setInitialLiked(false);
-            } finally {
-                setLikedLoading(false);
             }
         };
         run();

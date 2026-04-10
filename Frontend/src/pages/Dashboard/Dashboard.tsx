@@ -66,12 +66,10 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
 
 
   // Recipes that are fully cookable with current pantry items (may be filtered by allergens, search, etc.)
-  const [subsetRecipes, setSubsetRecipes] = useState<Recipe[]>([]);
+  const [_subsetRecipes, setSubsetRecipes] = useState<Recipe[]>([]);
 
   // Recipes with possible missing ingredients (may be filtered by allergens, search, etc.)
-  const [incompleteRecipes, setIncompleteRecipes] = useState<Recipe[]>([]);
-
-
+  const [_incompleteRecipes, setIncompleteRecipes] = useState<Recipe[]>([]);
 
   // Recipes currently displayed in the UI after applying transient UI filters (e.g. search)
   // Derived from subsetRecipes and reset when UI filters are cleared
@@ -82,14 +80,14 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
   const [filteredIncompleteRecipes, setFilteredIncompleteRecipes] = useState<Recipe[]>([]);
 
   // Recipes recommended based on user's liked recipes
-  const [likedRecommendedRecipes, setLikedRecommendedRecipes] = useState<Recipe[]>([]);
+  const [_likedRecommendedRecipes, setLikedRecommendedRecipes] = useState<Recipe[]>([]);
   const [filteredLikedRecommendedRecipes, setFilteredLikedRecommendedRecipes] = useState<Recipe[]>([]);
 
   // Collaborative filtering
-  const [collaborativeRecipes, setCollaborativeRecipes] = useState<Recipe[]>([]);
+  const [_collaborativeRecipes, setCollaborativeRecipes] = useState<Recipe[]>([]);
   const [filteredCollaborativeRecipes, setFilteredCollaborativeRecipes] = useState<Recipe[]>([]);
 
-  const [likedRecipeIds, setLikedRecipeIds] = useState<Set<number>>(new Set());
+  const [_likedRecipeIds, setLikedRecipeIds] = useState<Set<number>>(new Set());
 
   const [isLoadingRecipes, setIsLoadingRecipes] = useState(true);
 

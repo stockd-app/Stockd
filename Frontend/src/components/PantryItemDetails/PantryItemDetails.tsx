@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { ArrowLeft } from "lucide-react";
 import type { PantryItem } from "../PantryItemSection/PantryItemSection";
 import { addOrUpdatePantryItem, deletePantryItems } from "../../services/api";
 import { useNotification } from "../Notification/NotificationContext";

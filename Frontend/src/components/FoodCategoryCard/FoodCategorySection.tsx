@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Breakfast from "../../assets/images/food_category/breakfast.png";
 import Lunch from "../../assets/images/food_category/lunch.png";
 import Dinner from "../../assets/images/food_category/dinner.png";
