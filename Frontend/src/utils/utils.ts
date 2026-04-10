@@ -98,3 +98,16 @@ export const formatRecipes = (recipes: any[]) =>
             allergens: recipe.Allergens ?? [],
         };
     });
+
+/**
+ * Format time left for API rate limit countdown timer
+ * @param ms 
+ * @returns 
+ */
+export const formatTimeLeft = (ms: number) => {
+    const totalSeconds = Math.ceil(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+};

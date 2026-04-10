@@ -64,7 +64,7 @@ AI_SERVER_URL_RECIPE_RECOMMENDER = os.getenv("RECIPE_RECOMMENDER_MODEL_URL")
 
 
 @router.post("/upload-receipt", tags=["OCR"])
-@limiter.limit("5/minute")
+@limiter.limit("1/5minute")
 async def upload_receipt(
     request: Request,
     files: list[UploadFile] = File(...),

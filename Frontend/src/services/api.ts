@@ -59,7 +59,14 @@ export const uploadReceipt = async (files: File[]) => {
 
     return response.data;
   } catch (error: any) {
-    if (error.response?.status === 401) {
+    const status = error?.response?.status;
+
+    // Let ReceiptPreview handle rate limiting
+    if (status === 429) {
+      throw error;
+    }
+
+    if (status === 401) {
       // Token expired or invalid
       // Attempt to refresh the token
       const refreshed = await refreshToken();
@@ -701,7 +708,7 @@ export const searchRecipes = async (query: string, limit: number = 20) => {
 
   try {
     const url = `${API_ROUTES.SEARCH_RECIPES}?query=${encodeURIComponent(query)}&limit=${limit}`;
-    
+
     const idToken = localStorage.getItem("google_id_token");
 
     const res = await axios.get(url, {
