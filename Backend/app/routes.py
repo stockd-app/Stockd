@@ -1007,7 +1007,7 @@ async def fetch_recipe_from_ai(recipe_id: int) -> dict:
     Fetch a full recipe object from the AI service by recipe ID.
     """
     print(recipe_id)
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=180.0) as client:
         try:
             resp = await client.post(
                 f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recipe-by-id",
@@ -1182,7 +1182,7 @@ async def get_pantry_recommendations(user_id: int, top_n: int = 10):
 
     pantry_items = get_user_pantry(user_id)
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=180.0) as client:
         ai_data = await client.post(
             f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend",
             json={
@@ -1269,7 +1269,7 @@ async def get_all_recommendations(user_id: int, top_n: int = 5):
         "mode": "content",
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=180.0) as client:
         try:
             resp = await client.post(
                 f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend",
@@ -1301,7 +1301,7 @@ async def get_collaborative_recommendations(user_id: int, top_n: int = 5):
         "mode": "collaborative",
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=180.0) as client:
         try:
             resp = await client.post(
                 f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend",
@@ -1337,7 +1337,7 @@ async def search_recipes_route(request: Request, query: str, limit: int = 20):
 
     safe_query = sanitize_text(query)
 
-    async with httpx.AsyncClient(timeout=httpx.Timeout(10.0, read=10.0)) as client:
+    async with httpx.AsyncClient(timeout=180.0) as client:
         try:
             ai_response = await client.post(
                 f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/search-recipes",
@@ -1747,7 +1747,7 @@ async def get_subset_recommendations(user_id: int):
 
     payload = {"user_id": user_id, "pantry_items": pantry_items, "top_n": 20}
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=180.0) as client:
         resp = await client.post(
             f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend/subset", json=payload
         )
@@ -1785,7 +1785,7 @@ async def get_liked_category_recommendations(user_id: int, top_n: int = 10):
         "pantry_items": [],
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=180.0) as client:
         resp = await client.post(
             f"{AI_SERVER_URL_RECIPE_RECOMMENDER}/recommend/by-liked-categories",
             json=payload,
