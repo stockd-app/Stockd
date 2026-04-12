@@ -21,18 +21,18 @@ COPY allergendataset.csv .
 # Create data and canonical_db directories
 RUN mkdir -p data canonical_db
 
-# Download data files from Google Drive using --fuzzy flag for large files
-# recipes.parquet - 1TKWfXVzCQ_Dx4_tMw3DbOs52B-0-YTDk
+# Download data files from Google Drive
+# recipes.parquet - 1hKLAsGJw2afEgS9SBOG3TV5qFRUZ-GNR
 RUN echo "Downloading recipes.parquet..." && \
-    gdown --fuzzy "https://drive.google.com/file/d/1TKWfXVzCQ_Dx4_tMw3DbOs52B-0-YTDk/view?usp=sharing" -O data/recipes.parquet
+    gdown 1hKLAsGJw2afEgS9SBOG3TV5qFRUZ-GNR -O data/recipes.parquet
 
 # units.csv - 1BKsR476uvUeYPDVajuuxMnUo5RgSK-v_
 RUN echo "Downloading units.csv..." && \
-    gdown --fuzzy "https://drive.google.com/file/d/1BKsR476uvUeYPDVajuuxMnUo5RgSK-v_/view?usp=drive_link" -O data/units.csv
+    gdown 1BKsR476uvUeYPDVajuuxMnUo5RgSK-v_ -O data/units.csv
 
 # reviews.parquet - 19M4f3i2cBAZD-n4DDWwEV1UDKlwCPLTB
 RUN echo "Downloading reviews.parquet..." && \
-    gdown --fuzzy "https://drive.google.com/file/d/19M4f3i2cBAZD-n4DDWwEV1UDKlwCPLTB/view?usp=drive_link" -O data/reviews.parquet
+    gdown 19M4f3i2cBAZD-n4DDWwEV1UDKlwCPLTB -O data/reviews.parquet
 
 # Verify files were downloaded and are valid
 RUN ls -lh data/ && \
