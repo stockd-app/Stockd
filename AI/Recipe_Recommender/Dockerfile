@@ -40,7 +40,7 @@ RUN ls -lh data/ && \
     test -s data/recipes.parquet && \
     test -s data/units.csv && \
     test -s data/reviews.parquet && \
-    echo "✅ All data files downloaded successfully!"
+    echo "All data files downloaded successfully!"
 
 EXPOSE 9001
 

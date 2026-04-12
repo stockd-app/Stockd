@@ -110,16 +110,16 @@ file_size = os.path.getsize(DATA_PATH)
 print(f"Found recipe data file: {DATA_PATH}")
 print(f"File size: {file_size / (1024*1024):.2f} MB")
 
-if file_size < 1000:  # Less than 1KB is suspicious
+if file_size < 1000:
     raise ValueError(f"Recipe data file is too small ({file_size} bytes). File may be corrupted or incomplete.")
 
 print(f"Loading recipe data from {DATA_PATH}...")
 print("This may take 2-5 minutes for large files...")
 try:
     df = pd.read_parquet(DATA_PATH)
-    print(f"✅ Parquet file loaded successfully! Total rows: {len(df)}")
+    print(f"Parquet file loaded successfully! Total rows: {len(df)}")
 except Exception as e:
-    print(f"❌ ERROR loading parquet file: {str(e)}")
+    print(f"ERROR loading parquet file: {str(e)}")
     print(f"File might be corrupted. Try re-downloading or check if it's actually a parquet file.")
     raise
 df = df.copy()
