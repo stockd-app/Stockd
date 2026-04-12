@@ -4,11 +4,11 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-COPY Food_Classifier/food_classifier_requirements.txt .
+COPY food_classifier_requirements.txt .
 
 RUN pip install --no-cache-dir -r food_classifier_requirements.txt
 
-COPY Food_Classifier/ ./app/
+COPY . .
 
 EXPOSE 9002
 

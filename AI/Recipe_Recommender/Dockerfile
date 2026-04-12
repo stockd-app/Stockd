@@ -4,14 +4,14 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-COPY Recipe_Recommender/recipe_recommender_requirements.txt .
+COPY recipe_recommender_requirements.txt .
 
 RUN pip install --no-cache-dir -r recipe_recommender_requirements.txt
 
 # Download NLTK data
 RUN python -m nltk.downloader wordnet omw-1.4
 
-COPY Recipe_Recommender/ ./app/
+COPY . .
 
 EXPOSE 9001
 

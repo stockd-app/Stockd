@@ -45,8 +45,7 @@ CREATE TABLE item_classifications (
     category VARCHAR(255),
     storage VARCHAR(255),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        ON UPDATE CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY unique_itemclassifications_normalized_name (normalized_name)
 );
 
