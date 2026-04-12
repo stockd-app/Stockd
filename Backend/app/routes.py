@@ -503,6 +503,8 @@ async def verify_google_token(request: Request):
 
         except SQLAlchemyError as e:
             db.rollback()
+            print(f"SQLAlchemyError during user creation: {str(e)}")
+            print(f"SQLAlchemyError traceback: {traceback.format_exc()}")
             raise HTTPException(
                 status_code=500,
                 detail={
