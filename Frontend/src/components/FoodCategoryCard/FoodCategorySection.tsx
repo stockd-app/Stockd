@@ -1,8 +1,8 @@
 import React from "react";
-import Breakfast from "../../assets/images/food_category/breakfast.png";
-import Lunch from "../../assets/images/food_category/lunch.png";
-import Dinner from "../../assets/images/food_category/dinner.png";
-import Dessert from "../../assets/images/food_category/dessert.png";
+import Breakfast from "../../assets/images/food_category/Breakfast.png";
+import Lunch from "../../assets/images/food_category/Lunch.png";
+import Dinner from "../../assets/images/food_category/Dinner.png";
+import Dessert from "../../assets/images/food_category/Dessert.png";
 
 import "./foodcategorysection.css";
 import { useNavigate } from "react-router-dom";
