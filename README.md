@@ -14,6 +14,11 @@
 </div>
 </div>
 
+##  Live Demo
+
+The application is deployed on Railway and can be accessed at: **[https://stockd.live](https://stockd.live)**
+
+
 ---
 
 ## 📋 Table of Contents

@@ -1,7 +1,6 @@
 import React from "react";
 import pantry_placeholder from "../../assets/images/error_handling/recipe_placeholder_2.png"
 import { useLongPress } from "../../utils/useLongPress";
-import { Square, SquareCheckBig } from "lucide-react";
 
 import "./pantryitemcard.css";
 

@@ -59,14 +59,6 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ onManualAdd }) => {
     fileInputRef.current?.click(); // TODO: Implement the photo select from gallery, preview page and route in App.tsx
   };
 
-  // Handle successful receipt upload
-  const handleUploadSuccess = (data: any) => {
-    console.log("Receipt uploaded successfully:", data);
-    // Navigate to pantry page to show the new items
-    setActiveItem("pantry");
-    navigate("/pantry");
-  };
-
   // Sync activeItem with URL (persistent underline)
   useEffect(() => {
     const path = location.pathname;

@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { GOOGLE_CONSTS } from "../../config/consts";
 
-import "./customGoogleButton.css";
+import "./customgooglebutton.css";
 
 export const CustomGoogleButton: React.FC = () => {
   const navigate = useNavigate();

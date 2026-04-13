@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import ConfirmModal from "../ConfirmModal/ConfirmModal";
 import "./allergenpreferencemodal.css";
 
@@ -7,16 +7,9 @@ interface Props {
     onCancel: () => void;
 }
 
-const AllergenPreferenceModal: React.FC<Props> = ({ onConfirm, onCancel }) => {
-    const [dontAskAgain, setDontAskAgain] = useState(false);
-
+const AllergenPreferenceModal: React.FC<Props> = ({ onConfirm }) => {
     const handleConfirm = (mode: "hide" | "show") => {
         localStorage.setItem("allergen_visibility", mode);
-
-        if (dontAskAgain) {
-            localStorage.setItem("allergen_modal_dismissed", "true");
-        }
-
         onConfirm(mode);
     };
 

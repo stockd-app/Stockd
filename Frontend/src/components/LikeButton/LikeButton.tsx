@@ -3,7 +3,7 @@ import { Heart } from "lucide-react";
 import { toggleLikeRecipe } from "../../services/api";
 import { useNotification } from "../Notification/NotificationContext";
 import { NOTIFICATION_MESSAGES, NOTIFICATION_TYPES } from "../../config/consts";
-import "./LikeButton.css";
+import "./likebutton.css";
 
 interface LikeButtonProps {
     recipeId: number;
