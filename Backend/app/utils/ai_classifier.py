@@ -18,8 +18,8 @@ def classify_receipt_items(parsed_data: dict) -> dict:
     }
     
     try:
-        # Reduced timeout: 30 seconds total, 10 seconds to connect
-        with httpx.Client(timeout=httpx.Timeout(30.0, connect=10.0)) as client:
+        # timeout: 90 seconds total, 15 seconds to connect
+        with httpx.Client(timeout=httpx.Timeout(90.0, connect=15.0)) as client:
             response = client.post(
                 ai_endpoint,
                 json=ai_payload
