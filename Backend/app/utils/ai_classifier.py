@@ -4,7 +4,7 @@ import httpx
 def classify_receipt_items(parsed_data: dict) -> dict:
     """
     Takes parsed receipt data (from Asprise) and sends it to the AI model
-    for classification.
+    for classification. Returns empty results on timeout/error.
     """
     # Get URL from environment at runtime (not import time)
     FOOD_CLASSIFIER_MODEL_URL = os.getenv("FOOD_CLASSIFIER_MODEL_URL", "http://localhost:9002")
@@ -17,11 +17,23 @@ def classify_receipt_items(parsed_data: dict) -> dict:
         "items": parsed_data.get("items", {})
     }
     
-    # Use httpx with proper timeout settings
-    with httpx.Client(timeout=httpx.Timeout(250.0, connect=30.0)) as client:
-        response = client.post(
-            ai_endpoint,
-            json=ai_payload
-        )
-        response.raise_for_status()
-        return response.json()
+    try:
+        # Reduced timeout: 30 seconds total, 10 seconds to connect
+        with httpx.Client(timeout=httpx.Timeout(30.0, connect=10.0)) as client:
+            response = client.post(
+                ai_endpoint,
+                json=ai_payload
+            )
+            response.raise_for_status()
+            result = response.json()
+            print(f"AI classifier returned {len(result.get('results', {}))} items")
+            return result
+    except httpx.TimeoutException as e:
+        print(f"[ERROR] AI classifier timeout after 30s: {e}")
+        return {"results": {}}
+    except httpx.HTTPStatusError as e:
+        print(f"[ERROR] AI classifier HTTP error {e.response.status_code}: {e}")
+        return {"results": {}}
+    except Exception as e:
+        print(f"[ERROR] AI classifier failed: {e}")
+        return {"results": {}}
