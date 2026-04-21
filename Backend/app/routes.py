@@ -1290,9 +1290,29 @@ async def get_all_recommendations(user_id: int, top_n: int = 5):
 @router.get("/recommendations/collaborative/{user_id}")
 async def get_collaborative_recommendations(user_id: int, top_n: int = 5):
     pantry_items = get_user_pantry(user_id)
-    all_user_ids = get_all_user_ids()
-
-    user_likes = {uid: get_user_liked_recipes(uid) for uid in all_user_ids}
+    
+    # Get all user IDs and their liked recipes
+    db = SessionLocal()
+    try:
+        # Single query to get all users and their liked recipes
+        results = (
+            db.query(LikedRecipe.user_id, Recipe.dataset_recipe_id)
+            .join(Recipe, LikedRecipe.recipe_id == Recipe.id)
+            .all()
+        )
+        
+        # Build user_likes dictionary from results
+        user_likes = {}
+        all_user_ids = set()
+        for user_id_row, recipe_id in results:
+            all_user_ids.add(user_id_row)
+            if user_id_row not in user_likes:
+                user_likes[user_id_row] = []
+            user_likes[user_id_row].append(recipe_id)
+        
+        all_user_ids = list(all_user_ids)
+    finally:
+        db.close()
 
     payload = {
         "user_id": user_id,
