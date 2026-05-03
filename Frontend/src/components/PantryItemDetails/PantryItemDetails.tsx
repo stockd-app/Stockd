@@ -29,7 +29,7 @@ const PantryItemDetails: React.FC<PantryItemDetailProps> = ({
     const notify = useNotification();
 
     const [productName, setProductName] = useState(name);
-    const [quantity, setQuantity] = useState(Number(qty?.replace("x", "")) || 1);
+    const [quantity, setQuantity] = useState<number | "">(Number(qty?.replace("x", "")) || 1);
     const [quantityUnit, setQuantityUnit] = useState(unit);
     const [itemCategory, setItemCategory] = useState(category);
     const [itemLocation, setItemLocation] = useState(storage);
@@ -40,7 +40,7 @@ const PantryItemDetails: React.FC<PantryItemDetailProps> = ({
         const payload = {
             id: id,
             item_name: productName,
-            quantity_value: quantity,
+            quantity_value: quantity === "" ? 1 : quantity,
             quantity_unit: quantityUnit,
             category: itemCategory,
             storage: itemLocation,
@@ -102,21 +102,34 @@ const PantryItemDetails: React.FC<PantryItemDetailProps> = ({
                     <div className="pid__row editable">
                         <span className="pid__label">Quantity</span>
                         <div className="pid__qty_box">
-                            <button onClick={() => setQuantity(q => Math.max(1, q - 1))}>−</button>
+                            <button onClick={() => setQuantity(q => Math.max(1, (q === "" ? 1 : q) - 1))}>−</button>
                             <input
                                 type="number"
                                 min={1}
                                 step={1}
                                 value={quantity}
                                 onChange={(e) => {
-                                    const value = Number(e.target.value);
+                                    const inputValue = e.target.value;
+                                    // allow empty string to let user clear the input before entering a new number
+                                    if (inputValue === "") {
+                                        setQuantity("");
+                                        return;
+                                    }
+                                    const value = Number(inputValue);
+
                                     if (!Number.isNaN(value) && value >= 1) {
                                         setQuantity(value);
                                     }
                                 }}
+                                onBlur={() => {
+                                    // if user clears the input and doesn't enter a new number, restore to 1 when leaving the input field
+                                    if (quantity === "") {
+                                        setQuantity(1);
+                                    }
+                                }}
                                 className="pid__qty_input"
                             />
-                            <button onClick={() => setQuantity(q => q + 1)}>+</button>
+                            <button onClick={() => setQuantity(q => (q === "" ? 1 : q) + 1)}>+</button>
                         </div>
                     </div>
                     <div className="pid__row editable">
