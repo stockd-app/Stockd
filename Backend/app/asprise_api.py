@@ -1,4 +1,4 @@
-import requests
+import httpx
 from dotenv import load_dotenv
 import os
 
@@ -7,7 +7,7 @@ load_dotenv()
 ASPRISE_API_URL = os.getenv("ASPRISE_API_URL")
 ASPRISE_CLIENT_ID = os.getenv("ASPRISE_CLIENT_ID")
 
-def send_receipt_to_asprise(image_bytes: bytes, filename: str) -> dict:
+async def send_receipt_to_asprise(image_bytes: bytes, filename: str) -> dict:
     """
     Sends the image to Asprise OCR API and returns the JSON response
     """
@@ -23,7 +23,8 @@ def send_receipt_to_asprise(image_bytes: bytes, filename: str) -> dict:
         "ref_no": "receipt-ocr",        # Reference number for tracking
     }
 
-    response = requests.post(ASPRISE_API_URL, files=files, data=data)
+    async with httpx.AsyncClient(timeout=httpx.Timeout(250.0, connect=30.0)) as client:
+        response = await client.post(ASPRISE_API_URL, files=files, data=data)
 
     # Error handling
     response.raise_for_status()

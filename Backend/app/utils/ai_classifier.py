@@ -1,7 +1,7 @@
 import os
 import httpx
 
-def classify_receipt_items(parsed_data: dict) -> dict:
+async def classify_receipt_items(parsed_data: dict) -> dict:
     """
     Takes parsed receipt data (from Asprise) and sends it to the AI model
     for classification. Returns empty results on timeout/error.
@@ -19,8 +19,8 @@ def classify_receipt_items(parsed_data: dict) -> dict:
     
     try:
         # timeout: 90 seconds total, 15 seconds to connect
-        with httpx.Client(timeout=httpx.Timeout(90.0, connect=15.0)) as client:
-            response = client.post(
+        async with httpx.AsyncClient(timeout=httpx.Timeout(90.0, connect=15.0)) as client:
+            response = await client.post(
                 ai_endpoint,
                 json=ai_payload
             )

@@ -86,7 +86,7 @@ async def upload_receipt(
             image_bytes = await file.read()
 
             # Send to Asprise API and parse the response
-            asprise_data = send_receipt_to_asprise(
+            asprise_data = await send_receipt_to_asprise(
                 image_bytes, file.filename or "receipt.jpg"
             )
             print("Received asprise data: ", time.strftime("%Y-%m-%d %H:%M:%S"))
@@ -137,7 +137,7 @@ async def upload_receipt(
                     "store": parsed.get("store", "Unknown"),
                     "items": ai_items_payload,
                 }
-                ai_data = classify_receipt_items(ai_payload)
+                ai_data = await classify_receipt_items(ai_payload)
                 ai_results = ai_data.get("results", {})
 
             print("Received classified results: ", time.strftime("%Y-%m-%d %H:%M:%S"))
