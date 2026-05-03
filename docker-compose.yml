@@ -35,6 +35,9 @@ services:
       - ./Backend/.env
     volumes:
       - ./Backend:/app
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     depends_on:
       food-classifier:
         condition: service_healthy
@@ -78,6 +81,8 @@ services:
     container_name: stockd-recipe-recommender
     ports:
       - "9001:9001"
+    environment:
+      - ALLERGENS_CSV_PATH=/app/allergendataset.csv
     volumes:
       - ./AI/Recipe_Recommender:/app/
     networks:

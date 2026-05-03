@@ -45,8 +45,7 @@ CREATE TABLE item_classifications (
     category VARCHAR(255),
     storage VARCHAR(255),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        ON UPDATE CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY unique_itemclassifications_normalized_name (normalized_name)
 );
 
@@ -124,10 +123,8 @@ BEGIN
         'Users',
         NEW.id,
         JSON_OBJECT(
-            'name', NEW.name,
-            'email', NEW.email,
+            'email_hash', NEW.email_hash,
             'picture', NEW.picture,
-            'client_id', NEW.client_id,
             'role', NEW.role
         )
     );
@@ -148,17 +145,13 @@ BEGIN
         NEW.id,
         JSON_OBJECT(
             'old', JSON_OBJECT(
-                'name', OLD.name,
-                'email', OLD.email,
+                'email_hash', OLD.email_hash,
                 'picture', OLD.picture,
-                'client_id', OLD.client_id,
                 'role', OLD.role
             ),
             'new', JSON_OBJECT(
-                'name', NEW.name,
-                'email', NEW.email,
+                'email_hash', NEW.email_hash,
                 'picture', NEW.picture,
-                'client_id', NEW.client_id,
                 'role', NEW.role
             )
         )
@@ -179,10 +172,8 @@ BEGIN
         'Users',
         OLD.id,
         JSON_OBJECT(
-            'name', OLD.name,
-            'email', OLD.email,
+            'email_hash', OLD.email_hash,
             'picture', OLD.picture,
-            'client_id', OLD.client_id,
             'role', OLD.role
         )
     );

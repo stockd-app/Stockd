@@ -1,6 +1,5 @@
 import React from "react";
 import RecipeItemCard from "../RecipeItemCard/RecipeItemCard";
-import EmptyPantry from "../../assets/images/EmptyPantry.png";
 import loading_anim from "../../assets/images/loading_anim.gif";
 
 import "./recipeitemsection.css";

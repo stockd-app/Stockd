@@ -139,7 +139,7 @@ class LikedRecipe(Base):
     user = relationship("User", back_populates="liked_recipes", passive_deletes=True)
 
 class FoodImageCache(Base):
-    __tablename__ = "foodimagecache"
+    __tablename__ = "FoodImageCache"
     id = Column(Integer, primary_key=True)
     normalized_name = Column(String, unique=True, index=True)
     image_url = Column(String)

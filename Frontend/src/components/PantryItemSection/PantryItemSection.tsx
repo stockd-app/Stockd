@@ -32,7 +32,6 @@ const PantryItemSection: React.FC<PantryItemSectionProps> = ({ section, items, o
     const [isSelecting, setIsSelecting] = useState(false);
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
 
     const handleItemClick = (item: PantryItem) => {
         if (isSelecting) {
@@ -65,7 +64,6 @@ const PantryItemSection: React.FC<PantryItemSectionProps> = ({ section, items, o
         }
 
         try {
-            setIsDeleting(true);
             await deletePantryItems(ids);
             setIsSelecting(false);
             clearSelection();
@@ -74,8 +72,6 @@ const PantryItemSection: React.FC<PantryItemSectionProps> = ({ section, items, o
         } catch (e) {
             console.error("Failed to delete pantry items:", e);
             alert("Failed to delete items. Please try again.");
-        } finally {
-            setIsDeleting(false);
         }
     };
     const enterSelectMode = (id: number) => {

@@ -32,7 +32,14 @@
 .pantryRecipes__filterButton {
   background-color: var(--color-input-overlay) !important;
   color: var(--color-main-text) !important;
-
+  width: auto !important;
+  padding: 8px !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  z-index: 1;
 }
 
 .pantryRecipes__filterIcon {
