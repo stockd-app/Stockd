@@ -19,6 +19,91 @@ import "./singlerecipepage.css";
 const normalize = (s: string) =>
     s.toLowerCase().replace(/[^a-z\s]/g, "").trim();
 
+// Ingredients most users are expected to have already.
+// These are treated the same as pantry items, so they are checked and not added to groceries.
+const COMMON_INGREDIENTS = [
+    // Salt & seasoning
+    "salt",
+    "table salt",
+    "sea salt",
+    "kosher salt",
+    "pepper",
+    "black pepper",
+    "ground black pepper",
+
+    // Flour & baking basics
+    "flour",
+    "plain flour",
+    "all purpose flour",
+    "all-purpose flour",
+    "self raising flour",
+    "self-raising flour",
+    "baking powder",
+    "baking soda",
+    "bicarbonate of soda",
+
+    // Liquids
+    "water",
+    "olive oil",
+    "vegetable oil",
+    "sunflower oil",
+    "cooking oil",
+
+    // Sweeteners
+    "sugar",
+    "white sugar",
+    "brown sugar",
+    "caster sugar",
+    "icing sugar",
+    "powdered sugar",
+    "honey",
+
+    // Dairy basics
+    "butter",
+    "milk",
+
+    // Eggs
+    "egg",
+    "eggs",
+
+    // Common aromatics (optional — remove if too aggressive)
+    "garlic",
+    "garlic powder",
+    "onion powder",
+
+    // Herbs & spices (generic)
+    "mixed herbs",
+    "italian seasoning",
+    "oregano",
+    "basil",
+    "thyme",
+    "cinnamon",
+    "paprika",
+
+    // Condiments
+    "soy sauce",
+    "vinegar",
+    "white vinegar",
+    "apple cider vinegar",
+    "mustard",
+    "ketchup",
+];
+
+const isCommonIngredient = (ingredient: string) => {
+    const normIng = normalize(ingredient);
+
+    // Avoid auto-ticking vegetables like "bell pepper" as the pantry staple "pepper".
+    if (/\b(bell|red|green|yellow|orange|chili|chilli|jalapeno|poblano) pepper\b/.test(normIng)) {
+        return false;
+    }
+
+    return COMMON_INGREDIENTS.some((common) => {
+        const normCommon = normalize(common);
+        return new RegExp(`(^|\\s)${normCommon}(\\s|$)`).test(normIng);
+    });
+};
+
+
 const SingleRecipePage: React.FC = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -35,12 +120,17 @@ const SingleRecipePage: React.FC = () => {
     const [addedToGrocery, setAddedToGrocery] = useState<Map<string, number>>(new Map());
     const [showMoreNutrition, setShowMoreNutrition] = useState(false);
     const [useMetric, setUseMetric] = useState(true);
+
     const isInPantry = (ingredient: string, pantry: string[]) => {
         const normIng = normalize(ingredient);
         return pantry.some(
             (p) => normIng.includes(p) || p.includes(normIng)
         );
     };
+
+    const isIngredientAvailable = (ingredient: string, pantry: string[]) =>
+        isCommonIngredient(ingredient) || isInPantry(ingredient, pantry);
+
     const notify = useNotification();
     const calorieTarget = Math.max(Number("1000") || 0, 1);
 
@@ -140,9 +230,7 @@ const SingleRecipePage: React.FC = () => {
         const missing = recipe.RecipeIngredientParts.filter((part: string) => {
             const norm = normalize(part);
 
-            return !pantryNames.some(
-                (p) => norm.includes(p) || p.includes(norm)
-            );
+            return !isIngredientAvailable(norm, pantryNames);
         });
 
         setMissingIngredients(missing);
@@ -401,15 +489,17 @@ const SingleRecipePage: React.FC = () => {
                                 }
 
                                 const isAdded = addedToGrocery.has(normalize(ingredientName));
+                                const isCommon = isCommonIngredient(ingredientName);
                                 const inPantry = isInPantry(ingredientName, pantryNames);
-                                const checkboxDisabled = inPantry;
+                                const isAvailable = isCommon || inPantry;
+                                const checkboxDisabled = isAvailable;
 
                                 return (
                                     <li key={i} className="recipe__ingredient">
                                         <input
                                             type="checkbox"
                                             className="ingredient__checkbox"
-                                            checked={isAdded || inPantry}
+                                            checked={isAdded || isAvailable}
                                             disabled={checkboxDisabled}
                                             onChange={() => {
                                                 if (checkboxDisabled) return;
@@ -421,11 +511,13 @@ const SingleRecipePage: React.FC = () => {
                                                 }
                                             }}
                                             title={
-                                                inPantry
-                                                    ? "Already in pantry"
-                                                    : isAdded
-                                                        ? "Added to grocery list"
-                                                        : "Add to grocery list"
+                                                isCommon
+                                                    ? "Common ingredient"
+                                                    : inPantry
+                                                        ? "Already in pantry"
+                                                        : isAdded
+                                                            ? "Added to grocery list"
+                                                            : "Add to grocery list"
                                             }
                                         />
                                         <img
