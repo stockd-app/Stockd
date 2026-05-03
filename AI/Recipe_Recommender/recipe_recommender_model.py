@@ -175,26 +175,54 @@ df = df.merge(
     how='left'
 )
 
-# replace RecipeIngredientParts with the ingredients from units.csv
-df['RecipeIngredientParts'] = df['ingredients']
+# replace RecipeIngredientParts with the ingredients from units.csv, only if a match exists
+df['RecipeIngredientParts'] = df['ingredients'].combine_first(df['RecipeIngredientParts'])
+
+print("Total recipes:", len(df))
+print("Matched (units.csv):", df['ingredients'].notna().sum())
+print("Unmatched (fallback to parquet):", df['ingredients'].isna().sum())
+
+problem_id = 17614
+
+row = df[df["RecipeId"] == problem_id]
+
+print("\n=== TRACE RECIPE 17614 ===")
+
+if row.empty:
+    print("Recipe not found in df")
+else:
+    r = row.iloc[0]
+
+    print("Name:", r.get("Name"))
+    print("After combine_first:", r["RecipeIngredientParts"])
 
 # convert NaN to empty list, strings to single-item list, lists stay as-is
 def ensure_list(x):
     if x is None or (isinstance(x, float) and np.isnan(x)):
         return []
-    if isinstance(x, list):
-        return x
+    if isinstance(x, (list, np.ndarray)):
+        return list(x)
     if isinstance(x, str):
-        try:
-            # attempt to parse stringified list, e.g. "['milk','sugar']"
-            parsed = eval(x)
-            if isinstance(parsed, list):
-                return [str(i) for i in parsed]
-        except:
-            pass
-        # fallback: wrap string in a list
+        x = x.strip()
+        # 1. Handle R-style c("a", "b")
+        if x.startswith('c('):
+            items = re.findall(r'"([^"]*)"|\'([^\']*)\'', x[2:-1])
+            return [item[0] or item[1] for item in items if item[0] or item[1]]
+        
+        # 2. Handle space-separated bracket strings: ['a' 'b']
+        if x.startswith('[') and x.endswith(']'):
+            # Try to find all quoted substrings
+            items = re.findall(r"['\"](.*?)['\"]", x)
+            if items:
+                return items
+            # If no quotes, split by space (fallback)
+            return x[1:-1].replace("'", "").split()
+            
         return [x]
     return []
+
+row = df[df["RecipeId"] == problem_id]
+print("After ensure_list:", row.iloc[0]["RecipeIngredientParts"])
 
 df['ingredients_raw'] = df['ingredients_raw'].apply(ensure_list)
 df['RecipeIngredientParts'] = df['RecipeIngredientParts'].apply(ensure_list)
@@ -225,7 +253,7 @@ build_canonical_from_recipe_df(df, ing_col='RecipeIngredientParts', min_occurren
 # load cached model if exists and index if available
 if os.path.exists(MODEL_PATH) and os.path.exists(INDEX_PATH):
     print("Loading cached model and FAISS index...")
-    model, df = joblib.load(MODEL_PATH)
+    model = joblib.load(MODEL_PATH)
     index = faiss.read_index(INDEX_PATH)
 else:    
     print("Encoding recipes with MiniLM (first-time setup)...")
@@ -243,7 +271,7 @@ else:
     index.add(embeddings.astype('float32'))
 
     # cache model and index for future runs
-    joblib.dump((model, df), MODEL_PATH)
+    joblib.dump((model), MODEL_PATH)
     faiss.write_index(index, INDEX_PATH)
 
     print("model and FAISS index ready")

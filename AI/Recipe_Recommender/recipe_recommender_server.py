@@ -1,3 +1,5 @@
+import re
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
@@ -38,9 +40,7 @@ class RecipeObject(BaseModel):
     RecipeIngredientParts: List[str] | None = None
     ingredients_raw: List[str] | None = None
     RecipeInstructions: List[str] | None = None 
-    ingredients_raw: List[str] | None = None
     ingredients_standardized: Optional[List[dict]] = None
-    RecipeInstructions: List[str] | None = None
     AggregatedRating: float | None = None
     ReviewCount: int | None = None
     Calories: float | None = None
@@ -134,10 +134,26 @@ def sanitize_row_for_pydantic(row_dict):
 
     for f in list_fields:
         value = row_dict.get(f)
+
         if value is None:
             row_dict[f] = []
-        else:
-            row_dict[f] = [v if v is not None else "" for v in value]
+
+        elif isinstance(value, (np.ndarray, pd.Series)):
+            row_dict[f] = [str(v).strip() for v in value if str(v).strip()]
+
+        elif isinstance(value, list):
+            row_dict[f] = [str(v).strip() for v in value if str(v).strip()]
+
+        elif isinstance(value, str):
+            value = value.strip()
+            if not value:
+                row_dict[f] = []
+            elif value.startswith('[') and value.endswith(']'):
+                # Regex to extract items from strings like "['milk' 'eggs']" or "['milk', 'eggs']"
+                items = re.findall(r"['\"](.*?)['\"]", value)
+                row_dict[f] = items if items else [value]
+            else:
+                row_dict[f] = [value]
 
     for f in string_fields:
         value = row_dict.get(f)
