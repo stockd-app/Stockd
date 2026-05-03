@@ -2,7 +2,7 @@
   min-height: 100vh;
   background: var(--color-bg);
   color: var(--color-main-text);
-  padding-bottom: 90px;
+  padding-bottom: 120px;
 }
 
 .pantrySection__header {
@@ -11,11 +11,6 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px;
-}
-
-.pantrySection__filter{
-  position: absolute;
-  right: 13px;
 }
 
 .pantrySection__title {
@@ -28,6 +23,23 @@
   color: var(--color-main-text);
   text-align: center;
   pointer-events: none;
+}
+
+.pantrySection__filterButton{
+  background-color: var(--color-input-overlay) !important;
+  color: var(--color-main-text) !important;
+  width: auto !important;
+  padding: 8px !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  z-index: 1;
+}
+
+.pantrySection__fileterIcon {
+  color: var(--color-main-text);
 }
 
 .pantryItemSection__bulkActionsTrack {

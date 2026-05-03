@@ -117,22 +117,20 @@ const PantrySectionListPage: React.FC<PantrySectionListPageProps> = ({
         <>
             <div className="pantrySection__container">
                 <div className="pantrySection__header">
-                    <Button
-                        variant="back"
-                        onClick={() => navigate(-1)} />
+                    <Button variant="back" onClick={() => navigate(-1)} aria-label="Go back"/>
 
                     <h2 className="pantrySection__title">{title}</h2>
 
                     <Button
-                        className="pantrySection__filter"
+                        className="pantrySection__filterButton"
                         onClick={() => setShowFilters(true)}
                         aria-label="Open filters"
                     >
-                        <SlidersHorizontal size={20} />
+                        <SlidersHorizontal size={20} className="pantrySection__filterIcon" />
                     </Button>
 
                     {/* Empty spacer to mirror right-side button space */}
-                    <div className="pantrySection__spacer" />
+                    {/* <div className="pantrySection__spacer" /> */}
                 </div>
 
                 {isSelecting && (
