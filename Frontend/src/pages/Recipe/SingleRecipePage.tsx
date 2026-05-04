@@ -60,7 +60,6 @@ const COMMON_INGREDIENTS = [
 
     // Dairy basics
     "butter",
-    "milk",
 
     // Eggs
     "egg",
