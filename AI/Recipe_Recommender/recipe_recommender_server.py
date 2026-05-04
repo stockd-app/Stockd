@@ -1,3 +1,5 @@
+import re
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
@@ -38,9 +40,7 @@ class RecipeObject(BaseModel):
     RecipeIngredientParts: List[str] | None = None
     ingredients_raw: List[str] | None = None
     RecipeInstructions: List[str] | None = None 
-    ingredients_raw: List[str] | None = None
     ingredients_standardized: Optional[List[dict]] = None
-    RecipeInstructions: List[str] | None = None
     AggregatedRating: float | None = None
     ReviewCount: int | None = None
     Calories: float | None = None
@@ -134,10 +134,34 @@ def sanitize_row_for_pydantic(row_dict):
 
     for f in list_fields:
         value = row_dict.get(f)
-        if value is None:
+
+        if not value or (isinstance(value, list) and len(value) == 0):
+            print(f"!!! EMPTY ALERT: Recipe '{row_dict.get('Name')}' has no data in {f}")
+            print(f"    Raw Value Type: {type(value)}")
+            print(f"    Raw Value Content: {value}")
+
+        # 1. Handle None or empty
+        if value is None or (isinstance(value, float) and np.isnan(value)):
             row_dict[f] = []
+            continue
+
+        # 2. If it's a string, try to convert to list
+        if isinstance(value, str):
+            value = value.strip()
+            if value.startswith('[') and value.endswith(']'):
+                # Simple regex to extract items inside quotes
+                value = re.findall(r"['\"](.*?)['\"]", value)
+            elif value == "" or value == "[]":
+                value = []
+            else:
+                # Assume comma-separated if no brackets
+                value = [v.strip() for v in value.split(',') if v.strip()]
+
+        # 3. Final cleaning: Ensure it's a list and remove nulls/empty strings
+        if isinstance(value, (list, np.ndarray, pd.Series)):
+            row_dict[f] = [str(v).strip() for v in value if v and str(v).strip()]
         else:
-            row_dict[f] = [v if v is not None else "" for v in value]
+            row_dict[f] = []
 
     for f in string_fields:
         value = row_dict.get(f)

@@ -70,6 +70,16 @@ DESCRIPTORS = {
     "squeeze", "jar"
 }
 
+UNITS = {
+    "cup", "cups", "tablespoon", "tablespoons", "tbsp", "teaspoon", "teaspoons", "tsp",
+    "ounce", "ounces", "oz", "pound", "pounds", "lb", "lbs", "gram", "grams", "g",
+    "kilogram", "kilograms", "kg", "liter", "liters", "litre", "litres", "ml", "milliliter", "milliliters",
+    "pinch", "dash", "quart", "quarts", "pint", "pints", "package", "packages", "slice", "slices",
+    "piece", "pieces", "container", "containers", "stick", "sticks", "jar", "jars",
+}
+
+CONNECTORS = {"and", "or", "with", "without", "plus", "&", "any"}
+
 MULTI_KEEP = {
     "cream cheese", "feta cheese", "phyllo pastry",
     "brown sugar", "palm sugar",
@@ -77,7 +87,7 @@ MULTI_KEEP = {
     "olive oil", "vegetable oil", "sesame oil",
     "lemon juice", "lime juice",
     "baking soda", "baking powder",
-    "red wine vinegar", "white vinegar", "rice vinegar",
+    "red wine vinegar", "white vinegar", "rice vinegar", "white wine vinegar", "cider vinegar",
     "curry powder", "garam masala", "confectioners sugar",
     "dark rum", "cream sherry", "apple cider", "cornstarch"
 }
@@ -116,8 +126,8 @@ def normalize_tokens(text: str) -> str:
             text = text.replace(k, v)
 
     tokens = text.split()
-    # remove descriptors
-    tokens = [t for t in tokens if t not in DESCRIPTORS and t not in BRANDS]
+    # remove descriptors, brands, measurement units, and connector words
+    tokens = [t for t in tokens if t not in DESCRIPTORS and t not in BRANDS and t not in UNITS and t not in CONNECTORS]
     if not tokens:
         return ""
     # lemmatize tokens
@@ -134,12 +144,18 @@ def normalize_tokens(text: str) -> str:
     for token in reversed(tokens):
         if token in GENERIC_PROTEINS or token in GENERIC_ENDINGS:
             return token
-    
-    # if single token left
+
+    # if only one meaningful token remains, keep it
     if len(tokens) == 1:
         return tokens[0]
-    # otherwise keep first two tokens for safety
-    return " ".join(tokens[:2])
+
+    # prefer a two-token known phrase if it is in the multi-word preserve set
+    last_two = " ".join(tokens[-2:])
+    if last_two in MULTI_KEEP:
+        return last_two
+
+    # otherwise use the last token as the most specific ingredient noun
+    return tokens[-1]
 
 # canonical vocabulary management
 class CanonicalDB:

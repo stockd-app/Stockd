@@ -123,7 +123,8 @@ except Exception as e:
     print(f"File might be corrupted. Try re-downloading or check if it's actually a parquet file.")
     raise
 df = df.copy()
-df = df.head(15000)
+df = df.head(16000)
+# ensure final recipe count is approx 5k, it must be under 6k otherwise a timeout error is received
 
 print(f"Initial dataset size (after head): {len(df)}")
 
@@ -157,8 +158,6 @@ df['Allergens'] = df['ingredients_list'].apply(
 # convert RecipeId to int to match IDs from likedrecipes
 df["RecipeId"] = df["RecipeId"].astype(int)
 
-df = df.head(20000)
-
 # === Replacing RecipeIngredientQuantities with units.csv ===
 units_path = os.path.join(BASE_DIR, "data/units.csv")
 units_df = pd.read_csv(units_path)
@@ -175,24 +174,58 @@ df = df.merge(
     how='left'
 )
 
+df = df[df['id'].notna()]
+
 # replace RecipeIngredientParts with the ingredients from units.csv
 df['RecipeIngredientParts'] = df['ingredients']
 
+print("Total recipes:", len(df))
+print("Matched (units.csv):", df['ingredients'].notna().sum())
+print("Unmatched (fallback to parquet):", df['ingredients'].isna().sum())
+print("Sum of empty RecipeIngredientParts:", df['RecipeIngredientParts'].isna().sum())
+
 # convert NaN to empty list, strings to single-item list, lists stay as-is
+import ast
+import json
+
 def ensure_list(x):
     if x is None or (isinstance(x, float) and np.isnan(x)):
         return []
     if isinstance(x, list):
-        return x
+        return [str(i) for i in x if i]
+    if isinstance(x, np.ndarray):
+        return x.tolist()
     if isinstance(x, str):
-        try:
-            # attempt to parse stringified list, e.g. "['milk','sugar']"
-            parsed = eval(x)
-            if isinstance(parsed, list):
-                return [str(i) for i in parsed]
-        except:
-            pass
-        # fallback: wrap string in a list
+        x = x.strip()
+        if not x or x == '[]':
+            return []
+        # R-style: c("a", "b")
+        if x.startswith('c('):
+            items = re.findall(r'"([^"]*)"|\'([^\']*)\'', x[2:-1])
+            return [item[0] or item[1] for item in items if item[0] or item[1]]
+        # JSON array with double quotes: ["a", "b"]
+        if x.startswith('['):
+            try:
+                parsed = json.loads(x)
+                if isinstance(parsed, list):
+                    return [str(i).strip() for i in parsed if i]
+            except json.JSONDecodeError:
+                pass
+            # single quote fallback: ['a', 'b']
+            try:
+                parsed = eval(x)
+                if isinstance(parsed, list):
+                    return [str(i).strip() for i in parsed if i]
+            except:
+                pass
+            # last resort regex
+            items = re.findall(r"['\"](.*?)['\"]", x)
+            if items:
+                return items
+        # plain comma separated: milk, eggs, flour
+        if ',' in x:
+            return [i.strip() for i in x.split(',') if i.strip()]
+        # single value
         return [x]
     return []
 
