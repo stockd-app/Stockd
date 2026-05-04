@@ -123,7 +123,8 @@ except Exception as e:
     print(f"File might be corrupted. Try re-downloading or check if it's actually a parquet file.")
     raise
 df = df.copy()
-df = df.head(15000)
+df = df.head(16000)
+# ensure final recipe count is approx 5k, it must be under 6k otherwise a timeout error is received
 
 print(f"Initial dataset size (after head): {len(df)}")
 
@@ -157,8 +158,6 @@ df['Allergens'] = df['ingredients_list'].apply(
 # convert RecipeId to int to match IDs from likedrecipes
 df["RecipeId"] = df["RecipeId"].astype(int)
 
-df = df.head(20000)
-
 # === Replacing RecipeIngredientQuantities with units.csv ===
 units_path = os.path.join(BASE_DIR, "data/units.csv")
 units_df = pd.read_csv(units_path)
@@ -175,54 +174,60 @@ df = df.merge(
     how='left'
 )
 
-# replace RecipeIngredientParts with the ingredients from units.csv, only if a match exists
-df['RecipeIngredientParts'] = df['ingredients'].combine_first(df['RecipeIngredientParts'])
+df = df[df['id'].notna()]
+
+# replace RecipeIngredientParts with the ingredients from units.csv
+df['RecipeIngredientParts'] = df['ingredients']
 
 print("Total recipes:", len(df))
 print("Matched (units.csv):", df['ingredients'].notna().sum())
 print("Unmatched (fallback to parquet):", df['ingredients'].isna().sum())
-
-problem_id = 17614
-
-row = df[df["RecipeId"] == problem_id]
-
-print("\n=== TRACE RECIPE 17614 ===")
-
-if row.empty:
-    print("Recipe not found in df")
-else:
-    r = row.iloc[0]
-
-    print("Name:", r.get("Name"))
-    print("After combine_first:", r["RecipeIngredientParts"])
+print("Sum of empty RecipeIngredientParts:", df['RecipeIngredientParts'].isna().sum())
 
 # convert NaN to empty list, strings to single-item list, lists stay as-is
+import ast
+import json
+
 def ensure_list(x):
     if x is None or (isinstance(x, float) and np.isnan(x)):
         return []
-    if isinstance(x, (list, np.ndarray)):
-        return list(x)
+    if isinstance(x, list):
+        return [str(i) for i in x if i]
+    if isinstance(x, np.ndarray):
+        return x.tolist()
     if isinstance(x, str):
         x = x.strip()
-        # 1. Handle R-style c("a", "b")
+        if not x or x == '[]':
+            return []
+        # R-style: c("a", "b")
         if x.startswith('c('):
             items = re.findall(r'"([^"]*)"|\'([^\']*)\'', x[2:-1])
             return [item[0] or item[1] for item in items if item[0] or item[1]]
-        
-        # 2. Handle space-separated bracket strings: ['a' 'b']
-        if x.startswith('[') and x.endswith(']'):
-            # Try to find all quoted substrings
+        # JSON array with double quotes: ["a", "b"]
+        if x.startswith('['):
+            try:
+                parsed = json.loads(x)
+                if isinstance(parsed, list):
+                    return [str(i).strip() for i in parsed if i]
+            except json.JSONDecodeError:
+                pass
+            # single quote fallback: ['a', 'b']
+            try:
+                parsed = eval(x)
+                if isinstance(parsed, list):
+                    return [str(i).strip() for i in parsed if i]
+            except:
+                pass
+            # last resort regex
             items = re.findall(r"['\"](.*?)['\"]", x)
             if items:
                 return items
-            # If no quotes, split by space (fallback)
-            return x[1:-1].replace("'", "").split()
-            
+        # plain comma separated: milk, eggs, flour
+        if ',' in x:
+            return [i.strip() for i in x.split(',') if i.strip()]
+        # single value
         return [x]
     return []
-
-row = df[df["RecipeId"] == problem_id]
-print("After ensure_list:", row.iloc[0]["RecipeIngredientParts"])
 
 df['ingredients_raw'] = df['ingredients_raw'].apply(ensure_list)
 df['RecipeIngredientParts'] = df['RecipeIngredientParts'].apply(ensure_list)
@@ -253,7 +258,7 @@ build_canonical_from_recipe_df(df, ing_col='RecipeIngredientParts', min_occurren
 # load cached model if exists and index if available
 if os.path.exists(MODEL_PATH) and os.path.exists(INDEX_PATH):
     print("Loading cached model and FAISS index...")
-    model = joblib.load(MODEL_PATH)
+    model, df = joblib.load(MODEL_PATH)
     index = faiss.read_index(INDEX_PATH)
 else:    
     print("Encoding recipes with MiniLM (first-time setup)...")
@@ -271,7 +276,7 @@ else:
     index.add(embeddings.astype('float32'))
 
     # cache model and index for future runs
-    joblib.dump((model), MODEL_PATH)
+    joblib.dump((model, df), MODEL_PATH)
     faiss.write_index(index, INDEX_PATH)
 
     print("model and FAISS index ready")
