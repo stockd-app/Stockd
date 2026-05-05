@@ -13,11 +13,11 @@ import { formatQuantityUnit } from "../../utils/unitStandardizer";
 import { NOTIFICATION_MESSAGES, NOTIFICATION_TYPES, GetNutritionItems } from "../../config/consts";
 import Button from "../../components/Button/Button";
 import { buildNutritionDisplayItems, getNutritionOverview } from "../../utils/nutritionVisual";
+import { ingredientMatchScore, normalizeText } from "../../utils/textNormalizer";
 
 import "./singlerecipepage.css";
 
-const normalize = (s: string) =>
-    s.toLowerCase().replace(/[^a-z\s]/g, "").trim();
+const normalize = (s: string) => normalizeText(s);
 
 // Ingredients most users are expected to have already.
 // These are treated the same as pantry items, so they are checked and not added to groceries.
@@ -114,21 +114,22 @@ const SingleRecipePage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     //`initialLiked` will no longer be undefined.
     const [initialLiked, setInitialLiked] = useState(false);
-    const [pantryNames, setPantryNames] = useState<string[]>([]);
-    const [missingIngredients, setMissingIngredients] = useState<string[]>([]);
+    const [pantryItems, setPantryItems] = useState<any[]>([]);
     const [addedToGrocery, setAddedToGrocery] = useState<Map<string, number>>(new Map());
     const [showMoreNutrition, setShowMoreNutrition] = useState(false);
     const [useMetric, setUseMetric] = useState(true);
 
-    const isInPantry = (ingredient: string, pantry: string[]) => {
-        const normIng = normalize(ingredient);
-        return pantry.some(
-            (p) => normIng.includes(p) || p.includes(normIng)
-        );
-    };
+    const findBestPantryMatch = (ingredient: string, pantry: any[]) => {
+        const candidates = pantry
+            .map((item) => ({
+                item,
+                score: ingredientMatchScore(ingredient, item?.name || ""),
+            }))
+            .filter((entry) => entry.score > 0)
+            .sort((a, b) => b.score - a.score);
 
-    const isIngredientAvailable = (ingredient: string, pantry: string[]) =>
-        isCommonIngredient(ingredient) || isInPantry(ingredient, pantry);
+        return candidates[0]?.item ?? null;
+    };
 
     const notify = useNotification();
     const calorieTarget = Math.max(Number("1000") || 0, 1);
@@ -192,7 +193,17 @@ const SingleRecipePage: React.FC = () => {
 
     const handleCompleteRecipe = async () => {
         try {
-            const result = await completeRecipe(recipe.RecipeId);
+            const payload = {
+                matched_items: ingredientChecklist.map((ingredient: any) => ({
+                    ingredient_name: ingredient.ingredientName,
+                    pantry_item_id: ingredient.pantryMatch?.id ?? null,
+                    quantity: ingredient.sourceQuantity,
+                    unit: ingredient.sourceUnit,
+                    is_common: ingredient.isCommon,
+                })),
+            };
+
+            const result = await completeRecipe(recipe.RecipeId, payload);
             console.log("Recipe completed:", result);
             notify(NOTIFICATION_MESSAGES.RECIPE_COMPLETED, NOTIFICATION_TYPES.RECIPE_COMPLETED);
             setTimeout(() => { navigate("/dashboard"); }, 2000);
@@ -208,13 +219,9 @@ const SingleRecipePage: React.FC = () => {
         const run = async () => {
             try {
                 const res = await getPantryItems(userId);
-                const pantryItems = res?.grouped_items?.Pantry || [];
-                const names = pantryItems
-                    .map((i: any) => i?.name)
-                    .filter(Boolean)
-                    .map((name: string) => normalize(name));
-                console.log("Pantry normalized names:", names);
-                setPantryNames(names);
+                const allPantryItems = Object.values(res?.grouped_items || {}).flat() as any[];
+                console.log("Pantry item names:", allPantryItems.map((i: any) => i?.name).filter(Boolean));
+                setPantryItems(allPantryItems);
             } catch (e) {
                 console.error("Failed to fetch pantry", e);
             }
@@ -222,18 +229,6 @@ const SingleRecipePage: React.FC = () => {
 
         run();
     }, [userId]);
-
-    useEffect(() => {
-        if (!recipe) return;
-
-        const missing = recipe.RecipeIngredientParts.filter((part: string) => {
-            const norm = normalize(part);
-
-            return !isIngredientAvailable(norm, pantryNames);
-        });
-
-        setMissingIngredients(missing);
-    }, [recipe, pantryNames]);
 
     const addToGroceryList = async (name: string, qty: number, unit: string) => {
         if (!userId || !accessToken) return;
@@ -347,6 +342,74 @@ const SingleRecipePage: React.FC = () => {
     );
 
     const nutritionOverview = getNutritionOverview(nutritionDisplayItems);
+    const recipeIngredients =
+        recipe.ingredients_standardized && recipe.ingredients_standardized.length > 0
+            ? recipe.ingredients_standardized
+            : recipe.RecipeIngredientParts?.map((part: string, i: number) => {
+                const rawQty = recipe.RecipeIngredientQuantities?.[i];
+                const qtyParsed = parseQuantity(rawQty);
+                const { qty, unit } = resolveIngredientDisplay(part, qtyParsed);
+                return { name: part, quantity: qty, unit };
+            }) || [];
+
+    const ingredientChecklist = recipeIngredients.map((ingredient: any) => {
+        const ingredientName = ingredient.name || ingredient.original || "";
+
+        let qty;
+        let unit;
+        let displayQtyUnit;
+        let showFullOriginal = false;
+
+        if (useMetric) {
+            qty = ingredient.quantity || 1;
+            unit = ingredient.unit || "piece";
+            displayQtyUnit = formatQuantityUnit(qty, unit);
+        } else if (ingredient.original) {
+            displayQtyUnit = ingredient.original;
+            showFullOriginal = true;
+            const match = ingredient.original.match(/^([\d./\s]+)/);
+            qty = match ? parseFloat(match[1]) : 1;
+            unit = "";
+        } else {
+            const originalIndex = recipe.RecipeIngredientParts?.indexOf(ingredientName);
+            if (originalIndex !== -1 && recipe.RecipeIngredientQuantities?.[originalIndex]) {
+                const rawQty = recipe.RecipeIngredientQuantities[originalIndex];
+                const qtyParsed = parseQuantity(rawQty);
+                const resolved = resolveIngredientDisplay(ingredientName, qtyParsed);
+                qty = resolved.qty;
+                unit = resolved.unit;
+                displayQtyUnit = `${qty} ${unit}`;
+            } else {
+                qty = ingredient.quantity || 1;
+                unit = ingredient.unit || "piece";
+                displayQtyUnit = `${qty} ${unit}`;
+            }
+        }
+
+        const isAdded = addedToGrocery.has(normalize(ingredientName));
+        const isCommon = isCommonIngredient(ingredientName);
+        const pantryMatch = findBestPantryMatch(ingredientName, pantryItems);
+        const inPantry = Boolean(pantryMatch);
+        const isAvailable = isCommon || inPantry;
+
+        return {
+            ingredientName,
+            qty,
+            unit,
+            sourceQuantity: ingredient.quantity || qty || 1,
+            sourceUnit: ingredient.unit || "",
+            displayQtyUnit,
+            showFullOriginal,
+            isAdded,
+            isCommon,
+            inPantry,
+            isAvailable,
+            pantryMatch,
+        };
+    });
+
+    const missingIngredients = ingredientChecklist.filter((item: any) => !item.isAvailable);
+    const canCompleteRecipe = ingredientChecklist.length > 0 && missingIngredients.length === 0;
 
     return (
         <div className="recipe__page">
@@ -444,111 +507,63 @@ const SingleRecipePage: React.FC = () => {
                             </div>
                         </div>
                         <ul className="recipe__ingredients">
-                            {/* Use standardized ingredients if available, otherwise fall back to original */}
-                            {(recipe.ingredients_standardized && recipe.ingredients_standardized.length > 0
-                                ? recipe.ingredients_standardized
-                                : recipe.RecipeIngredientParts?.map((part: string, i: number) => {
-                                    const rawQty = recipe.RecipeIngredientQuantities?.[i];
-                                    const qtyParsed = parseQuantity(rawQty);
-                                    const { qty, unit } = resolveIngredientDisplay(part, qtyParsed);
-                                    return { name: part, quantity: qty, unit: unit };
-                                })
-                            )?.map((ingredient: any, i: number) => {
-                                const ingredientName = ingredient.name || ingredient.original || "";
-
-                                // Determine which units to display based on toggle
-                                let qty, unit, displayQtyUnit, showFullOriginal = false;
-
-                                if (useMetric) {
-                                    qty = ingredient.quantity || 1;
-                                    unit = ingredient.unit || "piece";
-                                    displayQtyUnit = formatQuantityUnit(qty, unit);
-                                } else {
-                                    if (ingredient.original) {
-                                        displayQtyUnit = ingredient.original;
-                                        showFullOriginal = true;
-                                        const match = ingredient.original.match(/^([\d./\s]+)/);
-                                        qty = match ? parseFloat(match[1]) : 1;
-                                        unit = "";
-                                    } else {
-                                        const originalIndex = recipe.RecipeIngredientParts?.indexOf(ingredientName);
-                                        if (originalIndex !== -1 && recipe.RecipeIngredientQuantities?.[originalIndex]) {
-                                            const rawQty = recipe.RecipeIngredientQuantities[originalIndex];
-                                            const qtyParsed = parseQuantity(rawQty);
-                                            const resolved = resolveIngredientDisplay(ingredientName, qtyParsed);
-                                            qty = resolved.qty;
-                                            unit = resolved.unit;
-                                            displayQtyUnit = `${qty} ${unit}`;
-                                        } else {
-                                            qty = ingredient.quantity || 1;
-                                            unit = ingredient.unit || "piece";
-                                            displayQtyUnit = `${qty} ${unit}`;
-                                        }
-                                    }
-                                }
-
-                                const isAdded = addedToGrocery.has(normalize(ingredientName));
-                                const isCommon = isCommonIngredient(ingredientName);
-                                const inPantry = isInPantry(ingredientName, pantryNames);
-                                const isAvailable = isCommon || inPantry;
-                                const checkboxDisabled = isAvailable;
+                            {ingredientChecklist.map((ingredient: any, i: number) => {
+                                const checkboxDisabled = ingredient.isAvailable;
 
                                 return (
                                     <li key={i} className="recipe__ingredient">
                                         <input
                                             type="checkbox"
                                             className="ingredient__checkbox"
-                                            checked={isAdded || isAvailable}
+                                            checked={ingredient.isAdded || ingredient.isAvailable}
                                             disabled={checkboxDisabled}
                                             onChange={() => {
                                                 if (checkboxDisabled) return;
 
-                                                if (isAdded) {
-                                                    removeFromGroceryList(ingredientName);
+                                                if (ingredient.isAdded) {
+                                                    removeFromGroceryList(ingredient.ingredientName);
                                                 } else {
-                                                    addToGroceryList(ingredientName, qty, unit);
+                                                    addToGroceryList(ingredient.ingredientName, ingredient.qty, ingredient.unit);
                                                 }
                                             }}
                                             title={
-                                                isCommon
+                                                ingredient.isCommon
                                                     ? "Common ingredient"
-                                                    : inPantry
+                                                    : ingredient.inPantry
                                                         ? "Already in pantry"
-                                                        : isAdded
+                                                        : ingredient.isAdded
                                                             ? "Added to grocery list"
                                                             : "Add to grocery list"
                                             }
                                         />
                                         <img
-                                            src={getIngredientIcon(ingredientName)}
-                                            alt={ingredientName}
+                                            src={getIngredientIcon(ingredient.ingredientName)}
+                                            alt={ingredient.ingredientName}
                                             className="recipe__ingredient__icon"
                                         />
                                         <div className="ingredient__text">
-                                            {showFullOriginal ? (
-                                                // When showing original US format, display the full string
+                                            {ingredient.showFullOriginal ? (
                                                 <span className="ingredient__full">
-                                                    {displayQtyUnit}
+                                                    {ingredient.displayQtyUnit}
                                                 </span>
                                             ) : (
-                                                // When showing metric, display quantity separately
                                                 <span className="ingredient__amount">
-                                                    <span className="ingredient__qty">{qty}</span>
-                                                    <span className="ingredient__unit">{unit}</span>
+                                                    <span className="ingredient__qty">{ingredient.qty}</span>
+                                                    <span className="ingredient__unit">{ingredient.unit}</span>
                                                 </span>
                                             )}
                                         </div>
-                                        {!showFullOriginal && (
+                                        {!ingredient.showFullOriginal && (
                                             <span className="recipe__ingredient__name">
-                                                {ingredientName}
+                                                {ingredient.ingredientName}
                                             </span>
                                         )}
-                                        {inPantry && (
+                                        {ingredient.inPantry && (
                                             <span className="ingredient__status">
                                                 In Pantry
                                             </span>
                                         )}
-                                        {isAdded && (
+                                        {ingredient.isAdded && (
                                             <span className="ingredient__status">
                                                 Added
                                             </span>
@@ -764,7 +779,7 @@ const SingleRecipePage: React.FC = () => {
                         </a>
                     </div>
 
-                    {missingIngredients.length === 0 && (
+                    {canCompleteRecipe && (
                         <div className="recipe__complete">
                             <Button variant="primary" onClick={handleCompleteRecipe}>
                                 Complete Recipe
@@ -778,4 +793,3 @@ const SingleRecipePage: React.FC = () => {
 };
 
 export default SingleRecipePage;
-

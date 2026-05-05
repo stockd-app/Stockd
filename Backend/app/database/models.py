@@ -74,6 +74,18 @@ class ItemClassification(Base):
 class PantryItemsDeleteRequest(BaseModel):
     pantry_item_ids: List[int]
 
+
+class RecipeCompletionMatchedItem(BaseModel):
+    ingredient_name: str
+    pantry_item_id: Optional[int] = None
+    quantity: Optional[float] = 1
+    unit: Optional[str] = ""
+    is_common: Optional[bool] = False
+
+
+class RecipeCompletionRequest(BaseModel):
+    matched_items: List[RecipeCompletionMatchedItem] = []
+
 class GroceryItem(Base):
     __tablename__ = "GroceryItems"
     id = Column(Integer, primary_key=True, index=True)

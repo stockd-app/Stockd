@@ -655,13 +655,13 @@ export const getLikedRecipes = async () => {
 /**
  * Complete a recipe and update pantry items
  */
-export const completeRecipe = async (recipeId: number) => {
+export const completeRecipe = async (recipeId: number, payload?: any) => {
   let idToken = localStorage.getItem("google_id_token");
 
   try {
     const res = await axios.post(
       API_ROUTES.COMPLETE_RECIPE.replace(":recipeId", String(recipeId)),
-      {},
+      payload ?? {},
       {
         headers: {
           Authorization: `Bearer ${idToken}`,
@@ -678,7 +678,7 @@ export const completeRecipe = async (recipeId: number) => {
 
         const retryRes = await axios.post(
           API_ROUTES.COMPLETE_RECIPE.replace(":recipeId", String(recipeId)),
-          {},
+          payload ?? {},
           {
             headers: {
               Authorization: `Bearer ${idToken}`,
