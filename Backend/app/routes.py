@@ -28,6 +28,14 @@ from fastapi import APIRouter, HTTPException
 from app.asprise_api import send_receipt_to_asprise
 from app.utils.receipt_parser import parse_asprise_response
 from app.utils.ai_classifier import classify_receipt_items
+from app.utils.text_normalizer import (
+    convert_quantity,
+    ingredient_match_score,
+    is_count_like_unit,
+    is_common_ingredient,
+    normalize_unit,
+    units_are_compatible,
+)
 from app.dependencies.auth import require_google_token
 from app.database.database import SessionLocal
 from app.database.models import (
@@ -36,6 +44,7 @@ from app.database.models import (
     PantryItemsDeleteRequest,
     PantryItemsRequest,
     Recipe,
+    RecipeCompletionRequest,
     RefreshTokenRequest,
     User,
     PantryItem,
@@ -61,6 +70,44 @@ GOOGLE_REVOKE_CLIENT_URI = os.getenv("GOOGLE_REVOKE_TOKEN_URI")
 
 router = APIRouter()
 AI_SERVER_URL_RECIPE_RECOMMENDER = os.getenv("RECIPE_RECOMMENDER_MODEL_URL")
+
+
+def normalize_storage(storage: str | None) -> str:
+    """Normalize storage values to Pantry/Fridge/Freezer."""
+    if not storage:
+        return "Pantry"
+
+    value = storage.strip().lower()
+
+    if value in {
+        "pantry",
+        "pantries",
+        "a cool dry pantry",
+        "dry pantry",
+        "cupboard",
+        "cabinet",
+    }:
+        return "Pantry"
+
+    if value in {
+        "fridge",
+        "fridges",
+        "refrigerator",
+        "refrigerators",
+        "a refrigerator",
+        "ref",
+    }:
+        return "Fridge"
+
+    if value in {
+        "freezer",
+        "freezers",
+        "a freezer",
+        "frozen",
+    }:
+        return "Freezer"
+
+    return "Pantry"
 
 
 @router.post("/upload-receipt", tags=["OCR"])
@@ -116,6 +163,7 @@ async def upload_receipt(
 
             cached_map = {}
             for c in cached:
+                c.storage = normalize_storage(c.storage)
                 cached_map[c.normalized_name] = c
 
             missing_items = {}
@@ -148,7 +196,7 @@ async def upload_receipt(
                 if isinstance(item_data, dict):
                     is_food = item_data.get("is_food") == "food"
                     category = item_data.get("category", "Uncategorized")
-                    storage = item_data.get("storage", "Pantry")
+                    storage = normalize_storage(item_data.get("storage", "Pantry"))
                     quantity = item_data.get("quantity", 1)
                 else:
                     # (1 = food, 0 = not food)
@@ -161,7 +209,7 @@ async def upload_receipt(
                 item_name = sanitize_text(raw_name)
                 quantity = sanitize_quantity(quantity)
                 category = sanitize_text(category)
-                storage = sanitize_text(storage)
+                storage = normalize_storage(sanitize_text(storage))
 
                 existing = (
                     db.query(ItemClassification)
@@ -170,6 +218,7 @@ async def upload_receipt(
                 )
 
                 if existing:
+                    existing.storage = normalize_storage(existing.storage)
                     cached_map[normalized] = existing
                 else:
                     classification = ItemClassification(
@@ -193,7 +242,7 @@ async def upload_receipt(
                     "item_name": sanitize_text(raw_name),
                     "normalized_name": norm_name,
                     "category": classification.category or "Uncategorized",
-                    "storage": classification.storage or "Pantry",
+                    "storage": normalize_storage(classification.storage or "Pantry"),
                     "quantity_value": sanitize_quantity(
                         parsed["items"].get(raw_name, 1)
                     ),
@@ -262,6 +311,9 @@ async def confirm_receipt_items(
             )
             if existing_item:
                 existing_item.quantity_value += quantity
+                existing_item.storage = normalize_storage(
+                    item.get("storage", existing_item.storage)
+                )
                 saved_items.append(existing_item)
                 continue
 
@@ -273,7 +325,7 @@ async def confirm_receipt_items(
                 item_name=sanitize_text(item["item_name"]),
                 normalized_name=norm_name,
                 category=sanitize_text(item.get("category", "Uncategorized")),
-                storage=sanitize_text(item.get("storage", "Pantry")),
+                storage=normalize_storage(sanitize_text(item.get("storage", "Pantry"))),
                 quantity_value=quantity,
                 quantity_unit="",
                 item_image=existing_image or "",
@@ -666,7 +718,7 @@ async def get_pantry_items(user_id: int, user=Depends(require_google_token)):
         # Group items by storage
         grouped_items = {}
         for item in items:
-            storage = item.storage or "Pantry"
+            storage = normalize_storage(item.storage or "Pantry")
             if storage not in grouped_items:
                 grouped_items[storage] = []
 
@@ -678,7 +730,7 @@ async def get_pantry_items(user_id: int, user=Depends(require_google_token)):
                     "unit": item.quantity_unit or "pcs",
                     "image": item.item_image or "",
                     "category": item.category or "Uncategorized",
-                    "storage": item.storage or "Pantry",
+                    "storage": storage,
                     "added_on": item.added_on,
                 }
             )
@@ -748,7 +800,9 @@ async def add_update_pantry_items(
             category = (
                 sanitize_text(item.category) if item.category else "Uncategorized"
             )
-            storage = sanitize_text(item.storage) if item.storage else "Pantry"
+            storage = normalize_storage(
+                sanitize_text(item.storage) if item.storage else "Pantry"
+            )
             item_image = sanitize_url(item.item_image)
 
             # Check if item already exists for this user
@@ -878,34 +932,55 @@ async def delete_pantry_items(
         db.close()
 
 
-def tokenize(text: str | None) -> str:
+def parse_quantity_value(raw_quantity) -> float:
     """
-    Convert text into normalized token set
-    e.g. 'Salted Butter' -> {'salted', 'butter'}
-    Handles plural forms: s, es, ies
+    Parse numeric quantities including fractions and mixed numbers.
     """
-    if not text:
-        return set()
-    text = text.lower()
-    text = re.sub(r"[^a-z\s]", "", text)
+    if raw_quantity is None:
+        return 1.0
 
-    tokens = set()
-    for word in text.split():
-        # berries -> berry
-        if word.endswith("ies") and len(word) > 3:
-            word = word[:-3] + "y"
+    if isinstance(raw_quantity, (int, float)):
+        return float(raw_quantity)
 
-        # tomatoes -> tomato, boxes -> box
-        elif word.endswith("es") and len(word) > 3:
-            word = word[:-2]
+    qty_str = str(raw_quantity).strip()
+    if not qty_str:
+        return 1.0
 
-        # eggs -> egg (but not 'glass')
-        elif word.endswith("s") and len(word) > 3 and not word.endswith("ss"):
-            word = word[:-1]
+    unicode_fractions = {
+        "¼": 0.25,
+        "½": 0.5,
+        "¾": 0.75,
+        "⅐": 1 / 7,
+        "⅓": 1 / 3,
+        "⅔": 2 / 3,
+        "⅛": 0.125,
+        "⅜": 0.375,
+        "⅝": 0.625,
+        "⅞": 0.875,
+    }
+    if qty_str in unicode_fractions:
+        return unicode_fractions[qty_str]
 
-        tokens.add(word)
+    mixed_match = re.match(r"^(\d+)\s+(\d+)/(\d+)$", qty_str)
+    if mixed_match:
+        whole = float(mixed_match.group(1))
+        numerator = float(mixed_match.group(2))
+        denominator = float(mixed_match.group(3))
+        if denominator:
+            return whole + numerator / denominator
 
-    return tokens
+    fraction_match = re.match(r"^(\d+)/(\d+)$", qty_str)
+    if fraction_match:
+        numerator = float(fraction_match.group(1))
+        denominator = float(fraction_match.group(2))
+        if denominator:
+            return numerator / denominator
+
+    numeric_match = re.search(r"\d+(\.\d+)?", qty_str)
+    if numeric_match:
+        return float(numeric_match.group(0))
+
+    return 1.0
 
 
 @router.post("/recipes/{recipe_id}/complete", tags=["Recipes"])
@@ -913,6 +988,7 @@ def tokenize(text: str | None) -> str:
 async def complete_recipe(
     request: Request,
     recipe_id: int,  # dataset_recipe_id
+    request_data: RecipeCompletionRequest | None = None,
     user=Depends(require_google_token),
 ):
     """
@@ -935,6 +1011,8 @@ async def complete_recipe(
 
         recipe_name = recipe_obj.get("Name", "Unknown Recipe")
         ingredients = recipe_obj.get("RecipeIngredientParts", [])
+        quantities = recipe_obj.get("RecipeIngredientQuantities", [])
+        standardized_ingredients = recipe_obj.get("ingredients_standardized", [])
 
         if not ingredients:
             raise HTTPException(
@@ -944,38 +1022,186 @@ async def complete_recipe(
         # Get user pantry
         pantry_items = db.query(PantryItem).filter(PantryItem.user_id == user.id).all()
 
-        # ingredient → match pantry → reduce quantity
-        for ingredient in ingredients:
-            ingredient_tokens = tokenize(ingredient)
-            print("INGREDIENT:", ingredient_tokens)
-            matched = False
-
-            for pantry_item in pantry_items:
-                pantry_text = pantry_item.normalized_name or pantry_item.item_name
-                pantry_tokens = tokenize(pantry_text)
-                if not pantry_tokens:
+        recipe_lines = []
+        if request_data and request_data.matched_items:
+            for item in request_data.matched_items:
+                recipe_lines.append(
+                    {
+                        "ingredient": item.ingredient_name,
+                        "quantity": float(item.quantity or 1),
+                        "unit": normalize_unit(item.unit or ""),
+                        "pantry_item_id": item.pantry_item_id,
+                        "is_common": bool(item.is_common),
+                    }
+                )
+        elif standardized_ingredients:
+            for item in standardized_ingredients:
+                ingredient_name = (item or {}).get("name") or ""
+                if not ingredient_name:
                     continue
-                print("PANTRY:", pantry_tokens)
+                recipe_lines.append(
+                    {
+                        "ingredient": ingredient_name,
+                        "quantity": float((item or {}).get("quantity") or 1),
+                        "unit": normalize_unit((item or {}).get("unit") or ""),
+                        "pantry_item_id": None,
+                        "is_common": False,
+                    }
+                )
+        else:
+            for index, ingredient in enumerate(ingredients):
+                recipe_lines.append(
+                    {
+                        "ingredient": ingredient,
+                        "quantity": parse_quantity_value(
+                            quantities[index] if index < len(quantities) else 1
+                        ),
+                        "unit": "",
+                        "pantry_item_id": None,
+                        "is_common": False,
+                    }
+                )
 
-                overlap = ingredient_tokens & pantry_tokens
-                if overlap:
-                    print("--------- “”MATCH“” ---------")
-                    pantry_item.quantity_value -= 1
-                    matched = True
-                    consumed.append(
-                        {
-                            "ingredient": ingredient,
-                            "pantry_item": pantry_item.item_name,
-                            "remaining": pantry_item.quantity_value,
-                        }
-                    )
-                    if pantry_item.quantity_value <= 0:
-                        db.delete(pantry_item)
+        simulated_quantities = {
+            pantry_item.id: float(pantry_item.quantity_value or 0) for pantry_item in pantry_items
+        }
+        pantry_items_by_id = {pantry_item.id: pantry_item for pantry_item in pantry_items}
 
+        for recipe_line in recipe_lines:
+            ingredient_name = recipe_line["ingredient"]
+            quantity_to_consume = float(recipe_line["quantity"] or 1)
+            recipe_unit = normalize_unit(recipe_line["unit"] or "")
+            pantry_item_id = recipe_line.get("pantry_item_id")
+            is_common = bool(recipe_line.get("is_common"))
+
+            candidates = []
+            if pantry_item_id is not None:
+                pantry_item = pantry_items_by_id.get(pantry_item_id)
+                if pantry_item:
+                    candidates.append((999, pantry_item))
+            else:
+                for pantry_item in pantry_items:
+                    pantry_text = pantry_item.item_name or pantry_item.normalized_name or ""
+                    score = ingredient_match_score(ingredient_name, pantry_text)
+                    if score <= 0:
+                        continue
+
+                    pantry_unit = normalize_unit(pantry_item.quantity_unit or "")
+                    if not units_are_compatible(recipe_unit, pantry_unit):
+                        continue
+
+                    candidates.append((score, pantry_item))
+
+            candidates.sort(
+                key=lambda item: (item[0], simulated_quantities.get(item[1].id, 0)),
+                reverse=True,
+            )
+
+            remaining_to_consume = quantity_to_consume
+            consumed_this_ingredient = []
+            matched_by_name = False
+
+            for score, pantry_item in candidates:
+                if remaining_to_consume <= 0:
                     break
 
-            if not matched:
-                unmatched.append(ingredient)
+                matched_by_name = True
+                pantry_unit = normalize_unit(pantry_item.quantity_unit or "")
+
+                available_in_pantry_unit = simulated_quantities.get(
+                    pantry_item.id,
+                    float(pantry_item.quantity_value or 0),
+                )
+                if available_in_pantry_unit <= 0:
+                    continue
+
+                use_count_fallback = is_count_like_unit(pantry_unit) and not is_count_like_unit(
+                    recipe_unit
+                )
+
+                if use_count_fallback:
+                    deducted_in_pantry_unit = min(available_in_pantry_unit, 1.0)
+                    deducted_in_recipe_unit = remaining_to_consume
+                else:
+                    try:
+                        required_in_pantry_unit = (
+                            convert_quantity(
+                                remaining_to_consume,
+                                recipe_unit,
+                                pantry_unit or recipe_unit,
+                            )
+                            if recipe_unit
+                            else remaining_to_consume
+                        )
+                    except ValueError:
+                        continue
+
+                    deducted_in_pantry_unit = min(
+                        available_in_pantry_unit,
+                        required_in_pantry_unit,
+                    )
+
+                    deducted_in_recipe_unit = (
+                        convert_quantity(
+                            deducted_in_pantry_unit,
+                            pantry_unit or recipe_unit,
+                            recipe_unit,
+                        )
+                        if recipe_unit
+                        else deducted_in_pantry_unit
+                    )
+
+                if deducted_in_pantry_unit <= 0:
+                    continue
+
+                remaining_to_consume = max(
+                    0.0,
+                    remaining_to_consume - deducted_in_recipe_unit,
+                )
+                remaining_in_pantry_unit = available_in_pantry_unit - deducted_in_pantry_unit
+                simulated_quantities[pantry_item.id] = remaining_in_pantry_unit
+
+                consumed_this_ingredient.append(
+                    {
+                        "ingredient": ingredient_name,
+                        "quantity_consumed": round(deducted_in_recipe_unit, 4),
+                        "quantity_unit": recipe_unit or pantry_unit or "piece",
+                        "pantry_item": pantry_item.item_name,
+                        "remaining": round(remaining_in_pantry_unit, 4),
+                        "remaining_unit": pantry_unit or "piece",
+                        "used_count_fallback": use_count_fallback,
+                    }
+                )
+
+            if not matched_by_name and not is_common and not is_common_ingredient(ingredient_name):
+                unmatched.append(
+                    {
+                        "ingredient": ingredient_name,
+                        "quantity_needed": round(quantity_to_consume, 4),
+                        "quantity_unit": recipe_unit or "piece",
+                        "quantity_missing": round(remaining_to_consume, 4),
+                    }
+                )
+            else:
+                consumed.extend(consumed_this_ingredient)
+
+        if unmatched:
+            db.rollback()
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "message": "Some recipe ingredients could not be matched to pantry items",
+                    "unmatched_ingredients": unmatched,
+                },
+            )
+
+        for pantry_item in pantry_items:
+            pantry_item.quantity_value = simulated_quantities.get(
+                pantry_item.id,
+                float(pantry_item.quantity_value or 0),
+            )
+            if pantry_item.quantity_value <= 1e-6:
+                db.delete(pantry_item)
 
         db.commit()
 
@@ -984,7 +1210,7 @@ async def complete_recipe(
             "message": "Recipe completed and pantry updated",
             "dataset_recipe_id": recipe_id,
             "recipe_name": recipe_name,
-            "total_ingredients": len(ingredients),
+            "total_ingredients": len(recipe_lines),
             "consumed_count": len(consumed),
             "unmatched_ingredients": unmatched,
             "consumed_items": consumed,

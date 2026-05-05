@@ -11,7 +11,7 @@ class FoodLabeler:
         self.storage_labels = ["a cool dry pantry", "a refrigerator", "a freezer"]
         self.storage_map = {
             "a cool dry pantry": "Pantry",
-            "a refrigerator": "Refrigerator",
+            "a refrigerator": "Fridge",
             "a freezer": "Freezer"
         }
         self.food_categories = [
@@ -60,4 +60,3 @@ if __name__ == "__main__":
         classification = model.classify(product)
         result.append(classification)
     print("Model's Result", result)
-
