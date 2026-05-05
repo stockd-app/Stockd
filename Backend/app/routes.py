@@ -111,7 +111,7 @@ def normalize_storage(storage: str | None) -> str:
 
 
 @router.post("/upload-receipt", tags=["OCR"])
-@limiter.limit("1/5minute")
+@limiter.limit("2/minute")
 async def upload_receipt(
     request: Request,
     files: list[UploadFile] = File(...),
